@@ -1,0 +1,67 @@
+services:
+  # ─── Laravel Backend ──────────────────────────────────────
+  backend:
+    build:
+      context: ./treneiro-service
+      target: production
+    container_name: treneiro-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persist SQLite database across container restarts
+      - ./treneiro-service/database:/app/database
+      # Persist uploaded media files
+      - storage_data:/app/storage/app/public
+    environment:
+      - APP_NAME=${APP_NAME:-TalentFoot}
+      - APP_ENV=${APP_ENV:-production}
+      - APP_KEY=${APP_KEY:-}
+      - APP_DEBUG=${APP_DEBUG:-false}
+      - APP_URL=${APP_URL:-http://localhost:8000}
+      - DB_CONNECTION=sqlite
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - LOG_CHANNEL=stack
+      - LOG_LEVEL=${LOG_LEVEL:-warning}
+      - CACHE_DRIVER=file
+      - SESSION_DRIVER=file
+      - QUEUE_CONNECTION=sync
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ─── Vue Frontend ─────────────────────────────────────────
+  frontend:
+    build:
+      context: ./treneiro-web-app
+      target: production
+    container_name: treneiro-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+# ─── Networks ─────────────────────────────────────────────
+networks:
+  app-network:
+    driver: bridge
+
+# ─── Volumes ──────────────────────────────────────────────
+volumes:
+  storage_data:
+    driver: local

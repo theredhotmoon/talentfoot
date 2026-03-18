@@ -1,0 +1,52 @@
+# Dependencies (rebuilt in Docker)
+node_modules
+
+# Build output (rebuilt in Docker)
+dist
+dist-ssr
+
+# Version control
+.git
+.gitignore
+
+# Testing
+cypress
+cypress.config.ts
+coverage
+*.lcov
+
+# IDE / Editor
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local env files
+.env
+.env.*.local
+*.local
+
+# Temporary scripts
+add_translations.cjs
+
+# Linting
+.eslintcache
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docs
+README.md
+CHANGELOG.md

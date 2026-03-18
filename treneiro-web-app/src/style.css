@@ -1,0 +1,608 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+    --font-sans: "Inter", sans-serif;
+    --font-heading: "Outfit", sans-serif;
+}
+
+/* ========================================
+   TalentFoot Design System
+   Contemporary, vivid, youth-friendly
+   ======================================== */
+
+:root {
+    /* Core palette */
+    --tf-bg-deep: #0f0e17;
+    --tf-bg-surface: rgba(30, 27, 46, 0.7);
+    --tf-bg-surface-solid: #1e1b2e;
+    --tf-bg-elevated: rgba(45, 40, 70, 0.6);
+    --tf-border: rgba(255, 255, 255, 0.08);
+    --tf-border-glow: rgba(255, 255, 255, 0.12);
+    --tf-text: #f0ecf9;
+    --tf-text-muted: #a09bb5;
+    --tf-text-dimmed: #6b6581;
+
+    /* Gradient accents */
+    --tf-gradient-primary: linear-gradient(135deg, #6ee7b7, #06b6d4);
+    --tf-gradient-secondary: linear-gradient(135deg, #a78bfa, #ec4899);
+    --tf-gradient-warm: linear-gradient(135deg, #fbbf24, #f97316);
+    --tf-gradient-cool: linear-gradient(135deg, #818cf8, #06b6d4);
+    --tf-gradient-mesh: linear-gradient(135deg, #0f0e17 0%, #1a1333 25%, #0f2027 50%, #121420 75%, #0f0e17 100%);
+
+    /* Accent colors */
+    --tf-accent-emerald: #6ee7b7;
+    --tf-accent-cyan: #06b6d4;
+    --tf-accent-violet: #a78bfa;
+    --tf-accent-pink: #ec4899;
+    --tf-accent-amber: #fbbf24;
+    --tf-accent-orange: #f97316;
+
+    /* Glassmorphism */
+    --tf-glass-bg: rgba(30, 27, 46, 0.55);
+    --tf-glass-border: rgba(255, 255, 255, 0.1);
+    --tf-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+    /* Radiuses */
+    --tf-radius-sm: 0.625rem;
+    --tf-radius-md: 1rem;
+    --tf-radius-lg: 1.25rem;
+    --tf-radius-xl: 1.5rem;
+    --tf-radius-2xl: 2rem;
+    --tf-radius-full: 9999px;
+}
+
+/* ========================================
+   Base Styles
+   ======================================== */
+
+body {
+    background: var(--tf-bg-deep);
+    color: var(--tf-text);
+    font-family: "Inter", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Selection color */
+::selection {
+    background: rgba(110, 231, 183, 0.3);
+    color: #fff;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* Subclips sidebar scrollbar — more visible */
+.subclips-sidebar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.05);
+}
+
+.subclips-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.subclips-sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 999px;
+}
+
+.subclips-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 999px;
+}
+
+.subclips-sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.45);
+}
+
+/* ========================================
+   Glass & Surface Utilities
+   ======================================== */
+
+.glass {
+    background: var(--tf-glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--tf-glass-border);
+    box-shadow: var(--tf-glass-shadow);
+}
+
+.glass-subtle {
+    background: rgba(30, 27, 46, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-nav {
+    background: rgba(15, 14, 23, 0.75);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.surface {
+    background: var(--tf-bg-surface-solid);
+    border: 1px solid var(--tf-border);
+}
+
+/* ========================================
+   Gradient Text
+   ======================================== */
+
+.gradient-text {
+    background: var(--tf-gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.gradient-text-secondary {
+    background: var(--tf-gradient-secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ========================================
+   Buttons
+   ======================================== */
+
+.btn-primary {
+    background: var(--tf-gradient-primary);
+    color: #0f0e17;
+    font-weight: 600;
+    padding: 0.625rem 1.5rem;
+    border-radius: var(--tf-radius-full);
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 0 24px rgba(110, 231, 183, 0.35);
+    transform: translateY(-1px);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-secondary {
+    background: var(--tf-gradient-secondary);
+    color: white;
+    font-weight: 600;
+    padding: 0.625rem 1.5rem;
+    border-radius: var(--tf-radius-full);
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-secondary:hover {
+    box-shadow: 0 0 24px rgba(167, 139, 250, 0.35);
+    transform: translateY(-1px);
+}
+
+.btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--tf-text-muted);
+    font-weight: 500;
+    padding: 0.625rem 1.5rem;
+    border-radius: var(--tf-radius-full);
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--tf-text);
+    border-color: var(--tf-glass-border);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    font-weight: 600;
+    padding: 0.625rem 1.5rem;
+    border-radius: var(--tf-radius-full);
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.35);
+    transform: translateY(-1px);
+}
+
+/* ========================================
+   Cards
+   ======================================== */
+
+.card {
+    background: var(--tf-glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--tf-glass-border);
+    border-radius: var(--tf-radius-xl);
+    box-shadow: var(--tf-glass-shadow);
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(110, 231, 183, 0.1);
+}
+
+.card-static {
+    background: var(--tf-glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--tf-glass-border);
+    border-radius: var(--tf-radius-xl);
+    box-shadow: var(--tf-glass-shadow);
+    overflow: hidden;
+}
+
+/* ========================================
+   Form Inputs
+   ======================================== */
+
+.input-modern {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--tf-radius-md);
+    padding: 0.75rem 1rem;
+    color: var(--tf-text);
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.input-modern::placeholder {
+    color: var(--tf-text-dimmed);
+}
+
+.input-modern:focus {
+    border-color: var(--tf-accent-emerald);
+    box-shadow: 0 0 0 3px rgba(110, 231, 183, 0.15);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.select-modern {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--tf-radius-md);
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    color: var(--tf-text);
+    font-size: 0.8125rem;
+    transition: all 0.2s ease;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a09bb5' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+}
+
+.select-modern:focus {
+    border-color: var(--tf-accent-emerald);
+    box-shadow: 0 0 0 3px rgba(110, 231, 183, 0.15);
+}
+
+.select-modern option {
+    background: var(--tf-bg-surface-solid);
+    color: var(--tf-text);
+}
+
+/* ========================================
+   Tags / Pills
+   ======================================== */
+
+.tag-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: var(--tf-radius-full);
+    border: 1px solid rgba(110, 231, 183, 0.3);
+    color: var(--tf-accent-emerald);
+    background: rgba(110, 231, 183, 0.08);
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.tag-pill:hover {
+    background: rgba(110, 231, 183, 0.2);
+    border-color: var(--tf-accent-emerald);
+    transform: translateY(-1px);
+}
+
+/* ========================================
+   Nav Link Pills
+   ======================================== */
+
+.nav-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border-radius: var(--tf-radius-full);
+    color: var(--tf-text-muted);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.nav-pill:hover {
+    color: var(--tf-text);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.nav-pill.router-link-active,
+.nav-pill.router-link-exact-active {
+    color: var(--tf-accent-emerald);
+    background: rgba(110, 231, 183, 0.1);
+    border-color: rgba(110, 231, 183, 0.2);
+}
+
+/* ========================================
+   Stat Badge
+   ======================================== */
+
+.stat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--tf-text-muted);
+}
+
+.stat-badge .stat-value {
+    font-weight: 700;
+}
+
+/* ========================================
+   Modal Overlay
+   ======================================== */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+
+.modal-card {
+    background: var(--tf-bg-surface-solid);
+    border: 1px solid var(--tf-glass-border);
+    border-radius: var(--tf-radius-xl);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 28rem;
+    margin: 1rem;
+    overflow: hidden;
+}
+
+/* ========================================
+   Animations
+   ======================================== */
+
+@keyframes fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes glow-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 16px rgba(110, 231, 183, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 32px rgba(110, 231, 183, 0.4);
+    }
+}
+
+@keyframes gradient-shift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.animate-fade-up {
+    animation: fade-up 0.4s ease-out;
+}
+
+.animate-glow {
+    animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* ========================================
+   Auth page background
+   ======================================== */
+
+.auth-bg {
+    background: var(--tf-bg-deep);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-bg::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+        radial-gradient(ellipse at 20% 50%, rgba(110, 231, 183, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(167, 139, 250, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(6, 182, 212, 0.06) 0%, transparent 50%);
+    animation: gradient-shift 15s ease infinite;
+    background-size: 200% 200%;
+}
+
+/* ========================================
+   Page transition
+   ======================================== */
+
+.page-enter-active,
+.page-leave-active {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.page-enter-from {
+    opacity: 0;
+    transform: translateY(8px);
+}
+
+.page-leave-to {
+    opacity: 0;
+    transform: translateY(-4px);
+}
+
+/* ========================================
+   Dropdown transition
+   ======================================== */
+
+.dropdown-enter-active,
+.dropdown-leave-active {
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+    opacity: 0;
+    transform: translateY(-6px);
+}
+
+/* ========================================
+   Table styles (admin)
+   ======================================== */
+
+.table-modern {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-modern th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--tf-text-dimmed);
+    border-bottom: 1px solid var(--tf-border);
+}
+
+.table-modern td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    font-size: 0.875rem;
+}
+
+.table-modern tbody tr {
+    transition: background 0.15s ease;
+}
+
+.table-modern tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* ========================================
+   Tag Toggle Buttons (Edit/Upload forms)
+   ======================================== */
+
+.btn-tag-active {
+    background: var(--tf-gradient-primary);
+    color: #0f0e17;
+    font-weight: 600;
+}
+
+.btn-tag-inactive {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--tf-text-muted);
+    border: 1px solid var(--tf-border);
+    transition: all 0.2s ease;
+}
+
+.btn-tag-inactive:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--tf-text);
+    border-color: var(--tf-glass-border);
+}

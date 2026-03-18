@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" width="600" height="200">
+  <defs>
+    <linearGradient id="ballGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6ee7b7"/>
+      <stop offset="50%" style="stop-color:#34d399"/>
+      <stop offset="100%" style="stop-color:#10b981"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6ee7b7"/>
+      <stop offset="40%" style="stop-color:#34d399"/>
+      <stop offset="70%" style="stop-color:#a78bfa"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="footGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#a78bfa"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="ballShadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#10b981" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Football / Soccer Ball -->
+  <g filter="url(#ballShadow)" transform="translate(80, 100)">
+    <!-- Ball body -->
+    <circle cx="0" cy="0" r="55" fill="url(#ballGrad)" opacity="0.95"/>
+    <!-- Pentagon patterns (simplified football pattern) -->
+    <g fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5">
+      <!-- Center pentagon -->
+      <polygon points="0,-18 -17,-6 -10,15 10,15 17,-6"/>
+      <!-- Top seams -->
+      <line x1="0" y1="-18" x2="0" y2="-40"/>
+      <line x1="-17" y1="-6" x2="-38" y2="-22"/>
+      <line x1="17" y1="-6" x2="38" y2="-22"/>
+      <!-- Bottom seams -->
+      <line x1="-10" y1="15" x2="-30" y2="35"/>
+      <line x1="10" y1="15" x2="30" y2="35"/>
+      <!-- Outer connections -->
+      <line x1="0" y1="-40" x2="-38" y2="-22"/>
+      <line x1="0" y1="-40" x2="38" y2="-22"/>
+      <line x1="-38" y1="-22" x2="-48" y2="10"/>
+      <line x1="38" y1="-22" x2="48" y2="10"/>
+      <line x1="-48" y1="10" x2="-30" y2="35"/>
+      <line x1="48" y1="10" x2="30" y2="35"/>
+      <line x1="-30" y1="35" x2="0" y2="50"/>
+      <line x1="30" y1="35" x2="0" y2="50"/>
+    </g>
+    <!-- Highlight -->
+    <circle cx="-15" cy="-20" r="18" fill="rgba(255,255,255,0.15)"/>
+  </g>
+
+  <!-- TalentFoot Text -->
+  <g filter="url(#glow)">
+    <!-- "Talent" -->
+    <text x="160" y="118" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-weight="800" font-size="64" fill="url(#textGrad)" letter-spacing="-1">
+      Talent
+    </text>
+    <!-- "Foot" -->
+    <text x="420" y="118" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-weight="800" font-size="64" fill="url(#footGrad)" letter-spacing="-1">
+      Foot
+    </text>
+  </g>
+
+  <!-- Tagline -->
+  <text x="300" y="155" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-weight="400" font-size="14" fill="rgba(255,255,255,0.5)" letter-spacing="4">
+    FOOTBALL TRAINING PLATFORM
+  </text>
+</svg>

@@ -1,0 +1,55 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Dependencies (rebuilt in Docker)
+vendor
+node_modules
+
+# Environment files (injected via Docker)
+.env
+.env.backup
+.env.production
+
+# IDE / Editor
+.fleet
+.idea
+.vscode
+
+# Storage (runtime data)
+storage/logs/*
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+# Database files
+database/*.sqlite
+database/*.sqlite-journal
+
+# Tests
+tests
+.phpunit.result.cache
+.phpunit.cache
+phpunit.xml
+
+# Build artifacts
+public/build
+public/hot
+public/storage
+
+# Temporary / debug scripts
+debug_check.php
+fix_translations.php
+migrate_tags.php
+reset_admin_pw.php
+test_login.js
+verify_routes.php
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docs
+README.md
+COMFYUI_SETUP.md

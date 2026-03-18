@@ -1,0 +1,70 @@
+<?php
+
+namespace App\Models;
+
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+
+class User extends Authenticatable
+{
+    use HasApiTokens, HasFactory, Notifiable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role',
+        'subscription_valid_until',
+        'auth_provider',
+        'google_id',
+        'show_tips',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'subscription_valid_until' => 'date',
+    ];
+
+    // Default role
+    protected $attributes = [
+        'role' => 'user',
+    ];
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function hasActiveSubscription()
+    {
+        return $this->subscription_valid_until && $this->subscription_valid_until->gte(now()->startOfDay());
+    }
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function challenges()
+    {
+        return $this->hasMany(Challenge::class);
+    }
+}

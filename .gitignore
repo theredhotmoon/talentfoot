@@ -1,0 +1,105 @@
+# =============================================
+# TalentFoot Monorepo — .gitignore
+# =============================================
+
+# ─── Global / Shared ────────────────────────
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE / Editor
+.vscode
+.idea
+.fleet
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environment files (root docker-compose .env)
+.env
+
+# Logs (generic)
+*.log
+
+# Linting
+.eslintcache
+
+# Misc
+Homestead.json
+Homestead.yaml
+auth.json
+
+# ─── Frontend (treneiro-web-app) ────────────
+
+# Dependencies
+treneiro-web-app/node_modules
+
+# Build output
+treneiro-web-app/dist
+treneiro-web-app/dist-ssr
+
+# Local env files
+treneiro-web-app/.env
+treneiro-web-app/.env.*.local
+*.local
+
+# Cypress test artifacts
+treneiro-web-app/cypress/screenshots
+treneiro-web-app/cypress/videos
+treneiro-web-app/cypress/downloads
+
+# Coverage
+treneiro-web-app/coverage
+*.lcov
+
+# Temporary scripts
+treneiro-web-app/add_translations.cjs
+
+# ─── Backend (treneiro-service) ─────────────
+
+# Dependencies
+treneiro-service/vendor
+treneiro-service/node_modules
+
+# Environment files
+treneiro-service/.env
+treneiro-service/.env.backup
+treneiro-service/.env.production
+
+# Laravel build & hot-reload
+treneiro-service/public/build
+treneiro-service/public/hot
+treneiro-service/public/storage
+
+# Storage (uploaded files, cache, logs, sessions)
+treneiro-service/storage/*.key
+treneiro-service/storage/app/public/clips/
+treneiro-service/storage/app/public/subclips/
+treneiro-service/storage/app/public/captions/
+treneiro-service/storage/app/public/thumbnails/
+treneiro-service/storage/framework/cache/data/
+treneiro-service/storage/framework/sessions/
+treneiro-service/storage/framework/views/
+treneiro-service/storage/logs/
+
+# Database
+treneiro-service/database/*.sqlite
+treneiro-service/database/*.sqlite-journal
+
+# PHPUnit
+treneiro-service/.phpunit.result.cache
+treneiro-service/.phpunit.cache
+
+# Documentation (auto-generated / not needed in repo)
+treneiro-service/COMFYUI_SETUP.md
+
+# Temporary / debug scripts
+treneiro-service/debug_check.php
+treneiro-service/fix_translations.php
+treneiro-service/migrate_tags.php
+treneiro-service/reset_admin_pw.php
+treneiro-service/test_login.js
+treneiro-service/verify_routes.php
