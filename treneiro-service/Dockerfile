@@ -1,7 +1,19 @@
 # ============================================================
 # Stage 1: Install Composer dependencies
 # ============================================================
-FROM composer:2 AS deps
+FROM php:8.2-cli AS deps
+
+# Install system deps needed by Composer and PHP extensions
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        git \
+        unzip \
+        libzip-dev \
+        libsqlite3-dev \
+    && docker-php-ext-install zip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
