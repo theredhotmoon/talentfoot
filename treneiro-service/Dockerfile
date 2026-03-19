@@ -43,6 +43,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
     && docker-php-ext-install \
         pdo_sqlite \
+        pdo_mysql \
         zip \
         bcmath \
     && apt-get purge -y --auto-remove \
