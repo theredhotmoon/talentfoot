@@ -1,5 +1,7 @@
 <template>
   <div>
+    <!-- Welcome Tour -->
+    <WelcomeTourModal v-if="showTour" @close="showTour = false" />
     <div v-if="loading" class="text-center py-16" style="color: var(--tf-text-muted);"><div class="w-8 h-8 rounded-full mx-auto mb-3 animate-spin" style="border: 3px solid var(--tf-border); border-top-color: var(--tf-accent-emerald);"></div>{{ $t('clip_detail.loading') }}</div>
     <div v-else-if="clip">
       <!-- Video + Subclips Row (side-by-side on desktop) -->
@@ -45,6 +47,7 @@
                   crossorigin="anonymous"
                   class="w-full max-h-[600px] object-contain bg-black"
                   @play="onVideoPlay"
+                  @pause="onVideoPause"
                   @ended="onVideoEnded"
                 >
                   <track
@@ -484,6 +487,7 @@ import IconFlame from '../components/icons/IconFlame.vue';
 import IconMessage from '../components/icons/IconMessage.vue';
 import IconFolder from '../components/icons/IconFolder.vue';
 import IconUsers from '../components/icons/IconUsers.vue';
+import WelcomeTourModal from '../components/WelcomeTourModal.vue';
 
 const { t, locale } = useI18n();
 const authStore = useAuthStore();
@@ -564,6 +568,7 @@ const viewedSubclips = ref<Set<string>>(new Set());
 const videoPlayer = ref<HTMLVideoElement | null>(null);
 const subscriptionActive = ref(false);
 const tipDismissed = ref(false);
+const showTour = ref(false);
 const cartoonFilePath = ref<string | null>(null);
 const showCartoon = ref(false);
 const captionsEnabled = ref(true);
@@ -581,6 +586,7 @@ const challengeStarting = ref(false);
 
 // Watch timing state
 const watchStartedAt = ref<number | null>(null);
+const accumulatedWatchTime = ref(0);
 const startedSubclips = ref<Set<string>>(new Set());
 
 const mainClipWatched = computed(() => {
@@ -693,13 +699,20 @@ const switchToSubclip = (subclip: Subclip) => {
     showChallengeModal.value = true;
 };
 
+const resetWatchTiming = () => {
+    watchStartedAt.value = null;
+    accumulatedWatchTime.value = 0;
+};
+
 const doSwitchSubclip = (subclip: Subclip) => {
     activeSubclip.value = subclip;
+    resetWatchTiming();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 const switchToMain = () => {
     activeSubclip.value = null;
+    resetWatchTiming();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
@@ -736,12 +749,22 @@ const onVideoPlay = () => {
         viewedSubclips.value.add(activeSubclip.value.id);
         recordSubclipView(activeSubclip.value.id);
     }
-    // Record watch start time for duration validation
-    watchStartedAt.value = Date.now();
+    // Record watch start time for duration validation (only on first play, not resume)
+    if (watchStartedAt.value === null) {
+        watchStartedAt.value = Date.now();
+    }
     // Mark as "started" for visual indicator
     const currentId = activeSubclip.value ? activeSubclip.value.id : clip.value?.id;
     if (currentId) {
         startedSubclips.value.add(currentId);
+    }
+};
+
+const onVideoPause = () => {
+    // Accumulate elapsed time from the current play segment
+    if (watchStartedAt.value !== null) {
+        accumulatedWatchTime.value += (Date.now() - watchStartedAt.value) / 1000;
+        watchStartedAt.value = null;
     }
 };
 
@@ -762,11 +785,12 @@ const onVideoEnded = () => {
         return;
     }
 
-    // Validate watch duration >= video duration
-    if (watchStartedAt.value && videoPlayer.value) {
-        const elapsedSeconds = (Date.now() - watchStartedAt.value) / 1000;
+    // Validate watch duration >= video duration (accumulated across pause/resume cycles)
+    if (videoPlayer.value) {
+        const currentSegment = watchStartedAt.value ? (Date.now() - watchStartedAt.value) / 1000 : 0;
+        const totalWatchedSeconds = accumulatedWatchTime.value + currentSegment;
         const videoDuration = videoPlayer.value.duration;
-        if (videoDuration && elapsedSeconds < videoDuration * 0.95) {
+        if (videoDuration && totalWatchedSeconds < videoDuration * 0.95) {
             // Watch time too short — show error
             showWatchErrorToast.value = true;
             setTimeout(() => { showWatchErrorToast.value = false; }, 5000);
@@ -774,6 +798,8 @@ const onVideoEnded = () => {
         }
     }
 
+    // Reset timing state after successful recording
+    resetWatchTiming();
     recordChallengeWatch(type, wId);
 };
 
@@ -856,6 +882,11 @@ onMounted(async () => {
         if (videoPlayer.value) {
             videoPlayer.value.play().catch(() => { /* browser may block autoplay */ });
         }
+    }
+
+    // Show welcome tour if user has tips enabled
+    if (authStore.isAuthenticated && authStore.showTips) {
+        showTour.value = true;
     }
 });
 </script>

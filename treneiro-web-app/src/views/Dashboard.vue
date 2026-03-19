@@ -1,7 +1,5 @@
 <template>
   <div>
-    <!-- Welcome Tour -->
-    <WelcomeTourModal v-if="showTour" @close="showTour = false" />
     <!-- Hero header -->
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -127,18 +125,18 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import ClipTile from '../components/ClipTile.vue';
 import SortFilterBar from '../components/SortFilterBar.vue';
-import WelcomeTourModal from '../components/WelcomeTourModal.vue';
+
 import IconLightning from '../components/icons/IconLightning.vue';
 import IconTrophy from '../components/icons/IconTrophy.vue';
 import { useTranslation } from '../composables/useTranslation';
 import { useMediaUrl } from '../composables/useMediaUrl';
-import { useAuthStore } from '../stores/auth';
+
 
 const router = useRouter();
 const { getTranslated } = useTranslation();
 const { getThumbnailUrl } = useMediaUrl();
-const authStore = useAuthStore();
-const showTour = ref(false);
+
+
 
 interface Clip {
   id: string;
@@ -246,9 +244,6 @@ onMounted(() => {
     fetchCategories();
     fetchClips();
     fetchChallenges();
-    // Show welcome tour if user has tips enabled
-    if (authStore.isAuthenticated && authStore.showTips) {
-        showTour.value = true;
-    }
+
 });
 </script>
