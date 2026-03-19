@@ -11,8 +11,6 @@ services:
       db:
         condition: service_healthy
     volumes:
-      # Persist SQLite database across container restarts
-      - db_data:/app/storage/database
       # Persist uploaded media files
       - storage_data:/app/storage/app/public
     environment:
@@ -53,7 +51,7 @@ services:
       MYSQL_DATABASE: talentfoot
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
     volumes:
-      - db_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
     networks:
       - app-network
     healthcheck:
@@ -92,5 +90,5 @@ networks:
 volumes:
   storage_data:
     driver: local
-  db_data:
+  mysql_data:
     driver: local

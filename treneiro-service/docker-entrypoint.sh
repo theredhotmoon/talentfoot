@@ -1,9 +1,8 @@
 #!/bin/bash
 set -e
 
-# Generate .env file from environment variables if it doesn't exist
-if [ ! -f /app/.env ]; then
-    cat > /app/.env <<EOF
+# Always generate .env from environment variables to ensure fresh config
+cat > /app/.env <<EOF
 APP_NAME="${APP_NAME:-TalentFoot}"
 APP_ENV="${APP_ENV:-production}"
 APP_KEY="${APP_KEY}"
@@ -13,7 +12,12 @@ APP_URL="${APP_URL:-http://localhost:8000}"
 LOG_CHANNEL="${LOG_CHANNEL:-stack}"
 LOG_LEVEL="${LOG_LEVEL:-warning}"
 
-DB_CONNECTION="${DB_CONNECTION:-sqlite}"
+DB_CONNECTION="${DB_CONNECTION:-mysql}"
+DB_HOST="${DB_HOST:-db}"
+DB_PORT="${DB_PORT:-3306}"
+DB_DATABASE="${DB_DATABASE:-talentfoot}"
+DB_USERNAME="${DB_USERNAME:-root}"
+DB_PASSWORD="${DB_PASSWORD:-secret}"
 
 CACHE_DRIVER="${CACHE_DRIVER:-file}"
 SESSION_DRIVER="${SESSION_DRIVER:-file}"
@@ -27,36 +31,11 @@ GOOGLE_CLIENT_SECRET="${GOOGLE_CLIENT_SECRET:-}"
 GOOGLE_REDIRECT_URI="${GOOGLE_REDIRECT_URI:-}"
 EOF
 
-    # Only append database config if explicitly provided by user,
-    # otherwise Laravel defaults handle it perfectly (esp. for SQLite)
-    if [ -n "${DB_HOST:-}" ]; then echo "DB_HOST=\"${DB_HOST}\"" >> /app/.env; fi
-    if [ -n "${DB_PORT:-}" ]; then echo "DB_PORT=\"${DB_PORT}\"" >> /app/.env; fi
-    if [ -n "${DB_DATABASE:-}" ]; then echo "DB_DATABASE=\"${DB_DATABASE}\"" >> /app/.env; fi
-    if [ -n "${DB_USERNAME:-}" ]; then echo "DB_USERNAME=\"${DB_USERNAME}\"" >> /app/.env; fi
-    if [ -n "${DB_PASSWORD:-}" ]; then echo "DB_PASSWORD=\"${DB_PASSWORD}\"" >> /app/.env; fi
+chown www-data:www-data /app/.env
+echo "Generated .env from environment variables"
 
-    chown www-data:www-data /app/.env
-    echo "Generated .env from environment variables"
-fi
-
-# Ensure SQLite database exists and is writable if using SQLite
-if [ "${DB_CONNECTION:-sqlite}" = "sqlite" ]; then
-    mkdir -p /app/storage/database
-    if [ ! -f /app/storage/database/database.sqlite ]; then
-        echo "Creating missing database.sqlite..."
-        touch /app/storage/database/database.sqlite
-    fi
-    # Ensure Apache can write to the DB and its directory (for journal files)
-    chown -R www-data:www-data /app/storage/database
-    chmod -R 775 /app/storage/database
-
-    # Force Laravel to use this path
-    export DB_DATABASE="/app/storage/database/database.sqlite"
-    echo "DB_DATABASE=\"/app/storage/database/database.sqlite\"" >> /app/.env
-fi
-
-# Run migrations if database exists
-if [ "${RUN_MIGRATIONS:-false}" = "true" ]; then
+# Run migrations
+if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
     echo "Running migrations..."
     php artisan migrate --force
 fi
