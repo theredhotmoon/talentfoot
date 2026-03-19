@@ -115,6 +115,9 @@ EOF
 chown www-data:www-data /app/.env
 echo "Generated .env from environment variables"
 
+# Ensure storage symlink exists (volumes may override the one created at build time)
+php artisan storage:link --force 2>/dev/null || true
+
 # Run migrations and seed
 if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
     echo "Running migrations..."
