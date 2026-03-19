@@ -14,24 +14,20 @@ services:
       # Persist uploaded media files
       - storage_data:/app/storage/app/public
     environment:
-      - APP_NAME=${APP_NAME:-TalentFoot}
-      - APP_ENV=${APP_ENV:-production}
-      - APP_KEY=${APP_KEY:-}
-      - APP_DEBUG=${APP_DEBUG:-false}
-      - APP_URL=${APP_URL:-http://localhost:8000}
+      # Infrastructure (always the same in Docker)
       - DB_CONNECTION=mysql
       - DB_HOST=db
       - DB_PORT=3306
       - DB_DATABASE=talentfoot
       - DB_USERNAME=root
       - DB_PASSWORD=${DB_PASSWORD:-secret}
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
-      - LOG_CHANNEL=stack
-      - LOG_LEVEL=${LOG_LEVEL:-warning}
       - CACHE_DRIVER=file
       - SESSION_DRIVER=file
       - QUEUE_CONNECTION=sync
-      - RUN_MIGRATIONS=${RUN_MIGRATIONS:-true}
+      - RUN_MIGRATIONS=true
+      # User-facing vars: set via Hostinger Environment panel
+      # APP_KEY, APP_NAME, APP_ENV, APP_DEBUG, APP_URL, FRONTEND_URL, LOG_LEVEL
+      # are injected by Hostinger directly into the container
     networks:
       - app-network
     restart: unless-stopped
