@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('show_tips')->default(true)->after('subscription_active');
+            $table->boolean('show_tips')->default(true);
         });
     }
 
