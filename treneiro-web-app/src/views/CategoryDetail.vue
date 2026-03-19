@@ -85,7 +85,7 @@ const challengeForClip = (clipId: string) => {
 
 const handleRate = async (clipId: string, rating: number) => {
     try {
-        const response = await axios.post(`http://localhost:8000/api/clips/${clipId}/rate`, { rating });
+        const response = await axios.post(`/api/clips/${clipId}/rate`, { rating });
         if (category.value?.clips) {
             const clip = category.value.clips.find((c: any) => c.id === clipId);
             if (clip) {
@@ -100,7 +100,7 @@ const handleRate = async (clipId: string, rating: number) => {
 
 const startChallengeForClip = async (clip: any) => {
     try {
-        const res = await axios.post('http://localhost:8000/api/challenges', { clip_id: clip.id });
+        const res = await axios.post('/api/challenges', { clip_id: clip.id });
         challenges.value.push(res.data.challenge);
         const slug = typeof clip.slug === 'string' ? clip.slug : clip.slug?.en || Object.values(clip.slug)[0];
         router.push(`/clips/${clip.id}/${slug}?autoplay=1`);
@@ -117,7 +117,7 @@ const startChallengeForClip = async (clip: any) => {
 
 const fetchChallenges = async () => {
     try {
-        const res = await axios.get('http://localhost:8000/api/challenges');
+        const res = await axios.get('/api/challenges');
         challenges.value = res.data;
     } catch (e) {
         // silently ignore
@@ -126,7 +126,7 @@ const fetchChallenges = async () => {
 
 const fetchCategory = async () => {
     try {
-        const res = await axios.get(`http://localhost:8000/api/categories/${route.params.id}`, {
+        const res = await axios.get(`/api/categories/${route.params.id}`, {
             params: {
                 sort: sortBy.value,
                 order: sortOrder.value,

@@ -141,7 +141,7 @@ const changePage = (page: number) => {
 const fetchUsers = async () => {
     loading.value = true;
     try {
-        const response = await axios.get('http://localhost:8000/api/users', {
+        const response = await axios.get('/api/users', {
             params: {
                 page: pagination.value.current_page,
                 search: search.value,
@@ -167,7 +167,7 @@ const fetchUsers = async () => {
 const deleteUser = async (user: User) => {
     if (!confirm(t('users.confirm_delete', { name: user.name }))) return;
     try {
-        await axios.delete(`http://localhost:8000/api/users/${user.id}`);
+        await axios.delete(`/api/users/${user.id}`);
         fetchUsers();
     } catch (e: any) {
         alert(e.response?.data?.message || 'Failed to delete user');

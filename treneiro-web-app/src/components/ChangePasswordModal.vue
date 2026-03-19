@@ -19,7 +19,7 @@ const handleSubmit = async () => {
     success.value = false;
 
     try {
-        await axios.put('http://localhost:8000/api/profile/password', form.value);
+        await axios.put('/api/profile/password', form.value);
         success.value = true;
         form.value = { current_password: '', password: '', password_confirmation: '' };
         setTimeout(() => emit('close'), 1500);

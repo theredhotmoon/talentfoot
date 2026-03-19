@@ -113,7 +113,7 @@ const getCategoryThumbnails = (category: Category) => {
 const fetchCategories = async () => {
     loading.value = true;
     try {
-        const response = await axios.get('http://localhost:8000/api/categories');
+        const response = await axios.get('/api/categories');
         categories.value = response.data;
     } catch (e) {
         console.error(e);
@@ -138,7 +138,7 @@ const openEditModal = (category: Category) => {
 const deleteCategory = async (category: Category) => {
     if (!confirm(t('categories.confirm_delete'))) return;
     try {
-        await axios.delete(`http://localhost:8000/api/categories/${category.id}`);
+        await axios.delete(`/api/categories/${category.id}`);
         fetchCategories();
     } catch (e: any) {
         alert(e.response?.data?.message || 'Failed to delete category');

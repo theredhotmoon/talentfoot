@@ -23,7 +23,7 @@ export const useAuthStore = defineStore('auth', {
     },
     actions: {
         async login(credentials: any) {
-            const response = await axios.post('http://localhost:8000/api/login', credentials);
+            const response = await axios.post('/api/login', credentials);
             this.token = response.data.access_token;
             this.user = response.data.user;
             localStorage.setItem('token', this.token);
@@ -31,7 +31,7 @@ export const useAuthStore = defineStore('auth', {
             router.push('/');
         },
         async register(credentials: any) {
-            const response = await axios.post('http://localhost:8000/api/register', credentials);
+            const response = await axios.post('/api/register', credentials);
             this.token = response.data.access_token;
             localStorage.setItem('token', this.token);
             axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
@@ -41,7 +41,7 @@ export const useAuthStore = defineStore('auth', {
         },
         async logout() {
             try {
-                await axios.post('http://localhost:8000/api/logout');
+                await axios.post('/api/logout');
             } catch (e) {
                 console.error(e);
             }
@@ -55,7 +55,7 @@ export const useAuthStore = defineStore('auth', {
             if (!this.token) return;
             try {
                 axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
-                const response = await axios.get('http://localhost:8000/api/user');
+                const response = await axios.get('/api/user');
                 this.user = response.data;
             } catch (error) {
                 console.error("Fetch user failed", error);
@@ -71,7 +71,7 @@ export const useAuthStore = defineStore('auth', {
         },
         async updateShowTips(value: boolean) {
             try {
-                const response = await axios.put('http://localhost:8000/api/profile/tips', {
+                const response = await axios.put('/api/profile/tips', {
                     show_tips: value,
                 });
                 this.user = response.data;

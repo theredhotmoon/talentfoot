@@ -99,7 +99,7 @@ const newTag = ref({
 const auth = useAuthStore();
 
 const fetchTags = async () => {
-  const res = await axios.get('http://localhost:8000/api/tags');
+  const res = await axios.get('/api/tags');
   tags.value = res.data;
 };
 
@@ -108,7 +108,7 @@ const createTag = async () => {
     if (!newTag.value.name.en) return;
 
     try {
-        await axios.post('http://localhost:8000/api/tags', newTag.value);
+        await axios.post('/api/tags', newTag.value);
         showCreateModal.value = false;
         newTag.value = { name: { en: '', pl: '', es: '' } };
         fetchTags();

@@ -27,7 +27,7 @@ const handleSubmit = async () => {
     success.value = false;
 
     try {
-        const response = await axios.put('http://localhost:8000/api/profile', form.value);
+        const response = await axios.put('/api/profile', form.value);
         if (auth.user) {
             auth.user.name = response.data.name;
             auth.user.email = response.data.email;

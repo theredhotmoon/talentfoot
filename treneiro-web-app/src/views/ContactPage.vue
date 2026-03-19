@@ -57,7 +57,7 @@ const submitForm = async () => {
     submitting.value = true;
     error.value = '';
     try {
-        await axios.post('http://localhost:8000/api/contact', form.value);
+        await axios.post('/api/contact', form.value);
         sent.value = true;
     } catch (e: any) {
         if (e.response?.data?.errors) {

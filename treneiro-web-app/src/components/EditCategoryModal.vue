@@ -81,9 +81,9 @@ const save = async () => {
     saving.value = true;
     try {
         if (props.isCreate) {
-            await axios.post('http://localhost:8000/api/categories', payload);
+            await axios.post('/api/categories', payload);
         } else if (props.category) {
-            await axios.put(`http://localhost:8000/api/categories/${props.category.id}`, payload);
+            await axios.put(`/api/categories/${props.category.id}`, payload);
         }
         emit('saved');
         emit('close');

@@ -286,8 +286,8 @@ const newSubclip = reactive({
 const fetchTagsAndCategories = async () => {
     try {
         const [tagsRes, catsRes] = await Promise.all([
-            axios.get('http://localhost:8000/api/tags'),
-            axios.get('http://localhost:8000/api/categories')
+            axios.get('/api/tags'),
+            axios.get('/api/categories')
         ]);
         availableTags.value = tagsRes.data;
         categories.value = catsRes.data;
@@ -298,7 +298,7 @@ const fetchTagsAndCategories = async () => {
 
 const fetchClip = async () => {
     try {
-        const response = await axios.get(`http://localhost:8000/api/clips/${id}`);
+        const response = await axios.get(`/api/clips/${id}`);
         const clip = response.data.clip;
         
         const safeGet = (field: any, lang: string) => {
@@ -365,7 +365,7 @@ const handleMainCaptionsChange = (event: Event, lang: string) => {
 const convertToCartoon = async () => {
     convertingCartoon.value = true;
     try {
-        const response = await axios.post(`http://localhost:8000/api/clips/${id}/convert-cartoon`);
+        const response = await axios.post(`/api/clips/${id}/convert-cartoon`);
         cartoonStatus.value = response.data.cartoon_status;
         startCartoonPolling();
     } catch (e: any) {
@@ -380,7 +380,7 @@ const startCartoonPolling = () => {
     if (cartoonPollInterval) clearInterval(cartoonPollInterval);
     cartoonPollInterval = setInterval(async () => {
         try {
-            const res = await axios.get(`http://localhost:8000/api/clips/${id}/cartoon-status`);
+            const res = await axios.get(`/api/clips/${id}/cartoon-status`);
             cartoonStatus.value = res.data.cartoon_status;
             cartoonError.value = res.data.cartoon_error;
             if (res.data.cartoon_status === 'done' || res.data.cartoon_status === 'failed') {
@@ -417,7 +417,7 @@ const handleUpdate = async () => {
             }
         });
 
-        const response = await axios.post(`http://localhost:8000/api/clips/${id}`, formData, {
+        const response = await axios.post(`/api/clips/${id}`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         
@@ -484,7 +484,7 @@ const addSubclip = async () => {
             formData.append('thumbnails[]', blob, `thumb_${index}.jpg`);
         });
 
-        const response = await axios.post(`http://localhost:8000/api/clips/${id}/subclips`, formData, {
+        const response = await axios.post(`/api/clips/${id}/subclips`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
 
@@ -532,7 +532,7 @@ const updateSubclip = async (subclip: any) => {
             }
         });
 
-        await axios.post(`http://localhost:8000/api/subclips/${subclip.id}`, formData, {
+        await axios.post(`/api/subclips/${subclip.id}`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         alert(t('subclips.update_success'));
@@ -548,7 +548,7 @@ const deleteSubclip = async (subclipId: string) => {
     if (!confirm(t('subclips.delete_confirm'))) return;
     
     try {
-        await axios.delete(`http://localhost:8000/api/subclips/${subclipId}`);
+        await axios.delete(`/api/subclips/${subclipId}`);
         subclips.value = subclips.value.filter(s => s.id !== subclipId);
         alert(t('subclips.delete_success'));
     } catch (e) {

@@ -75,7 +75,7 @@ const loading = ref(true);
 const fetchClips = async () => {
     loading.value = true;
     try {
-        const response = await axios.get(`http://localhost:8000/api/clips?tag=${tag.value}`);
+        const response = await axios.get(`/api/clips?tag=${tag.value}`);
         clips.value = response.data.data;
     } catch (e) {
         console.error(e);

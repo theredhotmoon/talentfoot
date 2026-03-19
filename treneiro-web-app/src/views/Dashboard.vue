@@ -172,7 +172,7 @@ const challengeForClip = (clipId: string) => {
 
 const startChallengeForClip = async (clip: Clip) => {
     try {
-        const res = await axios.post('http://localhost:8000/api/challenges', { clip_id: clip.id });
+        const res = await axios.post('/api/challenges', { clip_id: clip.id });
         // Add to local challenges list
         challenges.value.push(res.data.challenge);
         // Redirect to clip page
@@ -193,7 +193,7 @@ const startChallengeForClip = async (clip: Clip) => {
 };
 const fetchCategories = async () => {
     try {
-        const response = await axios.get('http://localhost:8000/api/categories');
+        const response = await axios.get('/api/categories');
         categories.value = response.data;
     } catch (e) {
         console.error(e);
@@ -211,7 +211,7 @@ const fetchClips = async () => {
             params.category_id = selectedCategory.value;
         }
 
-        const response = await axios.get('http://localhost:8000/api/clips', { params });
+        const response = await axios.get('/api/clips', { params });
         clips.value = response.data.data;
     } catch (e) {
         console.error(e);
@@ -222,7 +222,7 @@ const fetchClips = async () => {
 
 const handleRate = async (clipId: string, rating: number) => {
     try {
-        const response = await axios.post(`http://localhost:8000/api/clips/${clipId}/rate`, { rating });
+        const response = await axios.post(`/api/clips/${clipId}/rate`, { rating });
         const clip = clips.value.find(c => c.id === clipId);
         if (clip) {
             clip.average_rating = response.data.average_rating;
@@ -235,7 +235,7 @@ const handleRate = async (clipId: string, rating: number) => {
 
 const fetchChallenges = async () => {
     try {
-        const res = await axios.get('http://localhost:8000/api/challenges');
+        const res = await axios.get('/api/challenges');
         challenges.value = res.data;
     } catch (e) {
         // User might not be authenticated — silently ignore

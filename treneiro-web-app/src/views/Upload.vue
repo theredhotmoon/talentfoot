@@ -106,8 +106,8 @@ const uploading = ref(false);
 const fetchData = async () => {
     try {
         const [catsRes, tagsRes] = await Promise.all([
-            axios.get('http://localhost:8000/api/categories'),
-            axios.get('http://localhost:8000/api/tags')
+            axios.get('/api/categories'),
+            axios.get('/api/tags')
         ]);
         categories.value = catsRes.data;
         availableTags.value = tagsRes.data;
@@ -189,7 +189,7 @@ const handleUpload = async () => {
     }
 
     try {
-        const response = await axios.post('http://localhost:8000/api/clips', formData, {
+        const response = await axios.post('/api/clips', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }

@@ -89,7 +89,7 @@ const formatDate = (iso: string) => {
 
 onMounted(async () => {
     try {
-        const res = await axios.get('http://localhost:8000/api/challenges');
+        const res = await axios.get('/api/challenges');
         challenges.value = res.data;
     } catch (e) {
         console.error(e);

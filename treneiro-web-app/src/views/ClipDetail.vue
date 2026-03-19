@@ -707,7 +707,7 @@ const startChallenge = async () => {
     if (!clip.value) return;
     challengeStarting.value = true;
     try {
-        const res = await axios.post('http://localhost:8000/api/challenges', { clip_id: clip.value.id });
+        const res = await axios.post('/api/challenges', { clip_id: clip.value.id });
         activeChallenge.value = res.data.challenge;
         showChallengeModal.value = false;
         // Now switch to the pending subclip
@@ -780,7 +780,7 @@ const onVideoEnded = () => {
 const recordChallengeWatch = async (type: string, watchableId: string) => {
     if (!activeChallenge.value) return;
     try {
-        const res = await axios.post(`http://localhost:8000/api/challenges/${activeChallenge.value.id}/watch`, {
+        const res = await axios.post(`/api/challenges/${activeChallenge.value.id}/watch`, {
             watchable_type: type,
             watchable_id: watchableId,
         });
@@ -797,7 +797,7 @@ const recordChallengeWatch = async (type: string, watchableId: string) => {
 
 const recordSubclipView = async (subclipId: string) => {
     try {
-        const response = await axios.post(`http://localhost:8000/api/subclips/${subclipId}/view`);
+        const response = await axios.post(`/api/subclips/${subclipId}/view`);
         if (clip.value) {
             const sc = clip.value.subclips.find(s => s.id === subclipId);
             if (sc) sc.views = response.data.views;
@@ -809,7 +809,7 @@ const recordSubclipView = async (subclipId: string) => {
 
 const fetchClip = async () => {
     try {
-        const response = await axios.get(`http://localhost:8000/api/clips/${id}`);
+        const response = await axios.get(`/api/clips/${id}`);
         clip.value = response.data.clip;
         subscriptionActive.value = response.data.subscription_active;
         cartoonFilePath.value = response.data.cartoon_file_path || null;
@@ -821,7 +821,7 @@ const fetchClip = async () => {
 
 const fetchComments = async () => {
     try {
-        const response = await axios.get(`http://localhost:8000/api/clips/${id}/comments`);
+        const response = await axios.get(`/api/clips/${id}/comments`);
         comments.value = response.data;
     } catch (e) {
         console.error("Failed to fetch comments", e);
@@ -833,7 +833,7 @@ const submitComment = async () => {
     
     submitting.value = true;
     try {
-        const response = await axios.post(`http://localhost:8000/api/clips/${id}/comments`, {
+        const response = await axios.post(`/api/clips/${id}/comments`, {
             content: newComment.value
         });
         comments.value.unshift(response.data);

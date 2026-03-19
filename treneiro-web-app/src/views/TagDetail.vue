@@ -99,7 +99,7 @@ const challengeForClip = (clipId: string) => {
 
 const handleRate = async (clipId: string, rating: number) => {
     try {
-        const response = await axios.post(`http://localhost:8000/api/clips/${clipId}/rate`, { rating });
+        const response = await axios.post(`/api/clips/${clipId}/rate`, { rating });
         if (tag.value?.clips) {
             const clip = tag.value.clips.find((c: any) => c.id === clipId);
             if (clip) {
@@ -114,7 +114,7 @@ const handleRate = async (clipId: string, rating: number) => {
 
 const startChallengeForClip = async (clip: any) => {
     try {
-        const res = await axios.post('http://localhost:8000/api/challenges', { clip_id: clip.id });
+        const res = await axios.post('/api/challenges', { clip_id: clip.id });
         challenges.value.push(res.data.challenge);
         const slug = typeof clip.slug === 'string' ? clip.slug : clip.slug?.en || Object.values(clip.slug)[0];
         router.push(`/clips/${clip.id}/${slug}?autoplay=1`);
@@ -131,7 +131,7 @@ const startChallengeForClip = async (clip: any) => {
 
 const fetchChallenges = async () => {
     try {
-        const res = await axios.get('http://localhost:8000/api/challenges');
+        const res = await axios.get('/api/challenges');
         challenges.value = res.data;
     } catch (e) {
         // silently ignore
@@ -140,7 +140,7 @@ const fetchChallenges = async () => {
 
 const fetchCategories = async () => {
     try {
-        const response = await axios.get('http://localhost:8000/api/categories');
+        const response = await axios.get('/api/categories');
         return response.data;
     } catch (e) {
         console.error(e);
@@ -158,7 +158,7 @@ const fetchTag = async () => {
             params.category_id = selectedCategory.value;
         }
 
-        const res = await axios.get(`http://localhost:8000/api/tags/${route.params.id}`, { params });
+        const res = await axios.get(`/api/tags/${route.params.id}`, { params });
         tag.value = res.data;
     } catch (e) {
         console.error(e);
@@ -168,7 +168,7 @@ const fetchTag = async () => {
 
 const updateTag = async () => {
     try {
-        await axios.put(`http://localhost:8000/api/tags/${tag.value.id}`, {
+        await axios.put(`/api/tags/${tag.value.id}`, {
             name: tag.value.name
         });
         alert(t('upload.save')); // Simple feedback
@@ -180,7 +180,7 @@ const updateTag = async () => {
 const deleteTag = async () => {
     if (!confirm(t('tags.confirm_delete'))) return;
     try {
-        await axios.delete(`http://localhost:8000/api/tags/${tag.value.id}`);
+        await axios.delete(`/api/tags/${tag.value.id}`);
         router.push('/tags');
     } catch (e) {
         console.error(e);

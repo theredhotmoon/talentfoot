@@ -62,7 +62,7 @@ const statItems = [
 
 onMounted(async () => {
   try {
-    const res = await axios.get('http://localhost:8000/api/stats');
+    const res = await axios.get('/api/stats');
     stats.value = res.data;
   } catch (e) {
     // silently ignore — footer stats are non-critical

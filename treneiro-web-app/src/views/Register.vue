@@ -87,7 +87,7 @@ const handleRegister = async () => {
 const handleGoogleSignUp = async () => {
   googleLoading.value = true;
   try {
-    const response = await axios.get('http://localhost:8000/api/auth/google/redirect');
+    const response = await axios.get('/api/auth/google/redirect');
     window.location.href = response.data.url;
   } catch (e) {
     error.value = 'Failed to connect to Google. Please try again.';

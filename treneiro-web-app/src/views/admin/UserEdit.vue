@@ -68,7 +68,7 @@ const form = ref({
 
 onMounted(async () => {
     try {
-        const response = await axios.get(`http://localhost:8000/api/users/${id}`);
+        const response = await axios.get(`/api/users/${id}`);
         form.value.name = response.data.name;
         form.value.email = response.data.email;
         form.value.role = response.data.role;
@@ -84,7 +84,7 @@ onMounted(async () => {
 
 const saveUser = async () => {
     try {
-        await axios.put(`http://localhost:8000/api/users/${id}`, form.value);
+        await axios.put(`/api/users/${id}`, form.value);
         alert(t('users.saved_success'));
         router.push('/users');
     } catch (e: any) {
