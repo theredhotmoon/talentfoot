@@ -14,11 +14,6 @@ LOG_CHANNEL="${LOG_CHANNEL:-stack}"
 LOG_LEVEL="${LOG_LEVEL:-warning}"
 
 DB_CONNECTION="${DB_CONNECTION:-sqlite}"
-DB_HOST="${DB_HOST:-127.0.0.1}"
-DB_PORT="${DB_PORT:-3306}"
-DB_DATABASE="${DB_DATABASE:-}"
-DB_USERNAME="${DB_USERNAME:-}"
-DB_PASSWORD="${DB_PASSWORD:-}"
 
 CACHE_DRIVER="${CACHE_DRIVER:-file}"
 SESSION_DRIVER="${SESSION_DRIVER:-file}"
@@ -31,6 +26,15 @@ GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID:-}"
 GOOGLE_CLIENT_SECRET="${GOOGLE_CLIENT_SECRET:-}"
 GOOGLE_REDIRECT_URI="${GOOGLE_REDIRECT_URI:-}"
 EOF
+
+    # Only append database config if explicitly provided by user,
+    # otherwise Laravel defaults handle it perfectly (esp. for SQLite)
+    if [ -n "${DB_HOST:-}" ]; then echo "DB_HOST=\"${DB_HOST}\"" >> /app/.env; fi
+    if [ -n "${DB_PORT:-}" ]; then echo "DB_PORT=\"${DB_PORT}\"" >> /app/.env; fi
+    if [ -n "${DB_DATABASE:-}" ]; then echo "DB_DATABASE=\"${DB_DATABASE}\"" >> /app/.env; fi
+    if [ -n "${DB_USERNAME:-}" ]; then echo "DB_USERNAME=\"${DB_USERNAME}\"" >> /app/.env; fi
+    if [ -n "${DB_PASSWORD:-}" ]; then echo "DB_PASSWORD=\"${DB_PASSWORD}\"" >> /app/.env; fi
+
     chown www-data:www-data /app/.env
     echo "Generated .env from environment variables"
 fi
