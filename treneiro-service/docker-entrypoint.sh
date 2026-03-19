@@ -47,5 +47,14 @@ if [ "${APP_ENV}" = "production" ]; then
     php artisan view:cache
 fi
 
+# Fix permissions after artisan commands (entrypoint runs as root, Apache as www-data)
+mkdir -p /app/storage/framework/sessions \
+         /app/storage/framework/views \
+         /app/storage/framework/cache/data \
+         /app/storage/logs \
+         /app/bootstrap/cache
+chown -R www-data:www-data /app/storage /app/bootstrap/cache
+chmod -R 775 /app/storage /app/bootstrap/cache
+
 # Start Apache
 exec apache2-foreground
