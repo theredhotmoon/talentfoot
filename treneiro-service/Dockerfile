@@ -46,8 +46,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         pdo_mysql \
         zip \
         bcmath \
+        fileinfo \
     && apt-get purge -y --auto-remove \
     && rm -rf /var/lib/apt/lists/*
+
+# PHP upload & execution limits for video uploads
+COPY docker-php-uploads.ini /usr/local/etc/php/conf.d/uploads.ini
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite

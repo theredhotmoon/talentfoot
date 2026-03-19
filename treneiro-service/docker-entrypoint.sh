@@ -1,6 +1,87 @@
 #!/bin/bash
 set -e
 
+# ============================================================
+# Dependency & Environment Health Check
+# ============================================================
+echo "========================================"
+echo "  Dependency Health Check"
+echo "========================================"
+
+CHECKS_PASSED=true
+
+# --- Required PHP Extensions ---
+REQUIRED_EXTENSIONS="fileinfo pdo_mysql zip bcmath mbstring tokenizer json openssl"
+for ext in $REQUIRED_EXTENSIONS; do
+    if php -m 2>/dev/null | grep -qi "^${ext}$"; then
+        echo "  [PASS] PHP ext: $ext"
+    else
+        echo "  [FAIL] PHP ext: $ext is NOT loaded!"
+        CHECKS_PASSED=false
+    fi
+done
+
+# --- PHP Upload / Memory Limits ---
+check_php_limit() {
+    local setting_name=$1
+    local min_bytes=$2
+    local label=$3
+
+    local raw_value
+    raw_value=$(php -r "echo ini_get('${setting_name}');" 2>/dev/null)
+
+    # Convert shorthand (e.g. 64M) to bytes
+    local numeric_value
+    numeric_value=$(php -r "
+        \$v = trim('${raw_value}');
+        \$unit = strtolower(substr(\$v, -1));
+        \$n = (int)\$v;
+        switch(\$unit) {
+            case 'g': \$n *= 1073741824; break;
+            case 'm': \$n *= 1048576; break;
+            case 'k': \$n *= 1024; break;
+        }
+        echo \$n;
+    " 2>/dev/null)
+
+    if [ "$numeric_value" -ge "$min_bytes" ] 2>/dev/null; then
+        echo "  [PASS] $label = $raw_value"
+    else
+        echo "  [FAIL] $label = $raw_value (need >= $3)"
+        CHECKS_PASSED=false
+    fi
+}
+
+check_php_limit "upload_max_filesize" 52428800 "upload_max_filesize (min 50M)"
+check_php_limit "post_max_size"       52428800 "post_max_size (min 50M)"
+check_php_limit "memory_limit"        134217728 "memory_limit (min 128M)"
+
+# --- Required Writable Directories ---
+WRITABLE_DIRS="/app/storage/app/public/clips /app/storage/app/public/subclips /app/storage/app/public/thumbnails /app/storage/app/public/captions /app/storage/logs /app/bootstrap/cache"
+for dir in $WRITABLE_DIRS; do
+    if [ -d "$dir" ] && [ -w "$dir" ]; then
+        echo "  [PASS] Writable: $dir"
+    elif [ ! -d "$dir" ]; then
+        echo "  [WARN] Dir missing: $dir (creating...)"
+        mkdir -p "$dir"
+        chown www-data:www-data "$dir"
+        chmod 775 "$dir"
+    else
+        echo "  [FAIL] Not writable: $dir"
+        CHECKS_PASSED=false
+    fi
+done
+
+echo "========================================"
+if [ "$CHECKS_PASSED" = true ]; then
+    echo "  All dependency checks PASSED ✓"
+else
+    echo "  WARNING: Some checks FAILED!"
+    echo "  The application may not work correctly."
+    echo "  Review the failures above and fix the Docker image."
+fi
+echo "========================================\n"
+
 # Always generate .env from environment variables to ensure fresh config
 cat > /app/.env <<EOF
 APP_NAME="${APP_NAME:-TalentFoot}"
