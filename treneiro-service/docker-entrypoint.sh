@@ -34,10 +34,12 @@ EOF
 chown www-data:www-data /app/.env
 echo "Generated .env from environment variables"
 
-# Run migrations
+# Run migrations and seed
 if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
     echo "Running migrations..."
     php artisan migrate --force
+    echo "Seeding database..."
+    php artisan db:seed --force
 fi
 
 # Cache config for production
