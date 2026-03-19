@@ -140,6 +140,12 @@ class ClipController extends Controller
                 $thumbnailPaths[] = $path;
             }
             $clip->update(['thumbnails' => $thumbnailPaths]);
+        } else {
+            // Fallback: generate thumbnails server-side using FFmpeg
+            $thumbnailPaths = $this->generateThumbnailsFromVideo($clip);
+            if (!empty($thumbnailPaths)) {
+                $clip->update(['thumbnails' => $thumbnailPaths]);
+            }
         }
 
         // Handle Captions (VTT)
@@ -430,5 +436,70 @@ class ClipController extends Controller
             'cartoon_file_path' => $clip->cartoon_file_path,
             'cartoon_error' => $clip->cartoon_error,
         ]);
+    }
+
+    /**
+     * Generate thumbnails from a video file using FFmpeg.
+     * Extracts 5 frames at 0%, 25%, 50%, 75%, 99% of the video duration.
+     *
+     * @return array<string> Array of storage paths (relative to public disk)
+     */
+    private function generateThumbnailsFromVideo(Clip $clip): array
+    {
+        try {
+            $videoPath = Storage::disk('public')->path($clip->file_path);
+
+            if (!file_exists($videoPath)) {
+                \Illuminate\Support\Facades\Log::warning("Thumbnail generation: video not found at {$videoPath}");
+                return [];
+            }
+
+            // Get video duration using ffprobe
+            $durationCmd = sprintf(
+                'ffprobe -v error -show_entries format=duration -of csv=p=0 %s 2>&1',
+                escapeshellarg($videoPath)
+            );
+            $duration = trim(shell_exec($durationCmd));
+
+            if (!$duration || !is_numeric($duration) || (float) $duration <= 0) {
+                \Illuminate\Support\Facades\Log::warning("Thumbnail generation: could not determine video duration for clip {$clip->id}");
+                return [];
+            }
+
+            $duration = (float) $duration;
+            $timePoints = [0, 0.25, 0.5, 0.75, 0.99];
+            $thumbnailPaths = [];
+
+            // Ensure thumbnail directory exists
+            $thumbDir = "thumbnails/{$clip->id}";
+            Storage::disk('public')->makeDirectory($thumbDir);
+
+            foreach ($timePoints as $index => $point) {
+                $seekTime = $duration * $point;
+                $outputFile = Storage::disk('public')->path("{$thumbDir}/thumb_{$index}.jpg");
+
+                $cmd = sprintf(
+                    'ffmpeg -ss %s -i %s -vframes 1 -q:v 3 %s -y 2>&1',
+                    escapeshellarg(number_format($seekTime, 3, '.', '')),
+                    escapeshellarg($videoPath),
+                    escapeshellarg($outputFile)
+                );
+
+                shell_exec($cmd);
+
+                if (file_exists($outputFile) && filesize($outputFile) > 0) {
+                    $thumbnailPaths[] = "{$thumbDir}/thumb_{$index}.jpg";
+                }
+            }
+
+            if (!empty($thumbnailPaths)) {
+                \Illuminate\Support\Facades\Log::info("Generated " . count($thumbnailPaths) . " thumbnails for clip {$clip->id}");
+            }
+
+            return $thumbnailPaths;
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Thumbnail generation failed for clip {$clip->id}: " . $e->getMessage());
+            return [];
+        }
     }
 }

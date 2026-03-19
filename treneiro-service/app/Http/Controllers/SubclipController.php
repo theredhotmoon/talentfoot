@@ -54,6 +54,12 @@ class SubclipController extends Controller
                 $thumbnailPaths[] = $thumbPath;
             }
             $subclip->update(['thumbnails' => $thumbnailPaths]);
+        } else {
+            // Fallback: generate thumbnails server-side using FFmpeg
+            $thumbnailPaths = $this->generateSubclipThumbnails($subclip);
+            if (!empty($thumbnailPaths)) {
+                $subclip->update(['thumbnails' => $thumbnailPaths]);
+            }
         }
 
         // Handle Captions
@@ -181,5 +187,60 @@ class SubclipController extends Controller
             'average_rating' => round($avg, 1),
             'ratings_count' => $count,
         ]);
+    }
+
+    /**
+     * Generate thumbnails from a subclip video using FFmpeg.
+     */
+    private function generateSubclipThumbnails(Subclip $subclip): array
+    {
+        try {
+            $videoPath = Storage::disk('public')->path($subclip->file_path);
+
+            if (!file_exists($videoPath)) {
+                \Illuminate\Support\Facades\Log::warning("Subclip thumbnail generation: video not found at {$videoPath}");
+                return [];
+            }
+
+            $durationCmd = sprintf(
+                'ffprobe -v error -show_entries format=duration -of csv=p=0 %s 2>&1',
+                escapeshellarg($videoPath)
+            );
+            $duration = trim(shell_exec($durationCmd));
+
+            if (!$duration || !is_numeric($duration) || (float) $duration <= 0) {
+                return [];
+            }
+
+            $duration = (float) $duration;
+            $timePoints = [0, 0.25, 0.5, 0.75, 0.99];
+            $thumbnailPaths = [];
+
+            $thumbDir = "thumbnails/subclips/{$subclip->id}";
+            Storage::disk('public')->makeDirectory($thumbDir);
+
+            foreach ($timePoints as $index => $point) {
+                $seekTime = $duration * $point;
+                $outputFile = Storage::disk('public')->path("{$thumbDir}/thumb_{$index}.jpg");
+
+                $cmd = sprintf(
+                    'ffmpeg -ss %s -i %s -vframes 1 -q:v 3 %s -y 2>&1',
+                    escapeshellarg(number_format($seekTime, 3, '.', '')),
+                    escapeshellarg($videoPath),
+                    escapeshellarg($outputFile)
+                );
+
+                shell_exec($cmd);
+
+                if (file_exists($outputFile) && filesize($outputFile) > 0) {
+                    $thumbnailPaths[] = "{$thumbDir}/thumb_{$index}.jpg";
+                }
+            }
+
+            return $thumbnailPaths;
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Subclip thumbnail generation failed: " . $e->getMessage());
+            return [];
+        }
     }
 }

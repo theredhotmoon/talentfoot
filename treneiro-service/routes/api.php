@@ -60,6 +60,64 @@ Route::get('/stats', [StatsController::class, 'index']);
 Route::post('/contact', [ContactController::class, 'store']);
 Route::get('/health/dependencies', [HealthController::class, 'dependencies']);
 
+// Temporary debug endpoint — remove once thumbnails are confirmed working
+Route::get('/debug-storage', function () {
+    $symlinkPath = public_path('storage');
+    $symlinkTarget = is_link($symlinkPath) ? readlink($symlinkPath) : null;
+    $symlinkExists = file_exists($symlinkPath);
+
+    $thumbnailDir = storage_path('app/public/thumbnails');
+    $thumbnailFiles = [];
+    if (is_dir($thumbnailDir)) {
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($thumbnailDir, \RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+        foreach ($iterator as $file) {
+            $thumbnailFiles[] = [
+                'path' => str_replace(storage_path('app/public/'), '', $file->getPathname()),
+                'size' => $file->getSize(),
+                'readable' => is_readable($file->getPathname()),
+            ];
+        }
+    }
+
+    // Check a few clips from DB
+    $clips = \App\Models\Clip::whereNotNull('thumbnails')->limit(5)->get(['id', 'thumbnails']);
+    $clipThumbnails = $clips->map(function ($clip) {
+        $paths = $clip->thumbnails ?? [];
+        $checks = [];
+        foreach ($paths as $p) {
+            $fullPath = storage_path('app/public/' . $p);
+            $checks[] = [
+                'db_path' => $p,
+                'full_path' => $fullPath,
+                'exists' => file_exists($fullPath),
+                'readable' => is_readable($fullPath),
+                'url' => '/storage/' . $p,
+            ];
+        }
+        return ['clip_id' => $clip->id, 'thumbnails' => $checks];
+    });
+
+    return response()->json([
+        'symlink' => [
+            'path' => $symlinkPath,
+            'is_link' => is_link($symlinkPath),
+            'target' => $symlinkTarget,
+            'target_exists' => $symlinkTarget ? file_exists($symlinkTarget) : false,
+            'accessible' => $symlinkExists,
+        ],
+        'thumbnail_dir' => [
+            'path' => $thumbnailDir,
+            'exists' => is_dir($thumbnailDir),
+            'writable' => is_dir($thumbnailDir) && is_writable($thumbnailDir),
+            'file_count' => count($thumbnailFiles),
+            'files' => array_slice($thumbnailFiles, 0, 20),
+        ],
+        'clip_thumbnails_in_db' => $clipThumbnails,
+    ]);
+});
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);

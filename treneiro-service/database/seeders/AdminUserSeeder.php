@@ -17,6 +17,7 @@ class AdminUserSeeder extends Seeder
             'email' => 'admin@admin.com',
             'password' => Hash::make('1234'),
             'role' => 'admin',
+            'subscription_valid_until' => '2066-01-01',
         ]);
 
         $this->command->info('Admin user created: admin@admin.com / 1234');
