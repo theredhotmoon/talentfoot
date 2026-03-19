@@ -41,14 +41,18 @@ fi
 
 # Ensure SQLite database exists and is writable if using SQLite
 if [ "${DB_CONNECTION:-sqlite}" = "sqlite" ]; then
-    mkdir -p /app/database
-    if [ ! -f /app/database/database.sqlite ]; then
+    mkdir -p /app/storage/database
+    if [ ! -f /app/storage/database/database.sqlite ]; then
         echo "Creating missing database.sqlite..."
-        touch /app/database/database.sqlite
+        touch /app/storage/database/database.sqlite
     fi
     # Ensure Apache can write to the DB and its directory (for journal files)
-    chown -R www-data:www-data /app/database
-    chmod -R 775 /app/database
+    chown -R www-data:www-data /app/storage/database
+    chmod -R 775 /app/storage/database
+
+    # Force Laravel to use this path
+    export DB_DATABASE="/app/storage/database/database.sqlite"
+    echo "DB_DATABASE=\"/app/storage/database/database.sqlite\"" >> /app/.env
 fi
 
 # Run migrations if database exists

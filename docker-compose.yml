@@ -9,7 +9,7 @@ services:
       - "8000:8000"
     volumes:
       # Persist SQLite database across container restarts
-      - ./treneiro-service/database:/app/database
+      - db_data:/app/storage/database
       # Persist uploaded media files
       - storage_data:/app/storage/app/public
     environment:
@@ -65,4 +65,6 @@ networks:
 # ─── Volumes ──────────────────────────────────────────────
 volumes:
   storage_data:
+    driver: local
+  db_data:
     driver: local
