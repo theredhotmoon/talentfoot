@@ -46,10 +46,10 @@ treneiro-web-app/.env
 treneiro-web-app/.env.*.local
 *.local
 
-# Cypress test artifacts
-treneiro-web-app/cypress/screenshots
-treneiro-web-app/cypress/videos
-treneiro-web-app/cypress/downloads
+# Playwright test artifacts
+treneiro-web-app/playwright/.auth/
+treneiro-web-app/playwright-report/
+treneiro-web-app/test-results/
 
 # Coverage
 treneiro-web-app/coverage
