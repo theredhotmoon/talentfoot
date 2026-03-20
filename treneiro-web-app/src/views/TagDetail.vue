@@ -76,9 +76,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import axios from 'axios';
 import { useI18n } from 'vue-i18n';
+import api from '../api';
+import type { Clip, Challenge, Category } from '../types';
 import { useAuthStore } from '../stores/auth';
+import { useClipActions } from '../composables/useClipActions';
 import ClipTile from '../components/ClipTile.vue';
 import SortFilterBar from '../components/SortFilterBar.vue';
 
@@ -86,111 +88,79 @@ const { t } = useI18n();
 const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();
+
 const tag = ref<any>(null);
-const categories = ref<any[]>([]);
-const challenges = ref<any[]>([]);
+const categories = ref<Category[]>([]);
+const challenges = ref<Challenge[]>([]);
 const selectedCategory = ref('');
 const sortBy = ref('created_at');
 const sortOrder = ref('desc');
 
-const challengeForClip = (clipId: string) => {
-    return challenges.value.find((ch: any) => ch.clip_id === clipId) || null;
+// clips is derived from tag.clips — we create a computed-like ref to pass to useClipActions
+const clips = ref<Clip[]>([]);
+const { challengeForClip, handleRate, startChallengeForClip } = useClipActions(clips, challenges);
+
+const fetchChallenges = async (): Promise<void> => {
+  try {
+    const res = await api.get<Challenge[]>('/api/challenges');
+    challenges.value = res.data;
+  } catch {
+    // silently ignore
+  }
 };
 
-const handleRate = async (clipId: string, rating: number) => {
-    try {
-        const response = await axios.post(`/api/clips/${clipId}/rate`, { rating });
-        if (tag.value?.clips) {
-            const clip = tag.value.clips.find((c: any) => c.id === clipId);
-            if (clip) {
-                clip.average_rating = response.data.average_rating;
-                clip.ratings_count = response.data.ratings_count;
-            }
-        }
-    } catch (e) {
-        alert('Failed to rate');
-    }
+const fetchCategories = async (): Promise<Category[]> => {
+  try {
+    const response = await api.get<Category[]>('/api/categories');
+    return response.data;
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
 };
 
-const startChallengeForClip = async (clip: any) => {
-    try {
-        const res = await axios.post('/api/challenges', { clip_id: clip.id });
-        challenges.value.push(res.data.challenge);
-        const slug = typeof clip.slug === 'string' ? clip.slug : clip.slug?.en || Object.values(clip.slug)[0];
-        router.push(`/clips/${clip.id}/${slug}?autoplay=1`);
-    } catch (e: any) {
-        if (e.response?.status === 403) {
-            alert('You need an active subscription to start a challenge.');
-        } else if (e.response?.data?.challenge) {
-            challenges.value.push(e.response.data.challenge);
-            const slug = typeof clip.slug === 'string' ? clip.slug : clip.slug?.en || Object.values(clip.slug)[0];
-            router.push(`/clips/${clip.id}/${slug}?autoplay=1`);
-        }
+const fetchTag = async (): Promise<void> => {
+  try {
+    const params: Record<string, string> = {
+      sort: sortBy.value,
+      order: sortOrder.value,
+    };
+    if (selectedCategory.value) {
+      params.category_id = selectedCategory.value;
     }
+    const res = await api.get(`/api/tags/${route.params.id}`, { params });
+    tag.value = res.data;
+    // Keep clips ref in sync so useClipActions can update rating in-place
+    clips.value = tag.value?.clips ?? [];
+  } catch (e) {
+    console.error(e);
+    router.push('/tags');
+  }
 };
 
-const fetchChallenges = async () => {
-    try {
-        const res = await axios.get('/api/challenges');
-        challenges.value = res.data;
-    } catch (e) {
-        // silently ignore
-    }
+const updateTag = async (): Promise<void> => {
+  try {
+    await api.put(`/api/tags/${tag.value.id}`, { name: tag.value.name });
+    alert(t('upload.save'));
+  } catch (e) {
+    console.error(e);
+  }
 };
 
-const fetchCategories = async () => {
-    try {
-        const response = await axios.get('/api/categories');
-        return response.data;
-    } catch (e) {
-        console.error(e);
-        return [];
-    }
-};
-
-const fetchTag = async () => {
-    try {
-        const params: any = {
-            sort: sortBy.value,
-            order: sortOrder.value
-        };
-        if (selectedCategory.value) {
-            params.category_id = selectedCategory.value;
-        }
-
-        const res = await axios.get(`/api/tags/${route.params.id}`, { params });
-        tag.value = res.data;
-    } catch (e) {
-        console.error(e);
-        router.push('/tags');
-    }
-};
-
-const updateTag = async () => {
-    try {
-        await axios.put(`/api/tags/${tag.value.id}`, {
-            name: tag.value.name
-        });
-        alert(t('upload.save')); // Simple feedback
-    } catch (e) {
-        console.error(e);
-    }
-};
-
-const deleteTag = async () => {
-    if (!confirm(t('tags.confirm_delete'))) return;
-    try {
-        await axios.delete(`/api/tags/${tag.value.id}`);
-        router.push('/tags');
-    } catch (e) {
-        console.error(e);
-        alert('Error deleting tag');
-    }
+const deleteTag = async (): Promise<void> => {
+  if (!confirm(t('tags.confirm_delete'))) return;
+  try {
+    await api.delete(`/api/tags/${tag.value.id}`);
+    router.push('/tags');
+  } catch (e) {
+    console.error(e);
+    alert('Error deleting tag');
+  }
 };
 
 onMounted(async () => {
-    categories.value = await fetchCategories();
-    fetchTag();
-    fetchChallenges();
+  categories.value = await fetchCategories();
+  fetchTag();
+  fetchChallenges();
 });
 </script>

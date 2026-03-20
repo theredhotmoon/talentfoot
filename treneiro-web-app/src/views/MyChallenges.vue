@@ -73,28 +73,35 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from '../api';
+import type { Challenge } from '../types';
 import { useTranslation } from '../composables/useTranslation';
 import { useMediaUrl } from '../composables/useMediaUrl';
 
 const { getTranslated } = useTranslation();
 const { getThumbnailUrl } = useMediaUrl();
 
-const challenges = ref<any[]>([]);
+const challenges = ref<Challenge[]>([]);
 const loading = ref(true);
 
-const formatDate = (iso: string) => {
-    return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+const formatDate = (iso: string): string => {
+  return new Date(iso).toLocaleDateString(undefined, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 };
 
 onMounted(async () => {
-    try {
-        const res = await axios.get('/api/challenges');
-        challenges.value = res.data;
-    } catch (e) {
-        console.error(e);
-    } finally {
-        loading.value = false;
-    }
+  try {
+    const res = await api.get<Challenge[]>('/api/challenges');
+    challenges.value = res.data;
+  } catch (e) {
+    console.error(e);
+  } finally {
+    loading.value = false;
+  }
 });
 </script>

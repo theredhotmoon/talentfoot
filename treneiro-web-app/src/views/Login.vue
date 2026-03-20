@@ -50,7 +50,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useAuthStore } from '../stores/auth';
-import axios from 'axios';
+import api from '../api';
+import type { LoginCredentials } from '../types';
 
 const auth = useAuthStore();
 const email = ref('');
@@ -59,24 +60,26 @@ const error = ref('');
 const loading = ref(false);
 const googleLoading = ref(false);
 
-const handleLogin = async () => {
+const handleLogin = async (): Promise<void> => {
   loading.value = true;
   error.value = '';
   try {
-    await auth.login({ email: email.value, password: password.value });
-  } catch (e: any) {
-    error.value = e.response?.data?.message || 'Login failed';
+    const credentials: LoginCredentials = { email: email.value, password: password.value };
+    await auth.login(credentials);
+  } catch (e: unknown) {
+    const err = e as { response?: { data?: { message?: string } } };
+    error.value = err.response?.data?.message ?? 'Login failed';
   } finally {
     loading.value = false;
   }
 };
 
-const handleGoogleLogin = async () => {
+const handleGoogleLogin = async (): Promise<void> => {
   googleLoading.value = true;
   try {
-    const response = await axios.get('/api/auth/google/redirect');
+    const response = await api.get<{ url: string }>('/api/auth/google/redirect');
     window.location.href = response.data.url;
-  } catch (e) {
+  } catch {
     error.value = 'Failed to connect to Google. Please try again.';
     googleLoading.value = false;
   }

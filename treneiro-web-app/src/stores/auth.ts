@@ -1,83 +1,87 @@
 import { defineStore } from 'pinia';
-import axios from 'axios';
+import { ref, computed } from 'vue';
+import { useLocalStorage } from '@vueuse/core';
+import api from '../api';
 import router from '../router';
+import type { User, LoginCredentials, RegisterCredentials } from '../types';
 
-interface User {
-    id: number;
-    name: string;
-    email: string;
-    role: string;
-    auth_provider?: string | null;
-    show_tips?: boolean;
-}
+export const useAuthStore = defineStore('auth', () => {
+  const token = useLocalStorage<string>('token', '');
+  const user = ref<User | null>(null);
 
-export const useAuthStore = defineStore('auth', {
-    state: () => ({
-        user: null as User | null,
-        token: localStorage.getItem('token') || '',
-    }),
-    getters: {
-        isAuthenticated: (state) => !!state.token,
-        isAdmin: (state) => state.user?.role === 'admin',
-        showTips: (state) => state.user?.show_tips ?? true,
-    },
-    actions: {
-        async login(credentials: any) {
-            const response = await axios.post('/api/login', credentials);
-            this.token = response.data.access_token;
-            this.user = response.data.user;
-            localStorage.setItem('token', this.token);
-            axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
-            router.push('/');
-        },
-        async register(credentials: any) {
-            const response = await axios.post('/api/register', credentials);
-            this.token = response.data.access_token;
-            localStorage.setItem('token', this.token);
-            axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
-            // Fetch user
-            await this.fetchUser();
-            router.push('/');
-        },
-        async logout() {
-            try {
-                await axios.post('/api/logout');
-            } catch (e) {
-                console.error(e);
-            }
-            this.token = '';
-            this.user = null;
-            localStorage.removeItem('token');
-            delete axios.defaults.headers.common['Authorization'];
-            router.push('/login');
-        },
-        async fetchUser() {
-            if (!this.token) return;
-            try {
-                axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
-                const response = await axios.get('/api/user');
-                this.user = response.data;
-            } catch (error) {
-                console.error("Fetch user failed", error);
-                this.token = '';
-                localStorage.removeItem('token');
-            }
-        },
-        async setTokenAndFetchUser(token: string) {
-            this.token = token;
-            localStorage.setItem('token', token);
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            await this.fetchUser();
-        },
-        async updateShowTips(value: boolean) {
-            try {
-                const response = await axios.put('/api/profile/tips', {
-                    show_tips: value,
-                });
-                this.user = response.data;
-            } catch (error) {
-                console.error("Update show_tips failed", error);
-            }
-        },
-    },
+  const isAuthenticated = computed(() => !!token.value);
+  const isAdmin = computed(() => user.value?.role === 'admin');
+  const showTips = computed(() => user.value?.show_tips ?? true);
+
+  async function login(credentials: LoginCredentials): Promise<void> {
+    const response = await api.post<{ access_token: string; user: User }>(
+      '/api/login',
+      credentials,
+    );
+    token.value = response.data.access_token;
+    user.value = response.data.user;
+    router.push('/');
+  }
+
+  async function register(credentials: RegisterCredentials): Promise<void> {
+    const response = await api.post<{ access_token: string }>(
+      '/api/register',
+      credentials,
+    );
+    token.value = response.data.access_token;
+    await fetchUser();
+    router.push('/');
+  }
+
+  async function logout(): Promise<void> {
+    try {
+      await api.post('/api/logout');
+    } catch (e) {
+      console.error(e);
+    }
+    token.value = '';
+    user.value = null;
+    router.push('/login');
+  }
+
+  async function fetchUser(): Promise<void> {
+    if (!token.value) return;
+    try {
+      const response = await api.get<User>('/api/user');
+      user.value = response.data;
+    } catch (error) {
+      console.error('Fetch user failed', error);
+      token.value = '';
+    }
+  }
+
+  async function setTokenAndFetchUser(newToken: string): Promise<void> {
+    token.value = newToken;
+    await fetchUser();
+  }
+
+  async function updateShowTips(value: boolean): Promise<void> {
+    try {
+      const response = await api.put<User>('/api/profile/tips', {
+        show_tips: value,
+      });
+      user.value = response.data;
+    } catch (error) {
+      console.error('Update show_tips failed', error);
+    }
+  }
+
+  return {
+    token,
+    user,
+    isAuthenticated,
+    isAdmin,
+    showTips,
+    login,
+    register,
+    logout,
+    fetchUser,
+    setTokenAndFetchUser,
+    updateShowTips,
+  };
 });

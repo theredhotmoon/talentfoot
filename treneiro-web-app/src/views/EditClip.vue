@@ -232,10 +232,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted } from 'vue';
-import axios from 'axios';
+import { ref, reactive, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useIntervalFn } from '@vueuse/core';
+import api from '../api';
 import { useTranslation } from '../composables/useTranslation';
 import { useExtractThumbnails } from '../composables/useExtractThumbnails';
 import LanguageTabs from '../components/LanguageTabs.vue';
@@ -275,7 +276,22 @@ const newSubclipLang = ref('en');
 const cartoonStatus = ref<string | null>(null);
 const cartoonError = ref<string | null>(null);
 const convertingCartoon = ref(false);
-let cartoonPollInterval: ReturnType<typeof setInterval> | null = null;
+
+// VueUse useIntervalFn replaces manual setInterval/clearInterval and auto-stops on unmount.
+const { pause: pauseCartoonPoll, resume: resumeCartoonPoll } = useIntervalFn(async () => {
+    try {
+        const res = await api.get<{ cartoon_status: string | null; cartoon_error: string | null }>(
+            `/api/clips/${id}/cartoon-status`,
+        );
+        cartoonStatus.value = res.data.cartoon_status;
+        cartoonError.value = res.data.cartoon_error;
+        if (res.data.cartoon_status === 'done' || res.data.cartoon_status === 'failed') {
+            pauseCartoonPoll();
+        }
+    } catch (e) {
+        console.error('Polling error', e);
+    }
+}, 5000, { immediate: false });
 const newSubclip = reactive({
     name: { en: '', pl: '', es: '' } as Record<string, string>,
     video_file: null as File | null,
@@ -286,8 +302,8 @@ const newSubclip = reactive({
 const fetchTagsAndCategories = async () => {
     try {
         const [tagsRes, catsRes] = await Promise.all([
-            axios.get('/api/tags'),
-            axios.get('/api/categories')
+            api.get('/api/tags'),
+            api.get('/api/categories')
         ]);
         availableTags.value = tagsRes.data;
         categories.value = catsRes.data;
@@ -298,7 +314,7 @@ const fetchTagsAndCategories = async () => {
 
 const fetchClip = async () => {
     try {
-        const response = await axios.get(`/api/clips/${id}`);
+        const response = await api.get(`/api/clips/${id}`);
         const clip = response.data.clip;
         
         const safeGet = (field: any, lang: string) => {
@@ -365,37 +381,19 @@ const handleMainCaptionsChange = (event: Event, lang: string) => {
 const convertToCartoon = async () => {
     convertingCartoon.value = true;
     try {
-        const response = await axios.post(`/api/clips/${id}/convert-cartoon`);
+        const response = await api.post<{ cartoon_status: string }>(
+            `/api/clips/${id}/convert-cartoon`,
+        );
         cartoonStatus.value = response.data.cartoon_status;
-        startCartoonPolling();
-    } catch (e: any) {
+        resumeCartoonPoll();
+    } catch (e: unknown) {
         console.error(e);
-        cartoonError.value = e.response?.data?.message || 'Failed to start conversion';
+        const err = e as { response?: { data?: { message?: string } } };
+        cartoonError.value = err.response?.data?.message ?? 'Failed to start conversion';
     } finally {
         convertingCartoon.value = false;
     }
 };
-
-const startCartoonPolling = () => {
-    if (cartoonPollInterval) clearInterval(cartoonPollInterval);
-    cartoonPollInterval = setInterval(async () => {
-        try {
-            const res = await axios.get(`/api/clips/${id}/cartoon-status`);
-            cartoonStatus.value = res.data.cartoon_status;
-            cartoonError.value = res.data.cartoon_error;
-            if (res.data.cartoon_status === 'done' || res.data.cartoon_status === 'failed') {
-                if (cartoonPollInterval) clearInterval(cartoonPollInterval);
-                cartoonPollInterval = null;
-            }
-        } catch (e) {
-            console.error('Polling error', e);
-        }
-    }, 5000);
-};
-
-onUnmounted(() => {
-    if (cartoonPollInterval) clearInterval(cartoonPollInterval);
-});
 
 const handleUpdate = async () => {
     saving.value = true;
@@ -417,9 +415,11 @@ const handleUpdate = async () => {
             }
         });
 
-        const response = await axios.post(`/api/clips/${id}`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        const response = await api.post<{ slug: Record<string, string>; id: string }>(
+            `/api/clips/${id}`,
+            formData,
+            { headers: { 'Content-Type': 'multipart/form-data' } },
+        );
         
         alert(t('edit_clip.success'));
         const slug = response.data.slug.en || response.data.slug.pl || response.data.id;
@@ -484,7 +484,7 @@ const addSubclip = async () => {
             formData.append('thumbnails[]', blob, `thumb_${index}.jpg`);
         });
 
-        const response = await axios.post(`/api/clips/${id}/subclips`, formData, {
+        const response = await api.post(`/api/clips/${id}/subclips`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
 
@@ -532,7 +532,7 @@ const updateSubclip = async (subclip: any) => {
             }
         });
 
-        await axios.post(`/api/subclips/${subclip.id}`, formData, {
+        await api.post(`/api/subclips/${subclip.id}`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         alert(t('subclips.update_success'));
@@ -548,7 +548,7 @@ const deleteSubclip = async (subclipId: string) => {
     if (!confirm(t('subclips.delete_confirm'))) return;
     
     try {
-        await axios.delete(`/api/subclips/${subclipId}`);
+        await api.delete(`/api/subclips/${subclipId}`);
         subclips.value = subclips.value.filter(s => s.id !== subclipId);
         alert(t('subclips.delete_success'));
     } catch (e) {

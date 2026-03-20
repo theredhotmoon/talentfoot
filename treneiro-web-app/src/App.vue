@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
 import { useAuthStore } from './stores/auth';
-import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useTimeoutFn } from '@vueuse/core';
 import UserAvatarMenu from './components/UserAvatarMenu.vue';
 import AppFooter from './components/AppFooter.vue';
+import IconUpload from './components/icons/IconUpload.vue';
+import IconUsers from './components/icons/IconUsers.vue';
 
 const auth = useAuthStore();
 const { locale } = useI18n();
@@ -15,14 +18,21 @@ onMounted(async () => {
 });
 
 const showManagement = ref(false);
-let managementTimeout: ReturnType<typeof setTimeout> | null = null;
+
+// VueUse useTimeoutFn replaces the raw setTimeout / clearTimeout pair for hover-leave delay.
+const { start: startCloseTimer, stop: stopCloseTimer } = useTimeoutFn(
+  () => { showManagement.value = false; },
+  200,
+  { immediate: false },
+);
 
 const openManagement = () => {
-  if (managementTimeout) { clearTimeout(managementTimeout); managementTimeout = null; }
+  stopCloseTimer();
   showManagement.value = true;
 };
+
 const closeManagement = () => {
-  managementTimeout = setTimeout(() => { showManagement.value = false; }, 200);
+  startCloseTimer();
 };
 </script>
 
@@ -64,7 +74,6 @@ const closeManagement = () => {
                   <router-link to="/users" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-white/[0.06]" style="color: var(--tf-text);" @click="showManagement = false">
                     <IconUsers :size="18" class="text-current" /> {{ $t('nav.users') }}
                   </router-link>
-
                 </div>
               </transition>
             </div>

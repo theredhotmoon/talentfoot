@@ -1,20 +1,17 @@
 <script setup lang="ts">
+import type { Clip, Challenge } from '../types';
 import ClipCard from './ClipCard.vue';
 import IconTrophy from './icons/IconTrophy.vue';
 import IconLightning from './icons/IconLightning.vue';
 
-const props = defineProps<{
-    clip: any;
-    challenge?: {
-        is_completed: boolean;
-        watched_items: number;
-        total_items: number;
-    } | null;
+defineProps<{
+    clip: Clip;
+    challenge?: Pick<Challenge, 'is_completed' | 'watched_items' | 'total_items'> | null;
 }>();
 
 const emit = defineEmits<{
     (e: 'rate', clipId: string, rating: number): void;
-    (e: 'start-challenge', clip: any): void;
+    (e: 'start-challenge', clip: Clip): void;
 }>();
 </script>
 

@@ -52,7 +52,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useAuthStore } from '../stores/auth';
-import axios from 'axios';
+import api from '../api';
+import type { RegisterCredentials } from '../types';
 
 const auth = useAuthStore();
 const name = ref('');
@@ -63,33 +64,35 @@ const error = ref('');
 const loading = ref(false);
 const googleLoading = ref(false);
 
-const handleRegister = async () => {
+const handleRegister = async (): Promise<void> => {
   loading.value = true;
   error.value = '';
   try {
-    await auth.register({
+    const credentials: RegisterCredentials = {
       name: name.value,
       email: email.value,
       password: password.value,
-      password_confirmation: password_confirmation.value
-    });
-  } catch (e: any) {
-    if (e.response?.data?.errors) {
-      error.value = Object.values(e.response.data.errors).flat().join(', ');
+      password_confirmation: password_confirmation.value,
+    };
+    await auth.register(credentials);
+  } catch (e: unknown) {
+    const err = e as { response?: { data?: { errors?: Record<string, string[]>; message?: string } } };
+    if (err.response?.data?.errors) {
+      error.value = Object.values(err.response.data.errors).flat().join(', ');
     } else {
-      error.value = e.response?.data?.message || 'Registration failed';
+      error.value = err.response?.data?.message ?? 'Registration failed';
     }
   } finally {
     loading.value = false;
   }
 };
 
-const handleGoogleSignUp = async () => {
+const handleGoogleSignUp = async (): Promise<void> => {
   googleLoading.value = true;
   try {
-    const response = await axios.get('/api/auth/google/redirect');
+    const response = await api.get<{ url: string }>('/api/auth/google/redirect');
     window.location.href = response.data.url;
-  } catch (e) {
+  } catch {
     error.value = 'Failed to connect to Google. Please try again.';
     googleLoading.value = false;
   }

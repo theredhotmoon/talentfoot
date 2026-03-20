@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useRouter } from 'vue-router';
+import { onClickOutside } from '@vueuse/core';
 import EditProfileModal from './EditProfileModal.vue';
 import ChangePasswordModal from './ChangePasswordModal.vue';
 import WelcomeTourModal from './WelcomeTourModal.vue';
@@ -24,7 +25,7 @@ const initials = computed(() => {
     if (!auth.user?.name) return '?';
     return auth.user.name
         .split(' ')
-        .map(w => w[0])
+        .map((w: string) => w[0])
         .slice(0, 2)
         .join('')
         .toUpperCase();
@@ -36,14 +37,8 @@ const handleLogout = async () => {
     router.push('/login');
 };
 
-const handleClickOutside = (event: MouseEvent) => {
-    if (menuRef.value && !menuRef.value.contains(event.target as Node)) {
-        isOpen.value = false;
-    }
-};
-
-onMounted(() => document.addEventListener('click', handleClickOutside));
-onUnmounted(() => document.removeEventListener('click', handleClickOutside));
+// VueUse onClickOutside replaces the manual addEventListener / removeEventListener pair
+onClickOutside(menuRef, () => { isOpen.value = false; });
 </script>
 
 <template>
@@ -85,9 +80,7 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside));
                 <div class="py-1">
                     <button
                         @click="showEditProfile = true; isOpen = false"
-                        class="w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors" style="color: var(--tf-text-muted);"
-                        onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.color='var(--tf-text)'"
-                        onmouseout="this.style.background='transparent'; this.style.color='var(--tf-text-muted)'"
+                        class="menu-item w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors"
                     >
                         <IconEdit :size="18" class="text-current" />
                         {{ $t('profile.edit_details') }}
@@ -96,9 +89,7 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside));
                     <button
                         v-if="!auth.user?.auth_provider"
                         @click="showChangePassword = true; isOpen = false"
-                        class="w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors" style="color: var(--tf-text-muted);"
-                        onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.color='var(--tf-text)'"
-                        onmouseout="this.style.background='transparent'; this.style.color='var(--tf-text-muted)'"
+                        class="menu-item w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors"
                     >
                         <IconLock :size="18" class="text-current" />
                         {{ $t('profile.change_password') }}
@@ -125,10 +116,7 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside));
                     </div>
                     <button
                         @click="showWelcomeTour = true; isOpen = false"
-                        class="w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors"
-                        style="color: var(--tf-text-muted);"
-                        onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.color='var(--tf-text)'"
-                        onmouseout="this.style.background='transparent'; this.style.color='var(--tf-text-muted)'"
+                        class="menu-item w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors"
                     >
                         <IconQuestion :size="18" class="text-current" />
                         {{ $t('onboarding.how_it_works') }}
@@ -139,9 +127,7 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside));
                 <div style="border-top: 1px solid var(--tf-border);" class="py-1">
                     <button
                         @click="handleLogout"
-                        class="w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors" style="color: #f87171;"
-                        onmouseover="this.style.background='rgba(239,68,68,0.08)'"
-                        onmouseout="this.style.background='transparent'"
+                        class="menu-item-danger w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors"
                     >
                         <IconLogout :size="18" class="text-current" />
                         {{ $t('nav.logout') }}

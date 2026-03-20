@@ -121,129 +121,69 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
-import ClipTile from '../components/ClipTile.vue';
-import SortFilterBar from '../components/SortFilterBar.vue';
-
-import IconLightning from '../components/icons/IconLightning.vue';
-import IconTrophy from '../components/icons/IconTrophy.vue';
+import api from '../api';
+import type { Clip, Challenge, Category } from '../types';
+import { useClipActions } from '../composables/useClipActions';
 import { useTranslation } from '../composables/useTranslation';
 import { useMediaUrl } from '../composables/useMediaUrl';
+import ClipTile from '../components/ClipTile.vue';
+import SortFilterBar from '../components/SortFilterBar.vue';
+import IconLightning from '../components/icons/IconLightning.vue';
+import IconTrophy from '../components/icons/IconTrophy.vue';
 
-
-const router = useRouter();
 const { getTranslated } = useTranslation();
 const { getThumbnailUrl } = useMediaUrl();
 
-
-
-interface Clip {
-  id: string;
-  name: Record<string, string> | string;
-  slug: Record<string, string> | string;
-  description: Record<string, string> | string;
-  file_path: string;
-  thumbnails?: string[];
-  activeThumbnail?: string;
-  tags: { id: string; name: any; slug: any }[] | null;
-  difficulty: number;
-  average_rating: number;
-  ratings_count: number;
-  views: number;
-  comments_count?: number;
-  current_user_rating?: { rating: number } | null;
-  showRatingSelect?: boolean;
-}
-
 const clips = ref<Clip[]>([]);
-const categories = ref<any[]>([]);
-const challenges = ref<any[]>([]);
+const categories = ref<Category[]>([]);
+const challenges = ref<Challenge[]>([]);
 const loading = ref(true);
 const sortBy = ref('created_at');
 const sortOrder = ref('desc');
 const selectedCategory = ref('');
 
-const challengeForClip = (clipId: string) => {
-    return challenges.value.find((ch: any) => ch.clip_id === clipId) || null;
+const { challengeForClip, handleRate, startChallengeForClip } = useClipActions(clips, challenges);
+
+const fetchCategories = async (): Promise<void> => {
+  try {
+    const response = await api.get<Category[]>('/api/categories');
+    categories.value = response.data;
+  } catch (e) {
+    console.error(e);
+  }
 };
 
-const startChallengeForClip = async (clip: Clip) => {
-    try {
-        const res = await axios.post('/api/challenges', { clip_id: clip.id });
-        // Add to local challenges list
-        challenges.value.push(res.data.challenge);
-        // Redirect to clip page
-        const slug = typeof clip.slug === 'string' ? clip.slug : (clip.slug as any).en || Object.values(clip.slug)[0];
-        router.push(`/clips/${clip.id}/${slug}?autoplay=1`);
-    } catch (e: any) {
-        if (e.response?.status === 403) {
-            alert('You need an active subscription to start a challenge.');
-        } else if (e.response?.data?.challenge) {
-            // Challenge already exists
-            challenges.value.push(e.response.data.challenge);
-            const slug = typeof clip.slug === 'string' ? clip.slug : (clip.slug as any).en || Object.values(clip.slug)[0];
-            router.push(`/clips/${clip.id}/${slug}?autoplay=1`);
-        } else {
-            console.error('Failed to start challenge', e);
-        }
+const fetchClips = async (): Promise<void> => {
+  loading.value = true;
+  try {
+    const params: Record<string, string> = {
+      sort: sortBy.value,
+      order: sortOrder.value,
+    };
+    if (selectedCategory.value) {
+      params.category_id = selectedCategory.value;
     }
-};
-const fetchCategories = async () => {
-    try {
-        const response = await axios.get('/api/categories');
-        categories.value = response.data;
-    } catch (e) {
-        console.error(e);
-    }
+    const response = await api.get<{ data: Clip[] }>('/api/clips', { params });
+    clips.value = response.data.data;
+  } catch (e) {
+    console.error(e);
+  } finally {
+    loading.value = false;
+  }
 };
 
-const fetchClips = async () => {
-    loading.value = true;
-    try {
-        const params: any = {
-            sort: sortBy.value,
-            order: sortOrder.value
-        };
-        if (selectedCategory.value) {
-            params.category_id = selectedCategory.value;
-        }
-
-        const response = await axios.get('/api/clips', { params });
-        clips.value = response.data.data;
-    } catch (e) {
-        console.error(e);
-    } finally {
-        loading.value = false;
-    }
-};
-
-const handleRate = async (clipId: string, rating: number) => {
-    try {
-        const response = await axios.post(`/api/clips/${clipId}/rate`, { rating });
-        const clip = clips.value.find(c => c.id === clipId);
-        if (clip) {
-            clip.average_rating = response.data.average_rating;
-            clip.ratings_count = response.data.ratings_count;
-        }
-    } catch (e) {
-        alert('Failed to rate');
-    }
-};
-
-const fetchChallenges = async () => {
-    try {
-        const res = await axios.get('/api/challenges');
-        challenges.value = res.data;
-    } catch (e) {
-        // User might not be authenticated — silently ignore
-    }
+const fetchChallenges = async (): Promise<void> => {
+  try {
+    const res = await api.get<Challenge[]>('/api/challenges');
+    challenges.value = res.data;
+  } catch {
+    // User might not be authenticated — silently ignore
+  }
 };
 
 onMounted(() => {
-    fetchCategories();
-    fetchClips();
-    fetchChallenges();
-
+  fetchCategories();
+  fetchClips();
+  fetchChallenges();
 });
 </script>

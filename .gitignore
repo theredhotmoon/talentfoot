@@ -7,7 +7,7 @@
 # OS files
 .DS_Store
 Thumbs.db
-
+.agent
 # IDE / Editor
 .vscode
 .idea

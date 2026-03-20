@@ -606,3 +606,26 @@ html {
     color: var(--tf-text);
     border-color: var(--tf-glass-border);
 }
+
+/* ========================================
+   Dropdown Menu Items (UserAvatarMenu)
+   ======================================== */
+
+.menu-item {
+    color: var(--tf-text-muted);
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.menu-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--tf-text);
+}
+
+.menu-item-danger {
+    color: #f87171;
+    transition: background 0.15s ease;
+}
+
+.menu-item-danger:hover {
+    background: rgba(239, 68, 68, 0.08);
+}

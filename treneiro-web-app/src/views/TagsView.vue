@@ -84,37 +84,35 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from '../api';
+import type { Tag } from '../types';
 import { useAuthStore } from '../stores/auth';
 import { useTranslation } from '../composables/useTranslation';
 import { useMediaUrl } from '../composables/useMediaUrl';
 
 const { getTranslated } = useTranslation();
 const { getThumbnailUrl } = useMediaUrl();
-const tags = ref<any[]>([]);
-const showCreateModal = ref(false);
-const newTag = ref({
-  name: { en: '', pl: '', es: '' }
-});
 const auth = useAuthStore();
 
-const fetchTags = async () => {
-  const res = await axios.get('/api/tags');
+const tags = ref<(Tag & { clips_count?: number; preview_thumbnails?: string[] })[]>([]);
+const showCreateModal = ref(false);
+const newTag = ref({ name: { en: '', pl: '', es: '' } });
+
+const fetchTags = async (): Promise<void> => {
+  const res = await api.get('/api/tags');
   tags.value = res.data;
 };
 
-const createTag = async () => {
-    // Basic validation
-    if (!newTag.value.name.en) return;
-
-    try {
-        await axios.post('/api/tags', newTag.value);
-        showCreateModal.value = false;
-        newTag.value = { name: { en: '', pl: '', es: '' } };
-        fetchTags();
-    } catch (e) {
-        console.error(e);
-    }
+const createTag = async (): Promise<void> => {
+  if (!newTag.value.name.en) return;
+  try {
+    await api.post('/api/tags', newTag.value);
+    showCreateModal.value = false;
+    newTag.value = { name: { en: '', pl: '', es: '' } };
+    fetchTags();
+  } catch (e) {
+    console.error(e);
+  }
 };
 
 onMounted(fetchTags);

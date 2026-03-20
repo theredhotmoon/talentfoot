@@ -61,9 +61,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import axios from 'axios';
+import api from '../api';
+import type { Clip, Challenge } from '../types';
 import { useAuthStore } from '../stores/auth';
 import { useTranslation } from '../composables/useTranslation';
+import { useClipActions } from '../composables/useClipActions';
 import ClipTile from '../components/ClipTile.vue';
 import SortFilterBar from '../components/SortFilterBar.vue';
 import EditCategoryModal from '../components/EditCategoryModal.vue';
@@ -74,71 +76,38 @@ const router = useRouter();
 const { getTranslated } = useTranslation();
 
 const category = ref<any>(null);
-const challenges = ref<any[]>([]);
+const challenges = ref<Challenge[]>([]);
+const clips = ref<Clip[]>([]);
 const sortBy = ref('created_at');
 const sortOrder = ref('desc');
 const showEditModal = ref(false);
 
-const challengeForClip = (clipId: string) => {
-    return challenges.value.find((ch: any) => ch.clip_id === clipId) || null;
+const { challengeForClip, handleRate, startChallengeForClip } = useClipActions(clips, challenges);
+
+const fetchChallenges = async (): Promise<void> => {
+  try {
+    const res = await api.get<Challenge[]>('/api/challenges');
+    challenges.value = res.data;
+  } catch {
+    // silently ignore
+  }
 };
 
-const handleRate = async (clipId: string, rating: number) => {
-    try {
-        const response = await axios.post(`/api/clips/${clipId}/rate`, { rating });
-        if (category.value?.clips) {
-            const clip = category.value.clips.find((c: any) => c.id === clipId);
-            if (clip) {
-                clip.average_rating = response.data.average_rating;
-                clip.ratings_count = response.data.ratings_count;
-            }
-        }
-    } catch (e) {
-        alert('Failed to rate');
-    }
-};
-
-const startChallengeForClip = async (clip: any) => {
-    try {
-        const res = await axios.post('/api/challenges', { clip_id: clip.id });
-        challenges.value.push(res.data.challenge);
-        const slug = typeof clip.slug === 'string' ? clip.slug : clip.slug?.en || Object.values(clip.slug)[0];
-        router.push(`/clips/${clip.id}/${slug}?autoplay=1`);
-    } catch (e: any) {
-        if (e.response?.status === 403) {
-            alert('You need an active subscription to start a challenge.');
-        } else if (e.response?.data?.challenge) {
-            challenges.value.push(e.response.data.challenge);
-            const slug = typeof clip.slug === 'string' ? clip.slug : clip.slug?.en || Object.values(clip.slug)[0];
-            router.push(`/clips/${clip.id}/${slug}?autoplay=1`);
-        }
-    }
-};
-
-const fetchChallenges = async () => {
-    try {
-        const res = await axios.get('/api/challenges');
-        challenges.value = res.data;
-    } catch (e) {
-        // silently ignore
-    }
-};
-
-const fetchCategory = async () => {
-    try {
-        const res = await axios.get(`/api/categories/${route.params.id}`, {
-            params: {
-                sort: sortBy.value,
-                order: sortOrder.value,
-            }
-        });
-        category.value = res.data;
-    } catch (e) {
-        console.error(e);
-    }
+const fetchCategory = async (): Promise<void> => {
+  try {
+    const res = await api.get(`/api/categories/${route.params.id}`, {
+      params: { sort: sortBy.value, order: sortOrder.value },
+    });
+    category.value = res.data;
+    // Keep clips ref in sync so useClipActions can update rating in-place
+    clips.value = category.value?.clips ?? [];
+  } catch (e) {
+    console.error(e);
+    router.push('/');
+  }
 };
 
 onMounted(async () => {
-    await Promise.all([fetchCategory(), fetchChallenges()]);
+  await Promise.all([fetchCategory(), fetchChallenges()]);
 });
 </script>
