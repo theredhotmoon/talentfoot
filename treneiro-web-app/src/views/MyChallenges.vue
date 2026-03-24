@@ -1,7 +1,25 @@
 <template>
   <div>
-    <h1 class="font-heading font-extrabold text-3xl gradient-text mb-2">{{ $t('challenges.title') }}</h1>
-    <p class="text-sm mb-8" style="color: var(--tf-text-muted);">{{ $t('challenges.subtitle') }}</p>
+    <div class="mb-4">
+        <AppBackButton />
+    </div>
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+            <h1 class="font-heading font-extrabold text-3xl gradient-text">{{ $t('challenges.title') || 'My Challenges' }}</h1>
+            <p class="text-sm mt-1" style="color: var(--tf-text-muted);">{{ $t('challenges.subtitle') || 'Monitor your active courses' }}</p>
+        </div>
+        <SortFilterBar
+            :categories="[]"
+            :model-sort-by="sortBy"
+            :model-sort-order="sortOrder"
+            :model-selected-category="selectedCategory"
+            @update:model-sort-by="sortBy = $event"
+            @update:model-sort-order="sortOrder = $event"
+            @change="handleFilterChange"
+            :hide-category-filter="true"
+        />
+    </div>
 
     <div v-if="loading" class="text-center py-16" style="color: var(--tf-text-muted);">
       <div class="w-8 h-8 rounded-full mx-auto mb-3 animate-spin" style="border: 3px solid var(--tf-border); border-top-color: var(--tf-accent-emerald);"></div>
@@ -13,8 +31,9 @@
       <router-link to="/" class="btn-primary text-sm mt-4 inline-flex">{{ $t('challenges.browse_clips') }}</router-link>
     </div>
 
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div v-for="ch in challenges" :key="ch.id" class="card-static overflow-hidden" style="border-radius: var(--tf-radius-xl);">
+    <div v-else>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-for="ch in currentChallenges" :key="ch.id" class="card-static overflow-hidden" style="border-radius: var(--tf-radius-xl);">
         <!-- Thumbnail -->
         <router-link :to="`/clips/${ch.clip_id}/${getTranslated(ch.clip_slug)}`" class="block">
           <div class="aspect-video relative" style="background: rgba(255,255,255,0.04);">
@@ -67,22 +86,86 @@
           </div>
         </div>
       </div>
+      </div>
+      <AppPagination
+        :current-page="page"
+        :total-pages="totalPages"
+        @update:current-page="handlePageChange"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import api from '../api';
 import type { Challenge } from '../types';
 import { useTranslation } from '../composables/useTranslation';
 import { useMediaUrl } from '../composables/useMediaUrl';
+import { useSortFilterSync } from '../composables/useSortFilterSync';
+import AppBackButton from '../components/AppBackButton.vue';
+import SortFilterBar from '../components/SortFilterBar.vue';
+import AppPagination from '../components/AppPagination.vue';
+
+const route = useRoute();
 
 const { getTranslated } = useTranslation();
 const { getThumbnailUrl } = useMediaUrl();
 
 const challenges = ref<Challenge[]>([]);
 const loading = ref(true);
+
+const { sortBy, sortOrder, selectedCategory, page, updateQuery, initFromQuery } = useSortFilterSync('started_at');
+
+const perPage = 9;
+
+const handleFilterChange = () => {
+    page.value = 1;
+    updateQuery();
+};
+
+const handlePageChange = (newPage: number) => {
+    page.value = newPage;
+    updateQuery();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+const sortedChallenges = computed(() => {
+    let sorted = [...challenges.value];
+    
+    sorted.sort((a, b) => {
+        let valA: any = a.started_at;
+        let valB: any = b.started_at;
+        
+        if (sortBy.value === 'views') {
+             // Mock views/progress
+             valA = a.watched_items;
+             valB = b.watched_items;
+        } else if (sortBy.value === 'created_at') {
+             valA = a.started_at;
+             valB = b.started_at;
+        } else if (sortBy.value === 'average_rating') {
+             valA = a.is_completed ? 1 : 0;
+             valB = b.is_completed ? 1 : 0;
+        }
+        
+        if (valA < valB) return sortOrder.value === 'asc' ? -1 : 1;
+        if (valA > valB) return sortOrder.value === 'asc' ? 1 : -1;
+        return 0;
+    });
+    
+    return sorted;
+});
+
+const currentChallenges = computed(() => {
+    const startIndex = (page.value - 1) * perPage;
+    return sortedChallenges.value.slice(startIndex, startIndex + perPage);
+});
+
+const totalPages = computed(() => {
+    return Math.ceil(sortedChallenges.value.length / perPage) || 1;
+});
 
 const formatDate = (iso: string): string => {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -95,6 +178,7 @@ const formatDate = (iso: string): string => {
 };
 
 onMounted(async () => {
+  initFromQuery();
   try {
     const res = await api.get<Challenge[]>('/api/challenges');
     challenges.value = res.data;
@@ -104,4 +188,10 @@ onMounted(async () => {
     loading.value = false;
   }
 });
+
+watch(() => route.query, (newQ, oldQ) => {
+   if (newQ.page !== oldQ.page || newQ.sort !== oldQ.sort || newQ.category !== oldQ.category) {
+       initFromQuery();
+   }
+}, { deep: true });
 </script>

@@ -1,22 +1,14 @@
 <template>
   <div>
-    <!-- Hero header -->
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 class="font-heading font-extrabold text-3xl gradient-text">{{ $t('dashboard.title') }}</h1>
+          <div class="flex items-center gap-4">
+            <h1 class="font-heading font-extrabold text-3xl gradient-text">{{ $t('dashboard.title') }}</h1>
+            <router-link to="/courses" class="text-sm hover:opacity-80 transition" style="color: var(--tf-accent-cyan);">View all →</router-link>
+          </div>
           <p class="text-sm mt-1" style="color: var(--tf-text-muted);">Discover and master new skills</p>
         </div>
-        <SortFilterBar
-            :categories="categories"
-            :model-sort-by="sortBy"
-            :model-sort-order="sortOrder"
-            :model-selected-category="selectedCategory"
-            @update:model-sort-by="sortBy = $event"
-            @update:model-sort-order="sortOrder = $event"
-            @update:model-selected-category="selectedCategory = $event"
-            @change="fetchClips"
-        />
       </div>
     </div>
     
@@ -50,7 +42,7 @@
     
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <ClipTile
-        v-for="clip in clips"
+        v-for="clip in clips.slice(0, 6)"
         :key="clip.id"
         :clip="clip"
         :challenge="challengeForClip(clip.id)"
@@ -122,12 +114,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import api from '../api';
-import type { Clip, Challenge, Category } from '../types';
+import type { Clip, Challenge } from '../types';
 import { useClipActions } from '../composables/useClipActions';
 import { useTranslation } from '../composables/useTranslation';
 import { useMediaUrl } from '../composables/useMediaUrl';
 import ClipTile from '../components/ClipTile.vue';
-import SortFilterBar from '../components/SortFilterBar.vue';
 import IconLightning from '../components/icons/IconLightning.vue';
 import IconTrophy from '../components/icons/IconTrophy.vue';
 
@@ -135,34 +126,20 @@ const { getTranslated } = useTranslation();
 const { getThumbnailUrl } = useMediaUrl();
 
 const clips = ref<Clip[]>([]);
-const categories = ref<Category[]>([]);
 const challenges = ref<Challenge[]>([]);
 const loading = ref(true);
-const sortBy = ref('created_at');
-const sortOrder = ref('desc');
-const selectedCategory = ref('');
 
 const { challengeForClip, handleRate, startChallengeForClip } = useClipActions(clips, challenges);
 
-const fetchCategories = async (): Promise<void> => {
-  try {
-    const response = await api.get<Category[]>('/api/categories');
-    categories.value = response.data;
-  } catch (e) {
-    console.error(e);
-  }
-};
+
 
 const fetchClips = async (): Promise<void> => {
   loading.value = true;
   try {
     const params: Record<string, string> = {
-      sort: sortBy.value,
-      order: sortOrder.value,
+      sort: 'created_at',
+      order: 'desc',
     };
-    if (selectedCategory.value) {
-      params.category_id = selectedCategory.value;
-    }
     const response = await api.get<{ data: Clip[] }>('/api/clips', { params });
     clips.value = response.data.data;
   } catch (e) {
@@ -182,7 +159,6 @@ const fetchChallenges = async (): Promise<void> => {
 };
 
 onMounted(() => {
-  fetchCategories();
   fetchClips();
   fetchChallenges();
 });

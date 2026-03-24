@@ -30,7 +30,7 @@ const emit = defineEmits<{
                 <span class="text-[10px] flex-shrink-0" style="color: var(--tf-text-dimmed);">{{ challenge.watched_items }}/{{ challenge.total_items }}</span>
             </div>
             <!-- Start Challenge button (full width) -->
-            <button v-else @click.prevent="$emit('start-challenge', clip)" class="w-full text-xs px-3 py-2 rounded-lg font-semibold transition-all hover:scale-[1.02] flex items-center justify-center gap-2" style="background: rgba(251,191,36,0.15); color: var(--tf-accent-amber); border: 1px solid rgba(251,191,36,0.3);">
+            <button v-else @click.prevent="$emit('start-challenge', clip)" class="w-full text-xs px-3 py-2.5 rounded-full font-semibold transition-all hover:scale-[1.02] flex items-center justify-center gap-2" style="background: rgba(251,191,36,0.15); color: var(--tf-accent-amber); border: 1px solid rgba(251,191,36,0.25);">
                 <IconLightning :size="14" class="text-current" /> {{ $t('challenges.start_btn') }}
             </button>
         </div>

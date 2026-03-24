@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { useTimeoutFn } from '@vueuse/core';
 import UserAvatarMenu from './components/UserAvatarMenu.vue';
 import AppFooter from './components/AppFooter.vue';
+import AppBreadcrumb from './components/AppBreadcrumb.vue';
 import IconUpload from './components/icons/IconUpload.vue';
 import IconUsers from './components/icons/IconUsers.vue';
 
@@ -89,6 +90,7 @@ const closeManagement = () => {
         </div>
     </nav>
     <main class="p-6 max-w-7xl mx-auto flex-1 w-full">
+      <AppBreadcrumb v-if="auth.token && $route.path !== '/'" />
       <Transition name="page" mode="out-in">
         <router-view></router-view>
       </Transition>

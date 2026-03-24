@@ -277,8 +277,8 @@ html {
 }
 
 .card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(110, 231, 183, 0.1);
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .card-static {
@@ -297,10 +297,12 @@ html {
 
 .input-modern {
     width: 100%;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--tf-radius-md);
-    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--tf-radius-full);
+    padding: 0.75rem 1.25rem;
     color: var(--tf-text);
     font-size: 0.875rem;
     transition: all 0.2s ease;
@@ -318,19 +320,22 @@ html {
 }
 
 .select-modern {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--tf-radius-md);
-    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--tf-radius-full);
+    padding: 0.5rem 2.25rem 0.5rem 1rem;
     color: var(--tf-text);
     font-size: 0.8125rem;
+    font-weight: 500;
     transition: all 0.2s ease;
     outline: none;
     cursor: pointer;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a09bb5' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 0.75rem center;
+    background-position: right 1rem center;
 }
 
 .select-modern:focus {

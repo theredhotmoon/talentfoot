@@ -1,6 +1,8 @@
 <template>
   <div class="">
-    <router-link to="/tags" class=" hover:text-white mb-4 inline-block" style="color: var(--tf-accent-cyan)">&larr; {{ $t('tags.back_to_list') }}</router-link>
+    <div class="mb-4">
+        <AppBackButton />
+    </div>
 
     <div v-if="tag" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Edit Form -->
@@ -50,7 +52,7 @@
                     @update:model-sort-by="sortBy = $event"
                     @update:model-sort-order="sortOrder = $event"
                     @update:model-selected-category="selectedCategory = $event"
-                    @change="fetchTag"
+                    @change="handleFilterChange"
                 />
             </div>
             
@@ -58,14 +60,21 @@
                 {{ $t('tag_clips.no_clips') }}
             </div>
 
-            <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <ClipTile
-                    v-for="clip in tag.clips"
-                    :key="clip.id"
-                    :clip="clip"
-                    :challenge="challengeForClip(clip.id)"
-                    @rate="handleRate"
-                    @start-challenge="startChallengeForClip"
+            <div v-else>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <ClipTile
+                        v-for="clip in currentClips"
+                        :key="clip.id"
+                        :clip="clip"
+                        :challenge="challengeForClip(clip.id)"
+                        @rate="handleRate"
+                        @start-challenge="startChallengeForClip"
+                    />
+                </div>
+                <AppPagination
+                    :current-page="page"
+                    :total-pages="totalPages"
+                    @update:current-page="handlePageChange"
                 />
             </div>
         </div>
@@ -74,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../api';
@@ -83,6 +92,9 @@ import { useAuthStore } from '../stores/auth';
 import { useClipActions } from '../composables/useClipActions';
 import ClipTile from '../components/ClipTile.vue';
 import SortFilterBar from '../components/SortFilterBar.vue';
+import AppBackButton from '../components/AppBackButton.vue';
+import AppPagination from '../components/AppPagination.vue';
+import { useSortFilterSync } from '../composables/useSortFilterSync';
 
 const { t } = useI18n();
 const authStore = useAuthStore();
@@ -92,12 +104,35 @@ const router = useRouter();
 const tag = ref<any>(null);
 const categories = ref<Category[]>([]);
 const challenges = ref<Challenge[]>([]);
-const selectedCategory = ref('');
-const sortBy = ref('created_at');
-const sortOrder = ref('desc');
+
+const { sortBy, sortOrder, selectedCategory, page, updateQuery, initFromQuery } = useSortFilterSync();
+
+const perPage = 9;
+
+const handleFilterChange = () => {
+    page.value = 1;
+    updateQuery();
+    fetchTag();
+};
+
+const handlePageChange = (newPage: number) => {
+    page.value = newPage;
+    updateQuery();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
 
 // clips is derived from tag.clips — we create a computed-like ref to pass to useClipActions
 const clips = ref<Clip[]>([]);
+
+const currentClips = computed(() => {
+    const startIndex = (page.value - 1) * perPage;
+    return clips.value.slice(startIndex, startIndex + perPage);
+});
+
+const totalPages = computed(() => {
+    return Math.ceil(clips.value.length / perPage) || 1;
+});
+
 const { challengeForClip, handleRate, startChallengeForClip } = useClipActions(clips, challenges);
 
 const fetchChallenges = async (): Promise<void> => {
@@ -159,8 +194,18 @@ const deleteTag = async (): Promise<void> => {
 };
 
 onMounted(async () => {
+  initFromQuery();
   categories.value = await fetchCategories();
   fetchTag();
   fetchChallenges();
 });
+
+watch(() => route.query, (newQ, oldQ) => {
+   if (newQ.page !== oldQ.page || newQ.sort !== oldQ.sort || newQ.category !== oldQ.category) {
+       initFromQuery();
+       if (newQ.sort !== oldQ.sort || newQ.category !== oldQ.category) {
+           fetchTag();
+       }
+   }
+}, { deep: true });
 </script>
