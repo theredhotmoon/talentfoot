@@ -190,6 +190,25 @@ class SubclipController extends Controller
     }
 
     /**
+     * Reorder subclips for a given clip.
+     */
+    public function reorder(Request $request, Clip $clip)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:subclips,id',
+        ]);
+
+        foreach ($request->ids as $index => $id) {
+            Subclip::where('id', $id)
+                ->where('clip_id', $clip->id)
+                ->update(['sort_order' => $index]);
+        }
+
+        return response()->json(['message' => 'Subclips reordered successfully']);
+    }
+
+    /**
      * Generate thumbnails from a subclip video using FFmpeg.
      */
     private function generateSubclipThumbnails(Subclip $subclip): array

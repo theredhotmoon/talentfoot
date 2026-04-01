@@ -35,10 +35,10 @@ const emit = defineEmits<{
             <span class="flex-1 flex justify-start items-center gap-1.5" :title="$t('dashboard.views') || $t('sort.views')">
                 <IconEye :size="14" class="text-current" /> <span style="color: var(--tf-accent-cyan);">{{ views }}</span>
             </span>
-            <span class="flex-1 flex justify-center items-center gap-1.5" :title="$t('dashboard.difficulty') || $t('sort.difficulty')">
+            <span class="flex-1 flex justify-start items-center gap-1.5" :title="$t('dashboard.difficulty') || $t('sort.difficulty')">
                 <IconFlame :size="14" class="text-current" /> <span style="color: var(--tf-accent-amber);">{{ difficulty }}/10</span>
             </span>
-            <span class="flex-1 flex justify-end items-center gap-1.5" :title="$t('sort.comments')">
+            <span class="flex-1 flex justify-start items-center gap-1.5" :title="$t('sort.comments')">
                 <template v-if="comments !== undefined">
                     <IconMessage :size="14" class="text-current" /> <span style="color: var(--tf-accent-violet);">{{ comments }}</span>
                 </template>
@@ -55,15 +55,15 @@ const emit = defineEmits<{
                 </template>
             </span>
 
-            <span class="flex-1 flex justify-center items-center gap-1.5">
-                <template v-if="subclipsCount !== undefined && subclipsCount > 0">
+            <span class="flex-1 flex justify-start items-center gap-1.5">
+                <template v-if="subclipsCount !== undefined">
                     <span class="flex items-center gap-1.5" :title="$t('dashboard.subclips')">
                         <IconBook :size="14" class="text-current" /> <span style="color: var(--tf-accent-violet);">{{ subclipsCount }}</span>
                     </span>
                 </template>
             </span>
 
-            <span class="flex-1 flex justify-end items-center gap-1.5" :title="$t('dashboard.rating') || $t('sort.rating')">
+            <span class="flex-1 flex justify-start items-center gap-1.5" :title="$t('dashboard.rating') || $t('sort.rating')">
                 <template v-if="category && comments === undefined">
                     <span class="flex items-center gap-1.5" :title="categoryLabel || $t('edit_clip.category')">
                         <IconFolder :size="14" class="text-current" /> <span style="color: var(--tf-accent-orange);">{{ typeof category.name === 'string' ? category.name : '' }}</span>

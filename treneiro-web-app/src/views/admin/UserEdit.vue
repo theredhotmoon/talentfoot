@@ -19,8 +19,8 @@
             </div>
 
             <div class="mb-4">
-                <label class="block text-gray-400 mb-2">{{ $t('users.role') }}</label>
-                <select v-model="form.role" class="w-full bg-gray-700 rounded px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label for="roleSelect" class="block text-gray-400 mb-2">{{ $t('users.role') }}</label>
+                <select id="roleSelect" v-model="form.role" class="w-full bg-gray-700 rounded px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
                 </select>
@@ -49,7 +49,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import axios from 'axios';
+import api from '../../api';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -68,7 +68,7 @@ const form = ref({
 
 onMounted(async () => {
     try {
-        const response = await axios.get(`/api/users/${id}`);
+        const response = await api.get(`/api/users/${id}`);
         form.value.name = response.data.name;
         form.value.email = response.data.email;
         form.value.role = response.data.role;
@@ -84,7 +84,7 @@ onMounted(async () => {
 
 const saveUser = async () => {
     try {
-        await axios.put(`/api/users/${id}`, form.value);
+        await api.put(`/api/users/${id}`, form.value);
         alert(t('users.saved_success'));
         router.push('/users');
     } catch (e: any) {

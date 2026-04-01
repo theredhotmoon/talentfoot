@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import axios from 'axios';
+import api from '../api';
 
 const emit = defineEmits<{ (e: 'close'): void }>();
 
@@ -19,7 +19,7 @@ const handleSubmit = async () => {
     success.value = false;
 
     try {
-        await axios.put('/api/profile/password', form.value);
+        await api.put('/api/profile/password', form.value);
         success.value = true;
         form.value = { current_password: '', password: '', password_confirmation: '' };
         setTimeout(() => emit('close'), 1500);

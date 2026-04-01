@@ -139,6 +139,6 @@ onClickOutside(menuRef, () => { isOpen.value = false; });
         <!-- Modals -->
         <EditProfileModal v-if="showEditProfile" @close="showEditProfile = false" />
         <ChangePasswordModal v-if="showChangePassword" @close="showChangePassword = false" />
-        <WelcomeTourModal v-if="showWelcomeTour" @close="showWelcomeTour = false" />
+        <WelcomeTourModal v-if="showWelcomeTour" :is-guest="false" @close="showWelcomeTour = false" />
     </div>
 </template>

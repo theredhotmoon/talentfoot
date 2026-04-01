@@ -8,6 +8,8 @@ import type { User, LoginCredentials, RegisterCredentials } from '../types';
 export const useAuthStore = defineStore('auth', () => {
   const token = useLocalStorage<string>('token', '');
   const user = ref<User | null>(null);
+  const isInitialized = ref(false);
+  const showRegisterModal = ref(false);
 
   const isAuthenticated = computed(() => !!token.value);
   const isAdmin = computed(() => user.value?.role === 'admin');
@@ -23,14 +25,16 @@ export const useAuthStore = defineStore('auth', () => {
     router.push('/');
   }
 
-  async function register(credentials: RegisterCredentials): Promise<void> {
+  async function register(credentials: RegisterCredentials, redirect: boolean = true): Promise<void> {
     const response = await api.post<{ access_token: string }>(
       '/api/register',
       credentials,
     );
     token.value = response.data.access_token;
     await fetchUser();
-    router.push('/');
+    if (redirect) {
+      router.push('/');
+    }
   }
 
   async function logout(): Promise<void> {
@@ -45,13 +49,18 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function fetchUser(): Promise<void> {
-    if (!token.value) return;
+    if (!token.value) {
+      isInitialized.value = true;
+      return;
+    }
     try {
       const response = await api.get<User>('/api/user');
       user.value = response.data;
     } catch (error) {
       console.error('Fetch user failed', error);
       token.value = '';
+    } finally {
+      isInitialized.value = true;
     }
   }
 
@@ -74,6 +83,8 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     token,
     user,
+    isInitialized,
+    showRegisterModal,
     isAuthenticated,
     isAdmin,
     showTips,

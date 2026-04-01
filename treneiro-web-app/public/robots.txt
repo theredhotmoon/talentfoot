@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /upload
+Disallow: /my-challenges/
+
+Sitemap: /sitemap.xml

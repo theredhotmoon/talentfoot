@@ -31,12 +31,22 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'subscription_valid_until' => 'date',
+        'show_tips' => 'boolean',
     ];
 
     // Default role
     protected $attributes = [
         'role' => 'user',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($user) {
+            if (empty($user->subscription_valid_until)) {
+                $user->subscription_valid_until = now()->addWeek();
+            }
+        });
+    }
 
     public function isAdmin()
     {

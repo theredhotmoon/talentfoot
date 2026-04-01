@@ -13,7 +13,7 @@
                 :placeholder="$t('users.search_placeholder')" 
                 class="input-modern text-sm py-2 px-4"
             >
-            <select v-model="roleFilter" @change="fetchUsers" class="select-modern text-sm py-2 px-4">
+            <select v-model="roleFilter" @change="fetchUsers" :aria-label="$t('users.role') || 'Role'" class="select-modern text-sm py-2 px-4">
                 <option value="">{{ $t('users.all_roles') }}</option>
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
@@ -88,7 +88,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from '../../api';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -141,7 +141,7 @@ const changePage = (page: number) => {
 const fetchUsers = async () => {
     loading.value = true;
     try {
-        const response = await axios.get('/api/users', {
+        const response = await api.get('/api/users', {
             params: {
                 page: pagination.value.current_page,
                 search: search.value,
@@ -167,7 +167,7 @@ const fetchUsers = async () => {
 const deleteUser = async (user: User) => {
     if (!confirm(t('users.confirm_delete', { name: user.name }))) return;
     try {
-        await axios.delete(`/api/users/${user.id}`);
+        await api.delete(`/api/users/${user.id}`);
         fetchUsers();
     } catch (e: any) {
         alert(e.response?.data?.message || 'Failed to delete user');

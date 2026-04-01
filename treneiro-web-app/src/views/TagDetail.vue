@@ -1,67 +1,39 @@
 <template>
   <div class="">
-    <div class="mb-4">
-        <AppBackButton />
-    </div>
 
-    <div v-if="tag" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Edit Form -->
-        <div v-if="authStore.isAdmin" class="bg-gray-800 p-6 rounded shadow h-fit">
-            <h1 class="text-2xl font-bold mb-6">{{ $t('tags.edit_tag') }}</h1>
-            
-            <div class="mb-4">
-                <label class="block mb-1" style="color: var(--tf-text-muted)">Name (EN)</label>
-                <input v-model="tag.name.en" class="w-full input-modern">
-            </div>
-             <div class="mb-4">
-                <label class="block mb-1" style="color: var(--tf-text-muted)">Name (PL)</label>
-                <input v-model="tag.name.pl" class="w-full input-modern">
-            </div>
-             <div class="mb-4">
-                <label class="block mb-1" style="color: var(--tf-text-muted)">Name (ES)</label>
-                <input v-model="tag.name.es" class="w-full input-modern">
-            </div>
-
-            <div class="flex justify-between mt-6">
-                <button 
-                    @click="deleteTag" 
-                    :disabled="tag.clips && tag.clips.length > 0"
-                    class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                    :title="tag.clips && tag.clips.length > 0 ? $t('tags.cannot_delete') : ''"
-                >
-                    {{ $t('dashboard.delete') }}
-                </button>
-                <button @click="updateTag" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
-                    {{ $t('upload.save') }}
-                </button>
-            </div>
-            <p v-if="tag.clips && tag.clips.length > 0" class="text-xs text-gray-500 mt-2">
-                {{ $t('tags.delete_warning') }}
-            </p>
-        </div>
-
-        <!-- Clips List -->
-        <div class="lg:col-span-2">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold">{{ $t('tags.associated_clips') }} ({{ tag.clips ? tag.clips.length : 0 }})</h2>
-                <SortFilterBar
-                    :categories="categories"
-                    :model-sort-by="sortBy"
-                    :model-sort-order="sortOrder"
-                    :model-selected-category="selectedCategory"
-                    @update:model-sort-by="sortBy = $event"
-                    @update:model-sort-order="sortOrder = $event"
-                    @update:model-selected-category="selectedCategory = $event"
-                    @change="handleFilterChange"
-                />
+    <div v-if="tag">
+        <!-- Clips Section -->
+        <div>
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <div>
+                    <h2 class="font-heading font-extrabold text-3xl gradient-text">{{ getTranslated(tag.name) }}</h2>
+                    <p class="text-sm mt-1" style="color: var(--tf-text-muted);">{{ tag.clips ? tag.clips.length : 0 }} {{ $t('tags.clips_count') || 'clips' }}</p>
+                </div>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                    <button v-if="authStore.isAdmin" @click="showEditModal = true" class="btn-ghost flex-shrink-0 text-sm flex items-center justify-center gap-2">
+                        ✏️ {{ $t('tags.edit_tag') }}
+                    </button>
+                    <div class="flex-shrink-0 flex items-center w-full sm:w-auto">
+                        <SortFilterBar
+                            :categories="categories"
+                            :model-sort-by="sortBy"
+                            :model-sort-order="sortOrder"
+                            :model-selected-category="selectedCategory"
+                            @update:model-sort-by="sortBy = $event"
+                            @update:model-sort-order="sortOrder = $event"
+                            @update:model-selected-category="selectedCategory = $event"
+                            @change="handleFilterChange"
+                        />
+                    </div>
+                </div>
             </div>
             
-            <div v-if="!tag.clips || tag.clips.length === 0" class="text-gray-400">
+            <div v-if="!tag.clips || tag.clips.length === 0" class="text-center py-12" style="color: var(--tf-text-muted);">
                 {{ $t('tag_clips.no_clips') }}
             </div>
 
             <div v-else>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <ClipTile
                         v-for="clip in currentClips"
                         :key="clip.id"
@@ -79,31 +51,48 @@
             </div>
         </div>
     </div>
+
+    <div v-else class="text-center py-12" style="color: var(--tf-text-muted);">
+        {{ $t('common.loading') || 'Loading...' }}
+    </div>
+
+    <!-- Shared Edit Tag Modal -->
+    <EditTagModal
+        v-if="showEditModal"
+        :tag="tag"
+        @close="showEditModal = false"
+        @saved="fetchTag"
+        @deleted="router.push('/tags')"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useI18n } from 'vue-i18n';
 import api from '../api';
 import type { Clip, Challenge, Category } from '../types';
 import { useAuthStore } from '../stores/auth';
+import { useTranslation } from '../composables/useTranslation';
 import { useClipActions } from '../composables/useClipActions';
+import { useBreadcrumbLabel } from '../composables/useBreadcrumbLabel';
 import ClipTile from '../components/ClipTile.vue';
 import SortFilterBar from '../components/SortFilterBar.vue';
-import AppBackButton from '../components/AppBackButton.vue';
+import EditTagModal from '../components/EditTagModal.vue';
+
 import AppPagination from '../components/AppPagination.vue';
 import { useSortFilterSync } from '../composables/useSortFilterSync';
 
-const { t } = useI18n();
 const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();
+const { getTranslated } = useTranslation();
+const { setBreadcrumbLabel } = useBreadcrumbLabel();
 
 const tag = ref<any>(null);
 const categories = ref<Category[]>([]);
 const challenges = ref<Challenge[]>([]);
+const showEditModal = ref(false);
 
 const { sortBy, sortOrder, selectedCategory, page, updateQuery, initFromQuery } = useSortFilterSync();
 
@@ -165,6 +154,8 @@ const fetchTag = async (): Promise<void> => {
     }
     const res = await api.get(`/api/tags/${route.params.id}`, { params });
     tag.value = res.data;
+    // Register the tag name so the breadcrumb shows it instead of the UUID
+    setBreadcrumbLabel(String(route.params.id), getTranslated(tag.value?.name));
     // Keep clips ref in sync so useClipActions can update rating in-place
     clips.value = tag.value?.clips ?? [];
   } catch (e) {
@@ -173,31 +164,11 @@ const fetchTag = async (): Promise<void> => {
   }
 };
 
-const updateTag = async (): Promise<void> => {
-  try {
-    await api.put(`/api/tags/${tag.value.id}`, { name: tag.value.name });
-    alert(t('upload.save'));
-  } catch (e) {
-    console.error(e);
-  }
-};
-
-const deleteTag = async (): Promise<void> => {
-  if (!confirm(t('tags.confirm_delete'))) return;
-  try {
-    await api.delete(`/api/tags/${tag.value.id}`);
-    router.push('/tags');
-  } catch (e) {
-    console.error(e);
-    alert('Error deleting tag');
-  }
-};
-
 onMounted(async () => {
   initFromQuery();
   categories.value = await fetchCategories();
   fetchTag();
-  fetchChallenges();
+  if (authStore.isAuthenticated) fetchChallenges();
 });
 
 watch(() => route.query, (newQ, oldQ) => {

@@ -1,8 +1,5 @@
 <template>
   <div>
-    <div class="mb-4">
-        <AppBackButton />
-    </div>
     
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
@@ -35,7 +32,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-for="ch in currentChallenges" :key="ch.id" class="card-static overflow-hidden" style="border-radius: var(--tf-radius-xl);">
         <!-- Thumbnail -->
-        <router-link :to="`/clips/${ch.clip_id}/${getTranslated(ch.clip_slug)}`" class="block">
+        <router-link :to="`/challenge/${ch.clip_id}/${getTranslated(ch.clip_slug)}`" class="block">
           <div class="aspect-video relative" style="background: rgba(255,255,255,0.04);">
             <img v-if="ch.clip_thumbnail" :src="getThumbnailUrl(ch.clip_thumbnail)" class="w-full h-full object-cover" />
             <div class="absolute inset-0 flex items-center justify-center" style="background: rgba(0,0,0,0.3);">
@@ -53,7 +50,7 @@
         </router-link>
 
         <div class="p-5">
-          <router-link :to="`/clips/${ch.clip_id}/${getTranslated(ch.clip_slug)}`" class="hover:opacity-80 transition-opacity">
+          <router-link :to="`/challenge/${ch.clip_id}/${getTranslated(ch.clip_slug)}`" class="hover:opacity-80 transition-opacity">
             <h3 class="font-heading font-bold text-lg mb-3" style="color: var(--tf-text);">{{ getTranslated(ch.clip_name) }}</h3>
           </router-link>
 
@@ -104,7 +101,7 @@ import type { Challenge } from '../types';
 import { useTranslation } from '../composables/useTranslation';
 import { useMediaUrl } from '../composables/useMediaUrl';
 import { useSortFilterSync } from '../composables/useSortFilterSync';
-import AppBackButton from '../components/AppBackButton.vue';
+
 import SortFilterBar from '../components/SortFilterBar.vue';
 import AppPagination from '../components/AppPagination.vue';
 

@@ -43,7 +43,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import axios from 'axios';
+import api from '../api';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -57,7 +57,7 @@ const submitForm = async () => {
     submitting.value = true;
     error.value = '';
     try {
-        await axios.post('/api/contact', form.value);
+        await api.post('/api/contact', form.value);
         sent.value = true;
     } catch (e: any) {
         if (e.response?.data?.errors) {

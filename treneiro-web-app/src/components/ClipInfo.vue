@@ -4,18 +4,12 @@ import { useTranslation } from '../composables/useTranslation';
 import TagPills from './TagPills.vue';
 import IconDiamond from './icons/IconDiamond.vue';
 import IconLightning from './icons/IconLightning.vue';
-import IconBook from './icons/IconBook.vue';
-import IconPlayMovie from './icons/IconPlayMovie.vue';
-import IconEye from './icons/IconEye.vue';
-import IconCheck from './icons/IconCheck.vue';
-import IconWarning from './icons/IconWarning.vue';
-import IconStar from './icons/IconStar.vue';
-import IconFlame from './icons/IconFlame.vue';
-import IconMessage from './icons/IconMessage.vue';
-import IconFolder from './icons/IconFolder.vue';
-import IconUsers from './icons/IconUsers.vue';
+import ClipStatsGrid from './ClipStatsGrid.vue';
+import RateClipModal from './RateClipModal.vue';
+import CourseHowTo from './CourseHowTo.vue';
 import type { Clip, Subclip, ActiveChallenge } from '../types';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import api from '../api';
 
 const props = defineProps<{
   clip: Clip;
@@ -29,6 +23,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'dismiss-tip'): void;
+  (e: 'start-course'): void;
 }>();
 
 const authStore = useAuthStore();
@@ -43,6 +38,25 @@ const currentRating = computed(() => {
 const currentRatingsCount = computed(() =>
   props.activeSubclip?.ratings_count ?? props.clip.ratings_count,
 );
+
+const showRateModal = ref(false);
+
+const onRateSubmit = async (rating: number, clipId: string) => {
+  showRateModal.value = false;
+  if (!authStore.isAuthenticated) return;
+  try {
+    const response = await api.post<{ average_rating: number; ratings_count: number }>(`/api/clips/${clipId}/rate`, { rating });
+    props.clip.average_rating = response.data.average_rating;
+    props.clip.ratings_count = response.data.ratings_count;
+    if (props.clip.current_user_rating) {
+        props.clip.current_user_rating.rating = rating;
+    } else {
+        props.clip.current_user_rating = { rating: rating };
+    }
+  } catch {
+    alert('Failed to rate clip');
+  }
+};
 </script>
 
 <template>
@@ -50,10 +64,16 @@ const currentRatingsCount = computed(() =>
     <div class="p-6">
       <!-- Title + challenge badge -->
       <div class="flex items-start gap-3 mb-2">
-        <h1 class="text-3xl font-heading font-bold gradient-text">{{ getTranslated(clip.name) }}</h1>
+        <h1 class="text-3xl font-heading font-bold gradient-text">{{ getTranslated(clip.name) }}
+            <div v-if="authStore.isAdmin" class="mt-4 flex right-end">
+                <router-link :to="`/courses/${clip.id}/edit`" class="btn-ghost text-xs py-1.5 px-3 rounded-lg" style="border: 1px solid var(--tf-border);">
+                    {{ $t('clip_detail.edit_clip') }}
+                </router-link>
+            </div>
+        </h1>
 
         <!-- Completed badge -->
-        <div v-if="activeChallenge?.is_completed" class="relative group flex-shrink-0 mt-1 ml-auto">
+        <div v-if="authStore.isAuthenticated && activeChallenge?.is_completed" class="relative group flex-shrink-0 mt-1 ml-auto">
           <div class="w-9 h-9 rounded-full flex items-center justify-center cursor-help" style="background: rgba(110,231,183,0.15); border: 2px solid var(--tf-accent-emerald);">
             <span class="text-lg">🏆</span>
           </div>
@@ -65,7 +85,7 @@ const currentRatingsCount = computed(() =>
         </div>
 
         <!-- In-progress badge -->
-        <div v-else-if="activeChallenge && !activeChallenge.is_completed" class="relative group flex-shrink-0 mt-1 ml-auto">
+        <div v-else-if="authStore.isAuthenticated && activeChallenge && !activeChallenge.is_completed" class="relative group flex-shrink-0 mt-1 ml-auto">
           <div class="w-9 h-9 rounded-full flex items-center justify-center cursor-help" style="background: rgba(251,191,36,0.15); border: 2px solid var(--tf-accent-amber);">
             <span class="text-lg">⚡</span>
           </div>
@@ -80,7 +100,7 @@ const currentRatingsCount = computed(() =>
       <p class="mb-4" style="color: var(--tf-text-muted);">{{ getTranslated(clip.description) }}</p>
 
       <!-- Contextual tip: Subscribe to unlock -->
-      <div v-if="clip.subclips?.length && !subscriptionActive && authStore.showTips && !tipDismissed"
+      <div v-if="authStore.isAuthenticated && clip.subclips?.length && !subscriptionActive && authStore.showTips && !tipDismissed"
            class="mb-4 p-4 rounded-xl flex items-start gap-3" style="background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.2);">
         <IconDiamond :size="24" class="flex-shrink-0" style="color: var(--tf-accent-violet);" />
         <div class="flex-1 min-w-0">
@@ -91,7 +111,7 @@ const currentRatingsCount = computed(() =>
       </div>
 
       <!-- Tip: Start challenge -->
-      <div v-else-if="clip.subclips?.length && subscriptionActive && !activeChallenge && authStore.showTips && !tipDismissed"
+      <div v-else-if="authStore.isAuthenticated && clip.subclips?.length && subscriptionActive && !activeChallenge && authStore.showTips && !tipDismissed"
            class="mb-4 p-4 rounded-xl flex items-start gap-3" style="background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2);">
         <IconLightning :size="24" class="flex-shrink-0" style="color: var(--tf-accent-amber);" />
         <div class="flex-1 min-w-0">
@@ -102,77 +122,60 @@ const currentRatingsCount = computed(() =>
       </div>
 
       <!-- Course instructions (no challenge yet, tips dismissed) -->
-      <div v-else-if="clip.subclips?.length && !activeChallenge"
-           class="mb-4 p-4 rounded-xl" style="background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.2);">
-        <p class="font-semibold text-sm mb-2 flex items-center gap-2" style="color: var(--tf-accent-violet);">
-          <IconBook :size="16" /> {{ $t('course.how_it_works') }}
-        </p>
-        <ul class="text-xs space-y-2" style="color: var(--tf-text-muted);">
-          <li class="flex items-center gap-2"><IconPlayMovie :size="14" /> {{ $t('course.step_watch_main') }}</li>
-          <li class="flex items-center gap-2"><IconEye :size="14" /> {{ $t('course.step_preview') }}</li>
-          <li class="flex items-center gap-2"><IconLightning :size="14" /> {{ $t('course.step_start') }}</li>
-          <li class="flex items-center gap-2"><IconCheck :size="14" /> {{ $t('course.step_complete') }}</li>
-        </ul>
-      </div>
+      <CourseHowTo
+        v-else-if="authStore.isAuthenticated && clip.subclips?.length && !activeChallenge"
+        :main-clip-watched="mainClipWatched"
+        :subscription-active="subscriptionActive"
+        @start-course="emit('start-course')"
+      />
 
       <!-- Main clip required (active challenge, main not watched) -->
-      <div v-else-if="activeChallenge && !activeChallenge.is_completed && !mainClipWatched"
-           class="mb-4 p-4 rounded-xl" style="background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2);">
-        <p class="font-semibold text-sm mb-1 flex items-center gap-2" style="color: var(--tf-accent-amber);">
-          <IconWarning :size="16" /> {{ $t('course.main_clip_required_title') }}
-        </p>
-        <p class="text-xs" style="color: var(--tf-text-muted);">{{ $t('course.main_clip_required_msg') }}</p>
-      </div>
+      <!-- Needs to be restored but not here ?  -->
+<!--      <div v-else-if="activeChallenge && !activeChallenge.is_completed && !mainClipWatched"-->
+<!--           class="mb-4 p-4 rounded-xl" style="background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2);">-->
+<!--        <p class="font-semibold text-sm mb-1 flex items-center gap-2" style="color: var(&#45;&#45;tf-accent-amber);">-->
+<!--          <IconWarning :size="16" /> {{ $t('course.main_clip_required_title') }}-->
+<!--        </p>-->
+<!--        <p class="text-xs" style="color: var(&#45;&#45;tf-text-muted);">{{ $t('course.main_clip_required_msg') }}</p>-->
+<!--      </div>-->
 
-      <TagPills v-if="clip.tags" :tags="clip.tags" />
 
       <!-- Stats -->
-      <div class="flex flex-col gap-2 w-full text-sm mt-3" style="color: var(--tf-text-muted);">
-        <!-- Line 1 -->
-        <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <span class="stat-badge flex items-center gap-1.5"><IconEye :size="14" class="text-current" /> <span class="stat-value" style="color: var(--tf-accent-cyan);">{{ currentViews }}</span></span>
-          <span class="text-gray-600 font-bold opacity-30">•</span>
-          <span class="stat-badge flex items-center gap-1.5"><IconFlame :size="14" class="text-current" /> <span class="stat-value" style="color: var(--tf-accent-amber);">{{ currentDifficulty }}/10</span></span>
+<!--      <div class="flex flex-col w-full mt-4">-->
+      <div class="flex flex-wrap justify-start">
 
-          <template v-if="!activeSubclip">
-            <span class="text-gray-600 font-bold opacity-30">•</span>
-            <span class="stat-badge flex items-center gap-1.5"><IconMessage :size="14" class="text-current" /> <span class="stat-value" style="color: var(--tf-accent-violet);">{{ commentsCount }}</span></span>
-          </template>
+<!--          <div class="flex flex-wrap justify-start">-->
+              <div class="relative basis-1/2">
+                  <TagPills v-if="clip.tags" :tags="clip.tags" />
 
-          <div class="flex-1"></div>
-          <router-link v-if="authStore.isAdmin" :to="`/clips/${clip.id}/edit`" class="btn-ghost text-xs py-1 px-3">
-            {{ $t('clip_detail.edit_clip') }}
-          </router-link>
-        </div>
+              </div>
+              <div class="relative basis-1/2">
+                  <ClipStatsGrid
+                      :difficulty="currentDifficulty"
+                      :views="currentViews"
+                      :comments="!activeSubclip ? commentsCount : undefined"
+                      :rating="currentRating"
+                      :ratings-count="currentRatingsCount"
+                      :category="!activeSubclip ? clip.category : undefined"
+                      :category-label="!activeSubclip && clip.category ? getTranslated(clip.category.name) : undefined"
+                      :subclips-count="!activeSubclip ? clip.subclips_count : undefined"
+                      :participants-count="!activeSubclip ? clip.challenges_count : undefined"
+                      :completed-count="!activeSubclip ? clip.completed_challenges_count : undefined"
+                      :show-rate-select="!activeSubclip"
+                      @open-rate-modal="showRateModal = true"
+                  />
 
-        <!-- Line 2 -->
-        <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <template v-if="!activeSubclip && clip.challenges_count !== undefined">
-            <span class="stat-badge flex items-center gap-1.5 cursor-help" :title="`${clip.challenges_count} ${$t('dashboard.participants')}. ${clip.completed_challenges_count || 0} ${$t('clip_detail.completed') || 'completed'}.`">
-              <IconUsers :size="14" class="text-current" /> <span class="stat-value" style="color: var(--tf-accent-cyan);">{{ clip.challenges_count }}</span>
-            </span>
-            <span class="text-gray-600 font-bold opacity-30">•</span>
-          </template>
+                  <RateClipModal
+                      v-if="showRateModal"
+                      :initial-rating="clip.current_user_rating ? clip.current_user_rating.rating : 0"
+                      @close="showRateModal = false"
+                      @submit="onRateSubmit($event, clip.id)"
+                  />
 
-          <template v-if="!activeSubclip && clip.subclips_count !== undefined">
-            <span class="stat-badge flex items-center gap-1.5">
-              <IconBook :size="14" class="text-current" /> <span class="stat-value" style="color: var(--tf-accent-violet);">{{ clip.subclips_count }}</span>
-            </span>
-            <span class="text-gray-600 font-bold opacity-30">•</span>
-          </template>
+              </div>
+<!--          </div>-->
 
-          <span class="stat-badge flex items-center gap-1.5">
-            <IconStar :size="14" class="text-current" /> <span class="stat-value" style="color: var(--tf-accent-emerald);">{{ currentRating }}/10</span>
-            <span style="opacity:0.6; font-size: 0.9em;">({{ currentRatingsCount }} {{ $t('clip_detail.votes') }})</span>
-          </span>
 
-          <template v-if="clip.category">
-            <span class="text-gray-600 font-bold opacity-30">•</span>
-            <span class="stat-badge flex items-center gap-1.5">
-              <IconFolder :size="14" class="text-current" /> <span class="stat-value" style="color: var(--tf-accent-orange);">{{ getTranslated(clip.category.name) }}</span>
-            </span>
-          </template>
-        </div>
       </div>
     </div>
   </div>

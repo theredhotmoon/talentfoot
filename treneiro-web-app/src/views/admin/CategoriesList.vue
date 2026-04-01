@@ -28,6 +28,7 @@
                     }">
                     <img v-for="(thumb, i) in getCategoryThumbnails(category)" :key="i" 
                         :src="getThumbnailUrl(thumb)" 
+                        alt=""
                         class="w-full h-full object-cover" 
                         :class="{ 'col-span-2': getCategoryThumbnails(category).length === 3 && i === 0 }" />
                 </div>
@@ -76,7 +77,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from '../../api';
 import { useI18n } from 'vue-i18n';
 import { useTranslation } from '../../composables/useTranslation';
 import { useMediaUrl } from '../../composables/useMediaUrl';
@@ -113,7 +114,7 @@ const getCategoryThumbnails = (category: Category) => {
 const fetchCategories = async () => {
     loading.value = true;
     try {
-        const response = await axios.get('/api/categories');
+        const response = await api.get('/api/categories');
         categories.value = response.data;
     } catch (e) {
         console.error(e);
@@ -138,7 +139,7 @@ const openEditModal = (category: Category) => {
 const deleteCategory = async (category: Category) => {
     if (!confirm(t('categories.confirm_delete'))) return;
     try {
-        await axios.delete(`/api/categories/${category.id}`);
+        await api.delete(`/api/categories/${category.id}`);
         fetchCategories();
     } catch (e: any) {
         alert(e.response?.data?.message || 'Failed to delete category');

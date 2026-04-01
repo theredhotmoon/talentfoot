@@ -2,13 +2,11 @@
   <div>
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <div class="flex items-center gap-4">
-            <h1 class="font-heading font-extrabold text-3xl gradient-text">{{ $t('dashboard.title') }}</h1>
-            <router-link to="/courses" class="text-sm hover:opacity-80 transition" style="color: var(--tf-accent-cyan);">View all →</router-link>
-          </div>
-          <p class="text-sm mt-1" style="color: var(--tf-text-muted);">Discover and master new skills</p>
+        <div class="flex-1">
+          <h1 class="font-heading font-extrabold text-3xl gradient-text">Master Your Football Skills</h1>
+          <p class="text-sm mt-1" style="color: var(--tf-text-muted);">Discover premium online courses and challenges</p>
         </div>
+        <router-link to="/courses" class="text-sm hover:opacity-80 transition" style="color: var(--tf-accent-cyan);">View all →</router-link>
       </div>
     </div>
     
@@ -69,7 +67,7 @@
         </div>
       </div>
     </div>
-    <div v-else-if="challenges.length > 0" class="mt-10">
+    <div v-else-if="auth.isAuthenticated && challenges.length > 0" class="mt-10">
       <div class="flex justify-between items-center mb-4">
         <h2 class="font-heading font-bold text-xl flex items-center gap-2" style="color: var(--tf-text);"><IconLightning :size="20" class="text-current" style="color: var(--tf-accent-amber);" /> {{ $t('challenges.my_active') }}</h2>
         <router-link to="/my-challenges" class="text-sm hover:opacity-80 transition" style="color: var(--tf-accent-emerald);">{{ $t('challenges.view_all') }} →</router-link>
@@ -78,7 +76,7 @@
         <router-link
           v-for="ch in challenges.slice(0, 3)"
           :key="ch.id"
-          :to="`/clips/${ch.clip_id}/${getTranslated(ch.clip_slug)}`"
+          :to="`/challenge/${ch.clip_id}/${getTranslated(ch.clip_slug)}`"
           class="card-static p-4 flex gap-4 items-center transition-all duration-200 hover:scale-[1.01]"
           style="border-radius: var(--tf-radius-lg); text-decoration: none;"
         >
@@ -114,20 +112,30 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import api from '../api';
+import { useAuthStore } from '../stores/auth';
 import type { Clip, Challenge } from '../types';
 import { useClipActions } from '../composables/useClipActions';
 import { useTranslation } from '../composables/useTranslation';
 import { useMediaUrl } from '../composables/useMediaUrl';
+import { useHead } from '@unhead/vue';
 import ClipTile from '../components/ClipTile.vue';
 import IconLightning from '../components/icons/IconLightning.vue';
 import IconTrophy from '../components/icons/IconTrophy.vue';
 
+const auth = useAuthStore();
 const { getTranslated } = useTranslation();
 const { getThumbnailUrl } = useMediaUrl();
 
 const clips = ref<Clip[]>([]);
 const challenges = ref<Challenge[]>([]);
 const loading = ref(true);
+
+useHead({
+  title: 'Master Your Football Skills',
+  meta: [
+    { name: 'description', content: 'Join TalentFoot and master your football skills with our premium training videos and challenges.' }
+  ]
+});
 
 const { challengeForClip, handleRate, startChallengeForClip } = useClipActions(clips, challenges);
 
@@ -160,6 +168,6 @@ const fetchChallenges = async (): Promise<void> => {
 
 onMounted(() => {
   fetchClips();
-  fetchChallenges();
+  if (auth.isAuthenticated) fetchChallenges();
 });
 </script>

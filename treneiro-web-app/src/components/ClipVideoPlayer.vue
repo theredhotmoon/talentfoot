@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMediaUrl } from '../composables/useMediaUrl';
+import { useAuthStore } from '../stores/auth';
 
 const props = defineProps<{
   filePath: string;
@@ -10,6 +11,7 @@ const props = defineProps<{
   activeSubclipName: string | null;
   hasSubclips: boolean;
   subscriptionActive: boolean;
+  isLockedSubclip: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -21,6 +23,9 @@ const emit = defineEmits<{
 
 const { locale } = useI18n();
 const { getVideoUrl, getCaptionUrl } = useMediaUrl();
+const authStore = useAuthStore();
+
+const isAuthenticated = computed(() => authStore.isAuthenticated);
 
 const videoEl = ref<HTMLVideoElement | null>(null);
 const showCartoon = ref(false);
@@ -67,8 +72,20 @@ defineExpose({ videoEl });
 
 <template>
   <div class="card-static overflow-hidden" style="border-radius: var(--tf-radius-xl);">
-    <!-- Subscription gated -->
-    <template v-if="!subscriptionActive">
+    <!-- Gate: guest user (not logged in, viewing non-preview subclip) -->
+    <template v-if="!isAuthenticated && !subscriptionActive && isLockedSubclip">
+      <div class="flex flex-col items-center justify-center py-16 px-6" style="background: var(--tf-bg-surface-solid);">
+        <div class="text-5xl mb-4">🔒</div>
+        <h2 class="text-2xl font-heading font-bold mb-2" style="color: var(--tf-text);">{{ $t('auth.register_to_access_title') }}</h2>
+        <p class="text-center max-w-md mb-6" style="color: var(--tf-text-muted);">{{ $t('auth.register_to_access_desc') }}</p>
+        <router-link to="/register" class="btn-primary text-sm px-6 py-2.5 rounded-full font-semibold" style="text-decoration: none;">
+          {{ $t('auth.register_now') }}
+        </router-link>
+      </div>
+    </template>
+
+    <!-- Gate: logged-in user without subscription (viewing non-preview subclip) -->
+    <template v-else-if="isAuthenticated && !subscriptionActive && isLockedSubclip">
       <div class="flex flex-col items-center justify-center py-16 px-6" style="background: var(--tf-bg-surface-solid);">
         <div class="text-5xl mb-4">🔒</div>
         <h2 class="text-2xl font-heading font-bold mb-2" style="color: var(--tf-text);">{{ $t('subscription.renew_title') }}</h2>
@@ -130,6 +147,7 @@ defineExpose({ videoEl });
         <div v-if="Object.keys(captions).length > 0"
              class="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover/captions:opacity-100 transition-opacity duration-300 z-10">
           <select v-if="captionsEnabled" v-model="selectedCaptionLang" @change="applyCaptionLang"
+                  aria-label="Select Caption Language"
                   class="text-xs py-1 px-2 rounded-lg cursor-pointer"
                   style="background: rgba(0,0,0,0.7); color: white; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(8px);">
             <option v-for="(_path, lang) in captions" :key="lang" :value="lang">{{ getLanguageLabel(String(lang)) }}</option>

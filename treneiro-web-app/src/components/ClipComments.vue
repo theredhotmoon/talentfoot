@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import type { Comment } from '../types';
+import { useAuthStore } from '../stores/auth';
+
+const auth = useAuthStore();
 
 defineProps<{
   comments: Comment[];
@@ -24,8 +27,8 @@ const handleSubmit = () => {
   <div class="card-static p-6 mt-6" style="border-radius: var(--tf-radius-xl);">
     <h2 class="text-2xl font-heading font-bold mb-4" style="color: var(--tf-text);">{{ $t('clip_detail.comments_title') }}</h2>
 
-    <!-- Comment Form -->
-    <form @submit.prevent="handleSubmit" class="mb-8">
+    <!-- Comment Form (auth only) -->
+    <form v-if="auth.isAuthenticated" @submit.prevent="handleSubmit" class="mb-8">
       <div class="mb-4">
         <label class="block text-sm mb-2" style="color: var(--tf-text-muted);">{{ $t('clip_detail.leave_comment') }}</label>
         <textarea
@@ -39,6 +42,13 @@ const handleSubmit = () => {
         {{ submitting ? $t('clip_detail.posting') : $t('clip_detail.post_comment') }}
       </button>
     </form>
+
+    <!-- Guest CTA -->
+    <div v-else class="mb-8 p-4 rounded-xl text-center" style="background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.15);">
+      <button @click="auth.showRegisterModal = true" class="text-sm font-semibold hover:opacity-80 transition cursor-pointer" style="color: var(--tf-accent-emerald); background: none; border: none; padding: 0;">
+        {{ $t('auth.register_to_comment') }}
+      </button>
+    </div>
 
     <!-- Comments List -->
     <div class="space-y-4">

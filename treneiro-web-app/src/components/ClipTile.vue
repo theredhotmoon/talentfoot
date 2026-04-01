@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import type { Clip, Challenge } from '../types';
+import { useAuthStore } from '../stores/auth';
+import { useTranslation } from '../composables/useTranslation';
 import ClipCard from './ClipCard.vue';
 import IconTrophy from './icons/IconTrophy.vue';
 import IconLightning from './icons/IconLightning.vue';
+
+const auth = useAuthStore();
+const { getTranslated } = useTranslation();
 
 defineProps<{
     clip: Clip;
@@ -19,8 +24,8 @@ const emit = defineEmits<{
     <ClipCard :clip="clip" :show-rate-select="true" @rate="(clipId, rating) => emit('rate', clipId, rating)">
         <!-- Full-width challenge progress or start button -->
         <div class="mt-4 pt-3" style="border-top: 1px solid var(--tf-border);">
-            <!-- Active challenge progress bar -->
-            <div v-if="challenge" class="flex items-center gap-2">
+            <!-- Active challenge progress bar (auth only) -->
+            <div v-if="auth.isAuthenticated && challenge" class="flex items-center gap-2">
                 <IconTrophy v-if="challenge.is_completed" :size="14" class="flex-shrink-0" style="color: var(--tf-accent-emerald);" />
                 <IconLightning v-else :size="14" class="flex-shrink-0" style="color: var(--tf-accent-amber);" />
                 <div class="flex-1 h-1.5 rounded-full" style="background: rgba(255,255,255,0.08);">
@@ -29,10 +34,14 @@ const emit = defineEmits<{
                 </div>
                 <span class="text-[10px] flex-shrink-0" style="color: var(--tf-text-dimmed);">{{ challenge.watched_items }}/{{ challenge.total_items }}</span>
             </div>
-            <!-- Start Challenge button (full width) -->
-            <button v-else @click.prevent="$emit('start-challenge', clip)" class="w-full text-xs px-3 py-2.5 rounded-full font-semibold transition-all hover:scale-[1.02] flex items-center justify-center gap-2" style="background: rgba(251,191,36,0.15); color: var(--tf-accent-amber); border: 1px solid rgba(251,191,36,0.25);">
+            <!-- Start Challenge button (authenticated, no active challenge) -->
+            <button v-else-if="auth.isAuthenticated" @click.prevent="$emit('start-challenge', clip)" class="w-full text-xs px-3 py-2.5 rounded-full font-semibold transition-all hover:scale-[1.02] flex items-center justify-center gap-2" style="background: rgba(251,191,36,0.15); color: var(--tf-accent-amber); border: 1px solid rgba(251,191,36,0.25);">
                 <IconLightning :size="14" class="text-current" /> {{ $t('challenges.start_btn') }}
             </button>
+            <!-- Guest: See Preview CTA -->
+            <router-link v-else :to="`/courses/${clip.id}/${getTranslated(clip.slug)}`" class="w-full text-xs px-3 py-2.5 rounded-full font-semibold transition-all hover:scale-[1.02] flex items-center justify-center gap-2" style="background: rgba(16,185,129,0.15); color: var(--tf-accent-emerald); border: 1px solid rgba(16,185,129,0.25); text-decoration: none;">
+                <IconLightning :size="14" class="text-current" /> {{ $t('course.see_preview') }}
+            </router-link>
         </div>
     </ClipCard>
 </template>

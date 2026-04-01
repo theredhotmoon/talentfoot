@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../api';
 import { useAuthStore } from '../stores/auth';
 import { useTranslation } from '../composables/useTranslation';
 import { useChallenge } from '../composables/useChallenge';
+import { useHead } from '@unhead/vue';
 import type { Clip, Comment, Subclip } from '../types';
 
 // ── Components ─────────────────────────────────────────────────────────────
@@ -36,6 +37,9 @@ const subscriptionActive = ref(false);
 const cartoonFilePath = ref<string | null>(null);
 const tipDismissed = ref(false);
 const showTour = ref(false);
+const isGuestTour = ref(false);
+
+const GUEST_TOUR_LS_KEY = 'treneiro_guest_tour_dismissed';
 
 // ── Challenge composable ───────────────────────────────────────────────────
 const challenge = useChallenge(clipId);
@@ -60,8 +64,45 @@ const currentFilePath = computed(() =>
   activeSubclip.value?.file_path ?? clip.value?.file_path ?? '',
 );
 
+const isLockedSubclip = computed(() =>
+  !!activeSubclip.value && !activeSubclip.value.is_preview,
+);
+
 const startedIds = computed(() => [...challenge.startedSubclips.value]);
 const watchedIds = computed(() => challenge.activeChallenge.value?.watched_ids ?? []);
+
+// ── SEO Head & Schema ──────────────────────────────────────────────────────
+useHead({
+  title: computed(() => clip.value ? getTranslated(clip.value.name) : 'Course Details'),
+  meta: [
+    {
+      name: 'description',
+      content: computed(() =>
+        clip.value && clip.value.description
+          ? getTranslated(clip.value.description).substring(0, 155)
+          : 'Learn and master football skills with this premium course on TalentFoot.'
+      )
+    }
+  ],
+  script: [
+    {
+      type: 'application/ld+json',
+      innerHTML: computed(() => {
+        if (!clip.value) return '';
+        return JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Course",
+          "name": getTranslated(clip.value.name),
+          "description": clip.value.description ? getTranslated(clip.value.description) : 'Master your football skills with premium video tutorials and challenges.',
+          "provider": {
+            "@type": "Organization",
+            "name": "TalentFoot"
+          }
+        });
+      })
+    }
+  ]
+});
 
 // ── Subclip navigation ─────────────────────────────────────────────────────
 const doSwitchSubclip = (subclip: Subclip) => {
@@ -134,6 +175,14 @@ const onConfirmStartChallenge = () => {
   });
 };
 
+const onStartCourse = () => {
+  if (!subscriptionActive.value) {
+    challenge.showSubRequiredModal.value = true;
+    return;
+  }
+  challenge.showChallengeModal.value = true;
+};
+
 // ── Lifecycle ──────────────────────────────────────────────────────────────
 onMounted(async () => {
   loading.value = true;
@@ -147,17 +196,32 @@ onMounted(async () => {
     await nextTick();
     playerRef.value?.videoEl?.play().catch(() => { /* browser may block autoplay */ });
   }
-
-  if (authStore.isAuthenticated && authStore.showTips) {
-    showTour.value = true;
-  }
 });
+
+// ── Welcome Tour Logic ─────────────────────────────────────────────────────
+// Watch for auth initialization to avoid showing the tour before we know the user's preference
+watch(() => authStore.isInitialized, (initialized) => {
+  if (!initialized || showTour.value) return;
+
+  if (authStore.isAuthenticated) {
+    if (authStore.showTips) {
+      isGuestTour.value = false;
+      showTour.value = true;
+    }
+  } else {
+    const dismissed = localStorage.getItem(GUEST_TOUR_LS_KEY);
+    if (!dismissed) {
+      isGuestTour.value = true;
+      showTour.value = true;
+    }
+  }
+}, { immediate: true });
 </script>
 
 <template>
   <div>
     <!-- Welcome Tour -->
-    <WelcomeTourModal v-if="showTour" @close="showTour = false" />
+    <WelcomeTourModal v-if="showTour" :is-guest="isGuestTour" @close="showTour = false" />
 
     <!-- Loading -->
     <div v-if="loading" class="text-center py-16" style="color: var(--tf-text-muted);">
@@ -180,6 +244,7 @@ onMounted(async () => {
             :active-subclip-name="activeSubclipName"
             :has-subclips="!!clip.subclips?.length"
             :subscription-active="subscriptionActive"
+            :is-locked-subclip="isLockedSubclip"
             @play="onPlay"
             @pause="onPause"
             @ended="onEnded"
@@ -207,6 +272,13 @@ onMounted(async () => {
             :comments-count="clip.comments_count ?? comments.length"
             :tip-dismissed="tipDismissed"
             @dismiss-tip="tipDismissed = true"
+            @start-course="onStartCourse"
+          />
+          <!-- Comments -->
+          <ClipComments
+            :comments="comments"
+            :submitting="submittingComment"
+            @submit="submitComment"
           />
         </div>
 
@@ -221,13 +293,6 @@ onMounted(async () => {
           @select-subclip="handleSelectSubclip"
         />
       </div>
-
-      <!-- Comments -->
-      <ClipComments
-        :comments="comments"
-        :submitting="submittingComment"
-        @submit="submitComment"
-      />
     </div>
 
     <div v-else class="text-center mt-10">{{ $t('clip_detail.not_found') }}</div>

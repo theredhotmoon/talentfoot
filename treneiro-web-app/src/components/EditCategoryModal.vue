@@ -14,7 +14,7 @@ const emit = defineEmits<{
 
 useI18n();
 
-import axios from 'axios';
+import api from '../api';
 
 const editForm = ref({
     name: { en: '', pl: '', es: '' },
@@ -81,9 +81,9 @@ const save = async () => {
     saving.value = true;
     try {
         if (props.isCreate) {
-            await axios.post('/api/categories', payload);
+            await api.post('/api/categories', payload);
         } else if (props.category) {
-            await axios.put(`/api/categories/${props.category.id}`, payload);
+            await api.put(`/api/categories/${props.category.id}`, payload);
         }
         emit('saved');
         emit('close');

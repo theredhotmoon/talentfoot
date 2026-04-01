@@ -1,8 +1,5 @@
 <template>
   <div class="">
-    <div class="mb-4">
-        <AppBackButton />
-    </div>
 
     <div v-if="category">
         <!-- Clips Section -->
@@ -75,10 +72,11 @@ import type { Clip, Challenge } from '../types';
 import { useAuthStore } from '../stores/auth';
 import { useTranslation } from '../composables/useTranslation';
 import { useClipActions } from '../composables/useClipActions';
+import { useBreadcrumbLabel } from '../composables/useBreadcrumbLabel';
 import ClipTile from '../components/ClipTile.vue';
 import SortFilterBar from '../components/SortFilterBar.vue';
 import EditCategoryModal from '../components/EditCategoryModal.vue';
-import AppBackButton from '../components/AppBackButton.vue';
+
 import AppPagination from '../components/AppPagination.vue';
 import { useSortFilterSync } from '../composables/useSortFilterSync';
 
@@ -86,6 +84,7 @@ const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();
 const { getTranslated } = useTranslation();
+const { setBreadcrumbLabel } = useBreadcrumbLabel();
 
 const category = ref<any>(null);
 const challenges = ref<Challenge[]>([]);
@@ -134,6 +133,8 @@ const fetchCategory = async (): Promise<void> => {
       params: { sort: sortBy.value, order: sortOrder.value },
     });
     category.value = res.data;
+    // Register the category name so the breadcrumb shows it instead of the UUID
+    setBreadcrumbLabel(String(route.params.id), getTranslated(category.value?.name));
     // Keep clips ref in sync so useClipActions can update rating in-place
     clips.value = category.value?.clips ?? [];
   } catch (e) {
@@ -144,7 +145,8 @@ const fetchCategory = async (): Promise<void> => {
 
 onMounted(async () => {
   initFromQuery();
-  await Promise.all([fetchCategory(), fetchChallenges()]);
+  await fetchCategory();
+  if (authStore.isAuthenticated) await fetchChallenges();
 });
 
 // Watch route query changes (e.g., when clicking back button and returning to a saved filter state)

@@ -11,7 +11,7 @@
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div v-for="clip in clips" :key="clip.id" class="card-static overflow-hidden shadow-lg">
         <div class="bg-black aspect-video relative group cursor-pointer">
-            <router-link :to="`/clips/${clip.id}/${clip.slug}`">
+            <router-link :to="`/courses/${clip.id}/${clip.slug}`">
                 <video :src="getVideoUrl(clip.file_path)" class="w-full h-full object-contain pointer-events-none"></video>
                 <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/50">
                     <span class="text-white font-bold text-lg">{{ $t('dashboard.view_details') }}</span>
@@ -19,7 +19,7 @@
             </router-link>
         </div>
         <div class="p-4 text-white">
-          <router-link :to="`/clips/${clip.id}/${clip.slug}`" class="hover:opacity-80 transition-colors">
+          <router-link :to="`/courses/${clip.id}/${clip.slug}`" class="hover:opacity-80 transition-colors">
             <h3 class="font-bold text-xl mb-2">{{ clip.name }}</h3>
           </router-link>
           <p class="text-sm" style="color: var(--tf-text-muted) mb-4">{{ clip.description }}</p>
@@ -50,7 +50,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import axios from 'axios';
+import api from '../api';
 import { useMediaUrl } from '../composables/useMediaUrl';
 
 const { getVideoUrl } = useMediaUrl();
@@ -75,7 +75,7 @@ const loading = ref(true);
 const fetchClips = async () => {
     loading.value = true;
     try {
-        const response = await axios.get(`/api/clips?tag=${tag.value}`);
+        const response = await api.get(`/api/clips?tag=${tag.value}`);
         clips.value = response.data.data;
     } catch (e) {
         console.error(e);

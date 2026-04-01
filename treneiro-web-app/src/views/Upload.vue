@@ -56,7 +56,7 @@
 
         <div class="mb-6">
             <label class="block text-gray-400 mb-2">{{ $t('upload.category') }}</label>
-            <select v-model="form.category_id" class="w-full bg-gray-700 rounded px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select v-model="form.category_id" :aria-label="$t('upload.category') || 'Category'" class="w-full bg-gray-700 rounded px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">{{ $t('upload.select_category') }}</option>
                 <option v-for="category in categories" :key="category.id" :value="category.id">
                     {{ getTranslated(category.name) }}
@@ -73,7 +73,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from '../api';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useTranslation } from '../composables/useTranslation';
@@ -106,8 +106,8 @@ const uploading = ref(false);
 const fetchData = async () => {
     try {
         const [catsRes, tagsRes] = await Promise.all([
-            axios.get('/api/categories'),
-            axios.get('/api/tags')
+            api.get('/api/categories'),
+            api.get('/api/tags')
         ]);
         categories.value = catsRes.data;
         availableTags.value = tagsRes.data;
@@ -150,7 +150,7 @@ const handleUpload = async () => {
 
     // Basic validation: Ensure at least EN is filled
     if (!form.value.name.en || !form.value.description.en) {
-        alert('Please fill in at least English fields.');
+        alert(t('upload.fill_english'));
         return;
     }
 
@@ -189,14 +189,14 @@ const handleUpload = async () => {
     }
 
     try {
-        const response = await axios.post('/api/clips', formData, {
+        const response = await api.post('/api/clips', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
         });
         alert(t('upload.success'));
         // Redirect to edit page so user can add subclips
-        router.push(`/clips/${response.data.id}/edit`);
+        router.push(`/courses/${response.data.id}/edit`);
     } catch (e) {
         console.error(e);
         alert(t('upload.error'));

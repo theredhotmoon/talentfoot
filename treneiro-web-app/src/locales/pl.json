@@ -10,6 +10,8 @@
         "dashboard": "Panel g\u0142\u00f3wny",
         "tags": "Tagi",
         "my_challenges": "Moje Wyzwania",
+        "home": "Strona g\u0142\u00f3wna",
+        "courses": "Kursy",
         "management": "Zarz\u0105dzanie"
     },
     "categories": {
@@ -72,7 +74,8 @@
         "submitting": "Wysy\u0142anie...",
         "success": "Przes\u0142ano pomy\u015blnie!",
         "error": "B\u0142\u0105d wysy\u0142ania",
-        "save": "Zapisz"
+        "save": "Zapisz",
+        "fill_english": "Prosz\u0119 wype\u0142ni\u0107 przynajmniej pola w j\u0119zyku angielskim."
     },
     "clip_detail": {
         "loading": "\u0141adowanie...",
@@ -149,12 +152,17 @@
         "cannot_delete": "Nie mo\u017cna usun\u0105\u0107 tagu z przypisanymi klipami",
         "confirm_delete": "Czy na pewno chcesz usun\u0105\u0107 ten tag?",
         "delete_warning": "Tagi z przypisanymi klipami nie mog\u0105 zosta\u0107 usuni\u0119te.",
-        "subtitle": "Przegl\u0105daj i zarz\u0105dzaj tagami"
+        "subtitle": "Przegl\u0105daj i zarz\u0105dzaj tagami",
+        "delete_error": "B\u0142\u0105d usuwania tagu"
     },
     "sort": {
         "date": "Data",
         "rating": "Ocena",
         "difficulty": "Trudno\u015b\u0107",
+        "tags": "Tagi",
+        "category": "Kategoria",
+        "select_category": "Wybierz Kategori\u0119",
+        "updating": "Aktualizowanie...",
         "views": "Wy\u015bwietlenia",
         "comments": "Komentarze",
         "asc": "Rosn\u0105co",
@@ -283,7 +291,10 @@
         "start_step2": "Nast\u0119pnie przejd\u017a przez ka\u017cdy krok, ogl\u0105daj\u0105c go od pocz\u0105tku do ko\u0144ca",
         "start_step3": "Uko\u0144cz wszystkie kroki, aby zdoby\u0107 odznak\u0119",
         "start_btn": "Rozpocznij kurs",
-        "overview_heading": "Przegl\u0105d kursu \u2014 Obejrzyj pe\u0142n\u0105 demonstracj\u0119"
+        "see_preview": "Zobacz podgl\u0105d",
+        "overview_heading": "Przegl\u0105d kursu \u2014 Obejrzyj pe\u0142n\u0105 demonstracj\u0119",
+        "ready_to_start": "Obejrza\u0142e\u015b g\u0142\u00f3wny klip \u2014 mo\u017cesz ju\u017c zaczyna\u0107!",
+        "watch_first_hint": "Obejrzyj g\u0142\u00f3wny klip od pocz\u0105tku do ko\u0144ca, aby odblokowa\u0107 kolejne kroki kursu."
     },
     "captions": {
         "on": "Napisy W\u0141",
@@ -312,5 +323,13 @@
         "subscribe_desc": "Subskrybuj, aby odblokowa\u0107 ka\u017cd\u0105 lekcj\u0119 w tym kursie. Klipy podgl\u0105dowe s\u0105 dost\u0119pne za darmo!",
         "start_challenge_title": "Gotowy na nauk\u0119?",
         "start_challenge_desc": "Kliknij Rozpocznij wyzwanie, aby rozpocz\u0105\u0107 \u015bledzenie post\u0119p\u00f3w we wszystkich lekcjach tego kursu."
+    },
+    "auth": {
+        "login": "Zaloguj",
+        "register": "Rejestracja",
+        "register_now": "Zarejestruj się",
+        "register_to_comment": "Zarejestruj się, aby dodać komentarz",
+        "register_to_access_title": "Zarejestruj się i zaloguj",
+        "register_to_access_desc": "Załóż darmowe konto i zaloguj się, aby odblokować pełną treść kursów, rozpoczynać wyzwania i śledzić swoje postępy."
     }
 }

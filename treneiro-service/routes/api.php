@@ -60,6 +60,9 @@ Route::get('/stats', [StatsController::class, 'index']);
 Route::post('/contact', [ContactController::class, 'store']);
 Route::get('/health/dependencies', [HealthController::class, 'dependencies']);
 
+// Comments can be read by anyone (guests see them on ClipDetail)
+Route::get('/clips/{clip}/comments', [CommentController::class, 'index']);
+
 // Temporary debug endpoint — remove once thumbnails are confirmed working
 Route::get('/debug-storage', function () {
     $symlinkPath = public_path('storage');
@@ -123,7 +126,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
 
     Route::post('/clips/{clip}/rate', [ClipController::class, 'rate']);
-    Route::get('/clips/{clip}/comments', [CommentController::class, 'index']);
     Route::post('/clips/{clip}/comments', [CommentController::class, 'store'])->middleware('throttle:comments');
 
     // Subclip view tracking & rating (authenticated)
@@ -147,6 +149,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Subclip CRUD (admin only)
         Route::post('/clips/{clip}/subclips', [SubclipController::class, 'store']);
+        Route::post('/clips/{clip}/subclips/reorder', [SubclipController::class, 'reorder']);
         Route::put('/subclips/{subclip}', [SubclipController::class, 'update']);
         Route::delete('/subclips/{subclip}', [SubclipController::class, 'destroy']);
 

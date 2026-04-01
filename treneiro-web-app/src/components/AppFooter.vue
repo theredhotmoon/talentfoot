@@ -45,7 +45,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from '../api';
 
 const stats = ref<Record<string, number> | null>(null);
 const currentYear = new Date().getFullYear();
@@ -62,7 +62,7 @@ const statItems = [
 
 onMounted(async () => {
   try {
-    const res = await axios.get('/api/stats');
+    const res = await api.get('/api/stats');
     stats.value = res.data;
   } catch (e) {
     // silently ignore — footer stats are non-critical

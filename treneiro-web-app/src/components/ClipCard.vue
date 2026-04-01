@@ -37,10 +37,11 @@ const onStatsRate = (rating: number, clipId: string) => {
             @mouseleave="stopPreview(clip)"
             @mousemove="updatePreview($event, clip)"
         >
-            <router-link :to="`/clips/${clip.id}/${getTranslated(clip.slug)}`">
+            <router-link :to="`/courses/${clip.id}/${getTranslated(clip.slug)}`" :aria-label="`View course: ${getTranslated(clip.name)}`">
                 <img
                     v-if="clip.activeThumbnail"
                     :src="getThumbnailUrl(clip.activeThumbnail)"
+                    alt=""
                     class="w-full h-full object-cover pointer-events-none transition-transform duration-300 group-hover:scale-105"
                 />
                 <video
@@ -58,8 +59,8 @@ const onStatsRate = (rating: number, clipId: string) => {
             </router-link>
         </div>
         <div class="p-5">
-            <router-link :to="`/clips/${clip.id}/${getTranslated(clip.slug)}`" class="hover:opacity-80 transition-opacity">
-                <h3 class="font-heading font-bold text-lg mb-1.5" style="color: var(--tf-text);">{{ getTranslated(clip.name) }}</h3>
+            <router-link :to="`/courses/${clip.id}/${getTranslated(clip.slug)}`" class="hover:opacity-80 transition-opacity">
+                <h3 class="font-heading font-bold text-lg mb-4" style="color: var(--tf-text);">{{ getTranslated(clip.name) }}</h3>
             </router-link>
 
             <TagPills v-if="clip.tags" :tags="clip.tags" />

@@ -1,13 +1,10 @@
 <template>
   <div class="">
-    <div class="mb-4">
-        <AppBackButton />
-    </div>
-    
+
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-            <h1 class="font-heading font-extrabold text-3xl gradient-text">{{ $t('dashboard.title') || 'All Courses' }}</h1>
-            <p class="text-sm mt-1" style="color: var(--tf-text-muted);">{{ $t('dashboard.subtitle') || 'Browse the full catalog of courses' }}</p>
+            <h1 class="font-heading font-extrabold text-3xl gradient-text">Online Football Courses</h1>
+            <p class="text-sm mt-1" style="color: var(--tf-text-muted);">{{ $t('dashboard.subtitle') || 'Browse the full catalog of professional football courses' }}</p>
         </div>
         <SortFilterBar
             :categories="categories"
@@ -34,7 +31,7 @@
         </div>
       </div>
     </div>
-    
+
     <div v-else-if="clips.length === 0" class="text-center py-16 text-gray-400">
       {{ $t('tag_clips.no_clips') || 'No courses found.' }}
     </div>
@@ -65,20 +62,30 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '../api';
+import { useAuthStore } from '../stores/auth';
 import type { Clip, Challenge, Category } from '../types';
 import { useClipActions } from '../composables/useClipActions';
 import { useSortFilterSync } from '../composables/useSortFilterSync';
+import { useHead } from '@unhead/vue';
 import ClipTile from '../components/ClipTile.vue';
 import SortFilterBar from '../components/SortFilterBar.vue';
-import AppBackButton from '../components/AppBackButton.vue';
+
 import AppPagination from '../components/AppPagination.vue';
 
 const route = useRoute();
+const auth = useAuthStore();
 
 const clips = ref<Clip[]>([]);
 const categories = ref<Category[]>([]);
 const challenges = ref<Challenge[]>([]);
 const loading = ref(true);
+
+useHead({
+  title: 'Online Football Courses Catalog',
+  meta: [
+    { name: 'description', content: 'Browse our extensive catalog of professional football courses. Learn new techniques, soccer skills, and strategy.' }
+  ]
+});
 
 const { sortBy, sortOrder, selectedCategory, page, updateQuery, initFromQuery } = useSortFilterSync();
 
@@ -94,7 +101,7 @@ const handlePageChange = (newPage: number) => {
     page.value = newPage;
     updateQuery();
     // No need to fetch API here if we do client-side chunking, but if we do server side: fetchClips()
-    // By default Laravel sends paginated response but treneiro returns .data.data ? 
+    // By default Laravel sends paginated response but treneiro returns .data.data ?
     // If it returns hundreds of clips we probably want server-side. Wait, standard `/api/clips` in treneiro currently returned { data: Clip[] }. Let's assume it returns all matching or we can chunk locally.
     // I will chunk locally to guarantee 9 per page if full dataset comes, or rely on API if `current_page` is returned.
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -161,7 +168,7 @@ onMounted(() => {
   initFromQuery();
   fetchCategories();
   fetchClips();
-  fetchChallenges();
+  if (auth.isAuthenticated) fetchChallenges();
 });
 
 watch(() => route.query, (newQ, oldQ) => {

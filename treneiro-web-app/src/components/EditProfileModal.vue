@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
-import axios from 'axios';
+import api from '../api';
 
 const emit = defineEmits<{ (e: 'close'): void }>();
 const auth = useAuthStore();
@@ -27,7 +27,7 @@ const handleSubmit = async () => {
     success.value = false;
 
     try {
-        const response = await axios.put('/api/profile', form.value);
+        const response = await api.put('/api/profile', form.value);
         if (auth.user) {
             auth.user.name = response.data.name;
             auth.user.email = response.data.email;

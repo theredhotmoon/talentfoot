@@ -23,15 +23,15 @@
         <div class="absolute inset-0">
           <!-- 4-tile mosaic if 4+ thumbnails -->
           <div v-if="tag.preview_thumbnails && tag.preview_thumbnails.length >= 4" class="grid grid-cols-2 grid-rows-2 w-full h-full">
-            <img v-for="(thumb, i) in tag.preview_thumbnails.slice(0, 4)" :key="i" :src="getThumbnailUrl(thumb)" class="w-full h-full object-cover" />
+            <img v-for="(thumb, i) in tag.preview_thumbnails.slice(0, 4)" :key="i" :src="getThumbnailUrl(thumb)" alt="" class="w-full h-full object-cover" />
           </div>
           <!-- 2-tile split if 2-3 thumbnails -->
           <div v-else-if="tag.preview_thumbnails && tag.preview_thumbnails.length >= 2" class="grid grid-cols-2 w-full h-full">
-            <img v-for="(thumb, i) in tag.preview_thumbnails.slice(0, 2)" :key="i" :src="getThumbnailUrl(thumb)" class="w-full h-full object-cover" />
+            <img v-for="(thumb, i) in tag.preview_thumbnails.slice(0, 2)" :key="i" :src="getThumbnailUrl(thumb)" alt="" class="w-full h-full object-cover" />
           </div>
           <!-- Single thumbnail -->
           <div v-else-if="tag.preview_thumbnails && tag.preview_thumbnails.length === 1" class="w-full h-full">
-            <img :src="getThumbnailUrl(tag.preview_thumbnails[0])" class="w-full h-full object-cover" />
+            <img :src="getThumbnailUrl(tag.preview_thumbnails[0])" alt="" class="w-full h-full object-cover" />
           </div>
           <!-- Fallback gradient if no thumbnails -->
           <div v-else class="w-full h-full" :style="`background: linear-gradient(135deg, hsl(${(tag.id?.charCodeAt?.(0) || 0) * 37 % 360}, 60%, 25%), hsl(${(tag.id?.charCodeAt?.(0) || 0) * 37 % 360 + 60}, 50%, 15%));`"></div>

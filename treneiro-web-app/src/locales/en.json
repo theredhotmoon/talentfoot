@@ -10,6 +10,8 @@
         "dashboard": "Dashboard",
         "tags": "Tags",
         "my_challenges": "My Challenges",
+        "home": "Home",
+        "courses": "Courses",
         "management": "Management"
     },
     "categories": {
@@ -72,7 +74,8 @@
         "submitting": "Uploading...",
         "success": "Upload successful!",
         "error": "Upload failed",
-        "save": "Save"
+        "save": "Save",
+        "fill_english": "Please fill in at least the English fields."
     },
     "clip_detail": {
         "loading": "Loading...",
@@ -149,7 +152,8 @@
         "cannot_delete": "Cannot delete tag with associated clips",
         "confirm_delete": "Are you sure you want to delete this tag?",
         "delete_warning": "Tags with associated clips cannot be deleted.",
-        "subtitle": "Browse and manage content tags"
+        "subtitle": "Browse and manage content tags",
+        "delete_error": "Error deleting tag"
     },
     "sort": {
         "date": "Date",
@@ -287,7 +291,10 @@
         "start_step2": "Then work through each step by watching it from start to finish",
         "start_step3": "Complete all steps to finish the course and earn your badge",
         "start_btn": "Start Course",
-        "overview_heading": "Course Overview \u2014 Watch the full demonstration"
+        "see_preview": "See Preview",
+        "overview_heading": "Course Overview \u2014 Watch the full demonstration",
+        "ready_to_start": "You've watched the main clip \u2014 you're all set to begin!",
+        "watch_first_hint": "Watch the main clip from start to finish to unlock the course steps."
     },
     "captions": {
         "on": "Captions ON",
@@ -316,5 +323,13 @@
         "subscribe_desc": "Subscribe to unlock every step-by-step lesson in this course. Preview clips are available for free!",
         "start_challenge_title": "Ready to Learn?",
         "start_challenge_desc": "Click Start Challenge to begin tracking your progress through all lessons in this course."
+    },
+    "auth": {
+        "login": "Login",
+        "register": "Register",
+        "register_now": "Register Now",
+        "register_to_comment": "Register to leave a comment",
+        "register_to_access_title": "Register & Login to Get Access",
+        "register_to_access_desc": "Create a free account and log in to unlock all course content, start challenges, and track your progress."
     }
 }

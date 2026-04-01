@@ -4,6 +4,39 @@ All notable changes to the Trenejro frontend are documented here.
 
 ---
 
+## 2026-03-24 — WCAG Accessibility & Navigation Overhaul
+
+### Added
+- **Accessibility:** Completed automated WCAG 2.2 audit using `@axe-core/playwright` and resolved violations (added `aria-label`s, `alt` texts, and discernible link names).
+- **SEO:** Installed a head management library for dynamic meta tags and Schema.org structured data injection, and added `robots.txt`.
+- **Views:** Implemented routable user challenge views (`/challenge/:courseId/:courseSlug`).
+- **Testing:** Added a comprehensive End-to-End (E2E) test suite using Playwright to cover core functionalities.
+
+### Changed
+- **Routing:** Renamed "clips" URL segments to "courses" (`/courses/:courseId...`) globally to improve semantic clarity and SEO.
+- **Routing:** Unprotected core browsing areas (dashboard, course catalog, categories, tags) to allow public access for unregistered users.
+- **Navigation:** Reordered top navbar (Dashboard, Courses, Tags, My Challenges, Management) and ensured parent items stay highlighted for child routes.
+- **UI:** Redesigned breadcrumb navigation with a reduced vertical footprint and an integrated "back" button.
+- **UI:** Realigned icons and text to the right within the course tile component grids.
+- **UI:** Redesigned Tag Management UX by moving the edit panel into a modal.
+- **I18n:** Implemented `localStorage` persistence for the selected language and replaced hardcoded alerts with translation keys.
+- **API:** Fixed 401 Unauthorized errors by migrating raw `axios` API calls to the authenticated API instance.
+
+---
+
+## 2026-03-20 — Architecture, Pagination & UI Redesigns
+
+### Added
+- **Features:** Created a new "All Courses" view and implemented pagination, sorting, and filtering functionality across the Dashboard and related views.
+
+### Changed
+- **Architecture:** Split the monolithic repository into separate `backend` (`treneiro-service`) and `frontend` (`treneiro-web-app`) subfolders.
+- **Architecture:** Componentized `ClipDetail.vue` into smaller, focused components for maintainability and performance.
+- **UI:** Refactored Auto-Fill modals into a two-column layout (Player Selection / Settings).
+- **UI:** Redesigned TagDetail, CategoryDetail, and MyChallenges views with an enhanced, Apple-inspired aesthetic.
+
+---
+
 ## 2026-03-03 — I18n Translation Completeness
 
 ### Fixed

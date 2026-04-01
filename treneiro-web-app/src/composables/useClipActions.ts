@@ -1,6 +1,7 @@
 import type { Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../api';
+import { useAuthStore } from '../stores/auth';
 import type { Clip, Challenge } from '../types';
 
 /**
@@ -17,6 +18,7 @@ export function useClipActions(
   challenges: Ref<Challenge[]>,
 ) {
   const router = useRouter();
+  const auth = useAuthStore();
 
   /**
    * Returns the challenge for a given clip id (or null if none).
@@ -29,6 +31,10 @@ export function useClipActions(
    * Post a rating for a clip and update its local state.
    */
   const handleRate = async (clipId: string, rating: number): Promise<void> => {
+    if (!auth.isAuthenticated) {
+      router.push('/register');
+      return;
+    }
     try {
       const response = await api.post<{ average_rating: number; ratings_count: number }>(
         `/api/clips/${clipId}/rate`,
@@ -49,6 +55,11 @@ export function useClipActions(
    * If the challenge already exists the server returns it in the 422 body.
    */
   const startChallengeForClip = async (clip: Clip): Promise<void> => {
+    if (!auth.isAuthenticated) {
+      router.push('/register');
+      return;
+    }
+
     const getSlug = (c: Clip): string => {
       if (typeof c.slug === 'string') return c.slug;
       return (c.slug as Record<string, string>).en
@@ -61,14 +72,14 @@ export function useClipActions(
         clip_id: clip.id,
       });
       challenges.value.push(res.data.challenge);
-      router.push(`/clips/${clip.id}/${getSlug(clip)}?autoplay=1`);
+      router.push(`/challenge/${clip.id}/${getSlug(clip)}?autoplay=1`);
     } catch (e: unknown) {
       const err = e as { response?: { status?: number; data?: { challenge?: Challenge } } };
       if (err.response?.status === 403) {
         alert('You need an active subscription to start a challenge.');
       } else if (err.response?.data?.challenge) {
         challenges.value.push(err.response.data.challenge);
-        router.push(`/clips/${clip.id}/${getSlug(clip)}?autoplay=1`);
+        router.push(`/challenge/${clip.id}/${getSlug(clip)}?autoplay=1`);
       } else {
         console.error('Failed to start challenge', e);
       }
@@ -77,3 +88,4 @@ export function useClipActions(
 
   return { challengeForClip, handleRate, startChallengeForClip };
 }
+

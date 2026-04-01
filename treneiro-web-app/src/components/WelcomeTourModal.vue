@@ -7,6 +7,10 @@ const { t } = useI18n();
 const auth = useAuthStore();
 const emit = defineEmits<{ (e: 'close'): void }>();
 
+const props = withDefaults(defineProps<{ isGuest?: boolean }>(), { isGuest: false });
+
+const GUEST_LS_KEY = 'treneiro_guest_tour_dismissed';
+
 const currentStep = ref(0);
 const dontShowAgain = ref(false);
 
@@ -63,7 +67,11 @@ const prev = () => {
 
 const handleClose = async () => {
     if (dontShowAgain.value) {
-        await auth.updateShowTips(false);
+        if (props.isGuest) {
+            localStorage.setItem(GUEST_LS_KEY, 'true');
+        } else {
+            await auth.updateShowTips(false);
+        }
     }
     emit('close');
 };

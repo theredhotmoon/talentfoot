@@ -10,6 +10,8 @@
         "dashboard": "Tablero",
         "tags": "Etiquetas",
         "my_challenges": "Mis Desaf\u00edos",
+        "home": "Inicio",
+        "courses": "Cursos",
         "management": "Gesti\u00f3n"
     },
     "categories": {
@@ -72,7 +74,8 @@
         "submitting": "Subiendo...",
         "success": "\u00a1Subida exitosa!",
         "error": "Error al subir",
-        "save": "Guardar"
+        "save": "Guardar",
+        "fill_english": "Por favor, complete al menos los campos en ingl\u00e9s."
     },
     "clip_detail": {
         "loading": "Cargando...",
@@ -149,7 +152,8 @@
         "cannot_delete": "No se puede eliminar la etiqueta con clips asociados",
         "confirm_delete": "\u00bfEst\u00e1 seguro de que desea eliminar esta etiqueta?",
         "delete_warning": "Las etiquetas con clips asociados no se pueden eliminar.",
-        "subtitle": "Explora y gestiona etiquetas"
+        "subtitle": "Explora y gestiona etiquetas",
+        "delete_error": "Error al eliminar la etiqueta"
     },
     "sort": {
         "date": "Fecha",
@@ -287,7 +291,10 @@
         "start_step2": "Luego completa cada paso vi\u00e9ndolo de inicio a fin",
         "start_step3": "Completa todos los pasos para obtener tu insignia",
         "start_btn": "Iniciar curso",
-        "overview_heading": "Vista general del curso \u2014 Mira la demostraci\u00f3n completa"
+        "see_preview": "Ver vista previa",
+        "overview_heading": "Vista general del curso \u2014 Mira la demostraci\u00f3n completa",
+        "ready_to_start": "\u00a1Ya viste el clip principal \u2014 est\u00e1s listo para comenzar!",
+        "watch_first_hint": "Mira el clip principal de principio a fin para desbloquear los pasos del curso."
     },
     "captions": {
         "on": "Subt\u00edtulos S\u00cd",
@@ -316,5 +323,13 @@
         "subscribe_desc": "\u00a1Suscr\u00edbete para desbloquear cada lecci\u00f3n en este curso. Los clips de vista previa est\u00e1n disponibles gratis!",
         "start_challenge_title": "\u00bfListo para aprender?",
         "start_challenge_desc": "Haz clic en Iniciar desaf\u00edo para comenzar a seguir tu progreso en todas las lecciones."
+    },
+    "auth": {
+        "login": "Iniciar sesión",
+        "register": "Registrarse",
+        "register_now": "Regístrate ahora",
+        "register_to_comment": "Regístrate para dejar un comentario",
+        "register_to_access_title": "Regístrate e inicia sesión",
+        "register_to_access_desc": "Crea una cuenta gratuita e inicia sesión para desbloquear todo el contenido del curso, iniciar desafíos y seguir tu progreso."
     }
 }

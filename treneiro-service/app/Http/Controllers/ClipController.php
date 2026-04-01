@@ -181,6 +181,7 @@ class ClipController extends Controller
         // We can use getTranslations() to append them or simple return the model if we configured it to cast to array?
         // Load comments count and challenges logic
         $clip->loadCount('comments');
+        $clip->loadCount('subclips');
         $clip->loadCount('challenges');
         $clip->loadCount(['challenges as completed_challenges_count' => function ($q) {
             $q->whereNotNull('finished_at');
