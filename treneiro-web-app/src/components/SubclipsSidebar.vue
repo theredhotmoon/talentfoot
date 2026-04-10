@@ -8,6 +8,7 @@ const props = defineProps<{
   activeSubclipId: string | null;
   watchedIds: string[];
   startedIds: string[];
+  mainClipWatched?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -40,6 +41,8 @@ const { getThumbnailUrl } = useMediaUrl();
           <div v-if="!activeSubclipId" class="absolute top-1 left-1 text-xs px-1.5 py-0.5 rounded-full font-semibold" style="background: var(--tf-gradient-primary); color: #0f0e17;">
             {{ $t('subclips.now_playing') }}
           </div>
+          <div v-if="mainClipWatched" class="absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-semibold"
+               style="background: rgba(110,231,183,0.25); color: var(--tf-accent-emerald);">✅</div>
         </div>
         <div class="p-2" style="background: rgba(0,0,0,0.3);">
           <p class="text-xs font-semibold truncate">{{ getTranslated(clip.name) }}</p>
@@ -66,7 +69,7 @@ const { getThumbnailUrl } = useMediaUrl();
           <div v-if="activeSubclipId === subclip.id" class="absolute top-1 left-1 text-xs px-1.5 py-0.5 rounded-full font-semibold" style="background: var(--tf-gradient-primary); color: #0f0e17;">
             {{ $t('subclips.now_playing') }}
           </div>
-          <div v-else-if="watchedIds.includes(subclip.id)" class="absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-semibold"
+          <div v-if="watchedIds.includes(subclip.id)" class="absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-semibold"
                style="background: rgba(110,231,183,0.25); color: var(--tf-accent-emerald);">✅</div>
           <div v-else-if="startedIds.includes(subclip.id)" class="absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-semibold"
                style="background: rgba(251,191,36,0.25); color: var(--tf-accent-amber);">▶</div>

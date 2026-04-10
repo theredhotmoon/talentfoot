@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class ProfileController extends Controller
 {
@@ -36,15 +35,8 @@ class ProfileController extends Controller
         $user = $request->user();
 
         $request->validate([
-            'current_password' => 'required|string',
             'password' => 'required|string|min:8|confirmed',
         ]);
-
-        if (!Hash::check($request->current_password, $user->password)) {
-            throw ValidationException::withMessages([
-                'current_password' => ['The current password is incorrect.'],
-            ]);
-        }
 
         $user->update([
             'password' => Hash::make($request->password),
@@ -65,6 +57,40 @@ class ProfileController extends Controller
         ]);
 
         $user->update(['show_tips' => $request->show_tips]);
+
+        return response()->json($user->fresh());
+    }
+
+    public function renewSubscription(Request $request)
+    {
+        $user = $request->user();
+        // Set subscription to exactly one month from today for testing
+        $user->update(['subscription_valid_until' => now()->addMonth()]);
+        
+        return response()->json($user->fresh());
+    }
+
+    public function cancelSubscription(Request $request)
+    {
+        $user = $request->user();
+        // Invalidate subscription by setting it to a past date
+        $user->update(['subscription_valid_until' => now()->subDay()]);
+        
+        return response()->json($user->fresh());
+    }
+
+    /**
+     * Update the auto-play delay preference for the authenticated user.
+     */
+    public function updateAutoPlayDelay(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'auto_play_delay' => 'required|integer|min:3|max:30',
+        ]);
+
+        $user->update(['auto_play_delay' => $request->auto_play_delay]);
 
         return response()->json($user->fresh());
     }

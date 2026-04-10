@@ -136,9 +136,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile', [ProfileController::class, 'update']);
     Route::put('/profile/password', [ProfileController::class, 'changePassword']);
     Route::put('/profile/tips', [ProfileController::class, 'updateTips']);
+    Route::post('/profile/subscription/renew', [ProfileController::class, 'renewSubscription']);
+    Route::post('/profile/subscription/cancel', [ProfileController::class, 'cancelSubscription']);
+    Route::put('/profile/auto-play-delay', [ProfileController::class, 'updateAutoPlayDelay']);
 
     // Challenges (any authenticated user)
     Route::get('/challenges', [ChallengeController::class, 'index']);
+    Route::get('/challenges/active-count', [ChallengeController::class, 'activeCount']);
     Route::post('/challenges', [ChallengeController::class, 'start']);
     Route::post('/challenges/{challenge}/watch', [ChallengeController::class, 'recordWatch']);
 

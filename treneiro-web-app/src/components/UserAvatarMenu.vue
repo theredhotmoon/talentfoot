@@ -6,11 +6,13 @@ import { onClickOutside } from '@vueuse/core';
 import EditProfileModal from './EditProfileModal.vue';
 import ChangePasswordModal from './ChangePasswordModal.vue';
 import WelcomeTourModal from './WelcomeTourModal.vue';
+import RenewSubscriptionModal from './RenewSubscriptionModal.vue';
 import IconEdit from './icons/IconEdit.vue';
 import IconLock from './icons/IconLock.vue';
 import IconLightbulb from './icons/IconLightbulb.vue';
 import IconQuestion from './icons/IconQuestion.vue';
 import IconLogout from './icons/IconLogout.vue';
+import IconDiamond from './icons/IconDiamond.vue';
 
 const auth = useAuthStore();
 const router = useRouter();
@@ -19,6 +21,7 @@ const isOpen = ref(false);
 const showEditProfile = ref(false);
 const showChangePassword = ref(false);
 const showWelcomeTour = ref(false);
+const showRenewSubscription = ref(false);
 const menuRef = ref<HTMLElement | null>(null);
 
 const initials = computed(() => {
@@ -47,7 +50,7 @@ onClickOutside(menuRef, () => { isOpen.value = false; });
         <button
             @click="isOpen = !isOpen"
             class="w-9 h-9 rounded-full font-bold text-sm flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2"
-            style="background: var(--tf-gradient-secondary); color: white; focus-ring-color: var(--tf-accent-violet);"
+            style="background: var(--tf-gradient-secondary); color: white;"
             :title="auth.user?.name || ''"
         >
             {{ initials }}
@@ -85,14 +88,19 @@ onClickOutside(menuRef, () => { isOpen.value = false; });
                         <IconEdit :size="18" class="text-current" />
                         {{ $t('profile.edit_details') }}
                     </button>
-                    <!-- Show "Change Password" only if the user logged in with email/password -->
                     <button
-                        v-if="!auth.user?.auth_provider"
                         @click="showChangePassword = true; isOpen = false"
                         class="menu-item w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors"
                     >
                         <IconLock :size="18" class="text-current" />
                         {{ $t('profile.change_password') }}
+                    </button>
+                    <button
+                        @click="showRenewSubscription = true; isOpen = false"
+                        class="menu-item w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors"
+                    >
+                        <IconDiamond :size="18" class="text-current" />
+                        Renew Subscription (Test)
                     </button>
                 </div>
 
@@ -139,6 +147,7 @@ onClickOutside(menuRef, () => { isOpen.value = false; });
         <!-- Modals -->
         <EditProfileModal v-if="showEditProfile" @close="showEditProfile = false" />
         <ChangePasswordModal v-if="showChangePassword" @close="showChangePassword = false" />
+        <RenewSubscriptionModal v-if="showRenewSubscription" @close="showRenewSubscription = false" />
         <WelcomeTourModal v-if="showWelcomeTour" :is-guest="false" @close="showWelcomeTour = false" />
     </div>
 </template>

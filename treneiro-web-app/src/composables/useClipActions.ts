@@ -32,7 +32,7 @@ export function useClipActions(
    */
   const handleRate = async (clipId: string, rating: number): Promise<void> => {
     if (!auth.isAuthenticated) {
-      router.push('/register');
+      auth.showRegisterModal = true;
       return;
     }
     try {

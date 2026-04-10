@@ -9,6 +9,9 @@ import type { ActiveChallenge, Clip, Subclip } from '../types';
  *
  * @param clipId - the current clip's id (used for the POST /api/challenges)
  */
+
+const MAX_ACTIVE_CHALLENGES = 9;
+
 export function useChallenge(clipId: string) {
   // ── Challenge state ────────────────────────────────────────────────────
   const activeChallenge = ref<ActiveChallenge | null>(null);
@@ -19,6 +22,8 @@ export function useChallenge(clipId: string) {
   const showMainClipRequiredToast = ref(false);
   const pendingSubclip = ref<Subclip | null>(null);
   const challengeStarting = ref(false);
+  const activeChallengeCount = ref(0);
+  const showChallengeLimitToast = ref(false);
 
   // ── Watch timing state ─────────────────────────────────────────────────
   const watchStartedAt = ref<number | null>(null);
@@ -41,6 +46,15 @@ export function useChallenge(clipId: string) {
     5000,
     { immediate: false },
   );
+  const { start: dismissLimitToast } = useTimeoutFn(
+    () => { showChallengeLimitToast.value = false; },
+    6000,
+    { immediate: false },
+  );
+
+  const canStartChallenge = computed(() =>
+    activeChallengeCount.value < MAX_ACTIVE_CHALLENGES,
+  );
 
   // ── Computed helpers ───────────────────────────────────────────────────
   const mainClipWatched = (clip: Clip | null) =>
@@ -62,19 +76,36 @@ export function useChallenge(clipId: string) {
   };
 
   // ── API calls ──────────────────────────────────────────────────────────
-  const startChallenge = async (onSuccess: (subclip: Subclip | null) => void) => {
+  const fetchActiveChallengeCount = async () => {
+    try {
+      const res = await api.get<{ active_count: number; max_allowed: number }>('/api/challenges/active-count');
+      activeChallengeCount.value = res.data.active_count;
+    } catch {
+      // silently fail — will default to 0  
+    }
+  };
+
+  const startChallenge = async (
+    onSuccess: (subclip: Subclip | null) => void,
+    mainClipPreWatched = false,
+  ) => {
     challengeStarting.value = true;
     try {
       const res = await api.post<{ challenge: ActiveChallenge }>('/api/challenges', {
         clip_id: clipId,
+        ...(mainClipPreWatched ? { main_clip_pre_watched: true } : {}),
       });
       activeChallenge.value = res.data.challenge;
       showChallengeModal.value = false;
       onSuccess(pendingSubclip.value);
       pendingSubclip.value = null;
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { challenge?: ActiveChallenge } } };
-      if (err.response?.data?.challenge) {
+      const err = e as { response?: { status?: number; data?: { challenge?: ActiveChallenge; error?: string; active_count?: number } } };
+      if (err.response?.status === 429 && err.response?.data?.error === 'challenge_limit_reached') {
+        activeChallengeCount.value = err.response.data.active_count ?? MAX_ACTIVE_CHALLENGES;
+        showChallengeLimitToast.value = true;
+        dismissLimitToast();
+      } else if (err.response?.data?.challenge) {
         activeChallenge.value = err.response.data.challenge;
       }
       console.error('Failed to start challenge', e);
@@ -201,19 +232,24 @@ export function useChallenge(clipId: string) {
     showChallengeCompleteToast,
     showWatchErrorToast,
     showMainClipRequiredToast,
+    showChallengeLimitToast,
     challengeStarting,
     startedSubclips,
     watchStartedAt,
     accumulatedWatchTime,
+    activeChallengeCount,
     // Helpers
     mainClipWatched,
     isSubclipWatched,
     isSubclipStarted,
     resetWatchTiming,
+    canStartChallenge,
+    MAX_ACTIVE_CHALLENGES,
     // Actions
     startChallenge,
     cancelChallenge,
     trySelectSubclip,
+    fetchActiveChallengeCount,
     // Video handlers
     onVideoPlay,
     onVideoPause,

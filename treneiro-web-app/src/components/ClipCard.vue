@@ -5,9 +5,13 @@ import { useThumbnailPreview } from '../composables/useThumbnailPreview';
 import TagPills from './TagPills.vue';
 import ClipStatsGrid from './ClipStatsGrid.vue';
 import RateClipModal from './RateClipModal.vue';
+import LoginToRateModal from './LoginToRateModal.vue';
+import { useAuthStore } from '../stores/auth';
 import { ref } from 'vue';
 
 const showRateModal = ref(false);
+const showLoginToRateModal = ref(false);
+const auth = useAuthStore();
 
 const { getTranslated } = useTranslation();
 const { getVideoUrl, getThumbnailUrl } = useMediaUrl();
@@ -77,15 +81,21 @@ const onStatsRate = (rating: number, clipId: string) => {
                 :participants-count="clip.challenges_count"
                 :completed-count="clip.completed_challenges_count"
                 :show-rate-select="showRateSelect"
-                @open-rate-modal="showRateModal = true"
+                @open-rate-modal="auth.isAuthenticated ? (showRateModal = true) : (showLoginToRateModal = true)"
             />
 
-            <!-- Rate Clip Modal -->
+            <!-- Rate Clip Modal (authenticated) -->
             <RateClipModal
-                v-if="showRateModal"
+                v-if="showRateModal && auth.isAuthenticated"
                 :initial-rating="clip.current_user_rating ? clip.current_user_rating.rating : 0"
                 @close="showRateModal = false"
                 @submit="onStatsRate($event, clip.id)"
+            />
+
+            <!-- Login To Rate Modal (unauthenticated) -->
+            <LoginToRateModal
+                v-if="showLoginToRateModal && !auth.isAuthenticated"
+                @close="showLoginToRateModal = false"
             />
 
             <!-- Slot for extra content like challenge progress -->

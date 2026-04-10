@@ -9,6 +9,7 @@ const auth = useAuthStore();
 const form = ref({
     name: '',
     email: '',
+    auto_play_delay: 8,
 });
 const saving = ref(false);
 const error = ref('');
@@ -18,6 +19,7 @@ onMounted(() => {
     if (auth.user) {
         form.value.name = auth.user.name;
         form.value.email = auth.user.email;
+        form.value.auto_play_delay = auth.user.auto_play_delay ?? 8;
     }
 });
 
@@ -27,11 +29,16 @@ const handleSubmit = async () => {
     success.value = false;
 
     try {
-        const response = await api.put('/api/profile', form.value);
+        const response = await api.put('/api/profile', {
+            name: form.value.name,
+            email: form.value.email,
+        });
         if (auth.user) {
             auth.user.name = response.data.name;
             auth.user.email = response.data.email;
         }
+        // Update auto-play delay separately
+        await auth.updateAutoPlayDelay(form.value.auto_play_delay);
         success.value = true;
         setTimeout(() => emit('close'), 1000);
     } catch (e: any) {
@@ -64,6 +71,27 @@ const handleSubmit = async () => {
                     <div>
                         <label class="block text-sm mb-1.5" style="color: var(--tf-text-muted);">{{ $t('profile.email') }}</label>
                         <input v-model="form.email" type="email" required class="input-modern" />
+                    </div>
+
+                    <!-- Auto-play delay slider -->
+                    <div>
+                        <label class="block text-sm mb-1.5" style="color: var(--tf-text-muted);">
+                          {{ $t('profile.auto_play_delay') }}
+                          <span class="font-semibold ml-1" style="color: var(--tf-accent-emerald);">{{ form.auto_play_delay }}s</span>
+                        </label>
+                        <input
+                          v-model.number="form.auto_play_delay"
+                          type="range"
+                          min="3"
+                          max="30"
+                          step="1"
+                          class="w-full accent-emerald"
+                          style="accent-color: var(--tf-accent-emerald);"
+                        />
+                        <div class="flex justify-between text-xs mt-1" style="color: var(--tf-text-dimmed);">
+                          <span>3s</span>
+                          <span>30s</span>
+                        </div>
                     </div>
 
                     <div v-if="error" class="text-sm px-3 py-2 rounded-lg" style="color: #f87171; background: rgba(239,68,68,0.1);">{{ error }}</div>

@@ -8,6 +8,7 @@ import IconCheck from './icons/IconCheck.vue';
 const props = defineProps<{
   mainClipWatched: boolean;
   subscriptionActive: boolean;
+  hideCta?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -32,7 +33,7 @@ const emit = defineEmits<{
     </div>
 
     <!-- CTA — main clip already watched: ready state -->
-    <div v-if="props.mainClipWatched && props.subscriptionActive" class="p-4" style="background: rgba(16,185,129,0.06); border-top: 1px solid rgba(16,185,129,0.15);">
+    <div v-if="!props.hideCta && props.mainClipWatched && props.subscriptionActive" class="p-4" style="background: rgba(16,185,129,0.06); border-top: 1px solid rgba(16,185,129,0.15);">
       <p class="text-xs mb-3 flex items-center gap-2 font-medium" style="color: var(--tf-accent-emerald);">
         <span>✅</span> {{ $t('course.ready_to_start') }}
       </p>
@@ -47,7 +48,7 @@ const emit = defineEmits<{
     </div>
 
     <!-- CTA — main clip NOT yet watched (or no subscription): pending state -->
-    <div v-else class="p-4" style="background: rgba(99,102,241,0.04); border-top: 1px solid rgba(99,102,241,0.12);">
+    <div v-else-if="!props.hideCta" class="p-4" style="background: rgba(99,102,241,0.04); border-top: 1px solid rgba(99,102,241,0.12);">
       <p class="text-xs mb-3 flex items-start gap-2" style="color: var(--tf-text-muted);">
         <span class="mt-px">🎬</span>
         <span>{{ $t('course.watch_first_hint') }}</span>

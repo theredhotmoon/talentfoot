@@ -14,6 +14,8 @@ export interface User {
   role: string;
   auth_provider?: string | null;
   show_tips?: boolean;
+  auto_play_delay?: number;
+  subscription_valid_until?: string | null;
 }
 
 export interface LoginCredentials {

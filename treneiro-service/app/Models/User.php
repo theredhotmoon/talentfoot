@@ -26,12 +26,14 @@ class User extends Authenticatable
         'auth_provider',
         'google_id',
         'show_tips',
+        'auto_play_delay',
     ];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
         'subscription_valid_until' => 'date',
         'show_tips' => 'boolean',
+        'auto_play_delay' => 'integer',
     ];
 
     // Default role

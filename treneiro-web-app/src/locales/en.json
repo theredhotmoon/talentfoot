@@ -19,8 +19,7 @@
         "add_new": "Add Category",
         "create_category": "Create Category",
         "edit_category": "Edit Category",
-        "confirm_delete": "Are you sure you want to delete this category?",
-        "subtitle": "Organize your content library"
+        "confirm_delete": "Are you sure you want to delete this category?"
     },
     "users": {
         "title": "User Management",
@@ -55,7 +54,10 @@
         "subclips": "Lessons",
         "participants": "Participants",
         "rate_modal_title": "Rate this clip",
-        "rate_modal_submit": "Submit Rating"
+        "rate_modal_submit": "Submit Rating",
+        "register_cta_title": "Start Your First Challenge",
+        "register_cta_desc": "Join TalentFoot to track your progress, complete courses, and become a better football player.",
+        "register_to_start": "Register to start free challenge"
     },
     "upload": {
         "title": "Upload Clip",
@@ -152,7 +154,6 @@
         "cannot_delete": "Cannot delete tag with associated clips",
         "confirm_delete": "Are you sure you want to delete this tag?",
         "delete_warning": "Tags with associated clips cannot be deleted.",
-        "subtitle": "Browse and manage content tags",
         "delete_error": "Error deleting tag"
     },
     "sort": {
@@ -210,11 +211,14 @@
         "new_password": "New Password",
         "confirm_password": "Confirm New Password",
         "password_changed": "Password changed successfully!",
+        "password_min_length": "New password must be at least 8 characters.",
+        "password_mismatch": "Passwords do not match.",
         "save": "Save Changes",
         "edit_details": "Edit Profile Details",
         "name": "Name",
         "email": "Email",
-        "updated": "Profile updated successfully!"
+        "updated": "Profile updated successfully!",
+        "auto_play_delay": "Auto-play next video delay"
     },
     "common": {
         "loading": "Loading...",
@@ -291,10 +295,22 @@
         "start_step2": "Then work through each step by watching it from start to finish",
         "start_step3": "Complete all steps to finish the course and earn your badge",
         "start_btn": "Start Course",
-        "see_preview": "See Preview",
+        "see_preview": "Watch Course Effect",
+        "effect": "Course Effect",
         "overview_heading": "Course Overview \u2014 Watch the full demonstration",
         "ready_to_start": "You've watched the main clip \u2014 you're all set to begin!",
-        "watch_first_hint": "Watch the main clip from start to finish to unlock the course steps."
+        "watch_first_hint": "Watch the main clip from start to finish to unlock the course steps.",
+        "cover_watch_preview": "Watch Course Effect",
+        "cover_start_course": "Start Course",
+        "cover_subtitle": "Learn this skill step by step",
+        "play_next": "Play Next",
+        "play_next_countdown": "Playing next in {seconds}s...",
+        "replay": "Replay",
+        "course_complete": "Course Complete!",
+        "course_complete_desc": "You've finished all videos in this course.",
+        "clip_completed": "Completed!",
+        "challenge_limit_title": "Challenge Limit Reached",
+        "challenge_limit_message": "You can have up to {max} active challenges. Complete some to start new ones."
     },
     "captions": {
         "on": "Captions ON",
@@ -330,6 +346,16 @@
         "register_now": "Register Now",
         "register_to_comment": "Register to leave a comment",
         "register_to_access_title": "Register & Login to Get Access",
-        "register_to_access_desc": "Create a free account and log in to unlock all course content, start challenges, and track your progress."
+        "register_to_access_desc": "Create a free account and log in to unlock all course content, start challenges, and track your progress.",
+        "login_to_rate_title": "Login to Rate This Course",
+        "login_to_rate_subtitle": "Create a free account to share your rating and unlock the full experience.",
+        "login_reason_1": "Your ratings help other players find the best courses and improve their training.",
+        "login_reason_2": "Track your rated courses and get personalized recommendations based on your preferences.",
+        "login_reason_3": "Start challenges, earn badges, and see your progress across all courses.",
+        "login_reason_4": "Join a community of football enthusiasts — comment, rate, and learn together.",
+        "col_rate_title": "Rate Course",
+        "col_why_title": "Why Register?",
+        "col_register_title": "Create Account",
+        "rate_tooltip": "Rating is available only for logged-in users"
     }
 }

@@ -67,24 +67,47 @@
         </div>
       </div>
     </div>
-    <div v-else-if="auth.isAuthenticated && challenges.length > 0" class="mt-10">
+    <div v-else-if="auth.isAuthenticated ? challenges.length > 0 : true" class="mt-10">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="font-heading font-bold text-xl flex items-center gap-2" style="color: var(--tf-text);"><IconLightning :size="20" class="text-current" style="color: var(--tf-accent-amber);" /> {{ $t('challenges.my_active') }}</h2>
-        <router-link to="/my-challenges" class="text-sm hover:opacity-80 transition" style="color: var(--tf-accent-emerald);">{{ $t('challenges.view_all') }} →</router-link>
+        <h2 class="font-heading font-bold text-xl flex items-center gap-2" style="color: var(--tf-text);">
+          <IconLightning :size="20" class="text-current" style="color: var(--tf-accent-amber);" aria-hidden="true" /> 
+          {{ $t('challenges.my_active') }}
+        </h2>
+        <router-link v-if="auth.isAuthenticated" to="/my-challenges" class="text-sm hover:opacity-80 transition focus-visible:ring-2 focus-visible:ring-emerald-500 rounded outline-none" style="color: var(--tf-accent-emerald);">
+          {{ $t('challenges.view_all') }} →
+        </router-link>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      
+      <!-- Unauthenticated CTA -->
+      <div v-if="!auth.isAuthenticated" class="card-static flex flex-col items-center justify-center p-8 sm:p-12 text-center" style="border-radius: var(--tf-radius-xl); background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1);">
+        <div class="w-16 h-16 mb-4 rounded-full flex items-center justify-center" style="background: rgba(255,255,255,0.05);">
+            <IconLightning :size="32" style="color: var(--tf-accent-amber);" aria-hidden="true" />
+        </div>
+        <h3 class="font-heading font-bold text-xl mb-2 text-balance" style="color: var(--tf-text);">{{ $t('dashboard.register_cta_title') || 'Start Your First Challenge' }}</h3>
+        <p class="text-sm mb-6 max-w-md text-balance" style="color: var(--tf-text-muted);">{{ $t('dashboard.register_cta_desc') || 'Join TalentFoot to track your progress, complete courses, and become a better football player.' }}</p>
+        <button 
+          @click="auth.showRegisterModal = true" 
+          class="btn-primary hover:scale-105 transition-transform focus-visible:ring-2 focus-visible:ring-offset-2 outline-none" 
+          style="padding: 0.75rem 2rem; font-size: 1.125rem; border-radius: 9999px; font-weight: 700;"
+        >
+          {{ $t('dashboard.register_to_start') || 'Register To Start Free Challenge' }}
+        </button>
+      </div>
+
+      <!-- Authenticated Challenges Grid -->
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <router-link
           v-for="ch in challenges.slice(0, 3)"
           :key="ch.id"
           :to="`/challenge/${ch.clip_id}/${getTranslated(ch.clip_slug)}`"
-          class="card-static p-4 flex gap-4 items-center transition-all duration-200 hover:scale-[1.01]"
+          class="card-static p-4 flex gap-4 items-center transition-all duration-200 hover:scale-[1.01] focus-visible:ring-2 outline-none"
           style="border-radius: var(--tf-radius-lg); text-decoration: none;"
         >
           <div class="w-16 h-16 rounded-lg flex-shrink-0 overflow-hidden" style="background: rgba(255,255,255,0.04);">
-            <img v-if="ch.clip_thumbnail" :src="getThumbnailUrl(ch.clip_thumbnail)" class="w-full h-full object-cover" />
+            <img v-if="ch.clip_thumbnail" :src="getThumbnailUrl(ch.clip_thumbnail)" class="w-full h-full object-cover" alt="" />
             <div v-else class="w-full h-full flex items-center justify-center">
-              <IconTrophy v-if="ch.is_completed" :size="24" style="color: var(--tf-accent-emerald);" />
-              <IconLightning v-else :size="24" style="color: var(--tf-accent-amber);" />
+              <IconTrophy v-if="ch.is_completed" :size="24" style="color: var(--tf-accent-emerald);" aria-hidden="true" />
+              <IconLightning v-else :size="24" style="color: var(--tf-accent-amber);" aria-hidden="true" />
             </div>
           </div>
           <div class="flex-1 min-w-0">
@@ -94,7 +117,7 @@
                 <div class="h-1.5 rounded-full transition-all duration-500"
                      :style="`width: ${(ch.watched_items / ch.total_items) * 100}%; background: ${ch.is_completed ? 'var(--tf-gradient-primary)' : 'var(--tf-gradient-warm)'};`"></div>
               </div>
-              <span class="text-[10px] whitespace-nowrap" style="color: var(--tf-text-dimmed);">{{ ch.watched_items }}/{{ ch.total_items }}</span>
+              <span class="text-[10px] whitespace-nowrap" style="color: var(--tf-text-dimmed); font-variant-numeric: tabular-nums;">{{ ch.watched_items }}/{{ ch.total_items }}</span>
             </div>
             <span class="text-[10px] mt-1 inline-block px-2 py-0.5 rounded-full font-semibold"
                   :style="ch.is_completed

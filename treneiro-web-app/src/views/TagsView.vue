@@ -3,7 +3,6 @@
     <div class="flex justify-between items-center mb-6">
       <div>
         <h1 class="font-heading font-extrabold text-3xl gradient-text">{{ $t('tags.title') }}</h1>
-        <p class="text-sm mt-1" style="color: var(--tf-text-muted);">{{ $t('tags.subtitle') }}</p>
       </div>
       <button @click="showCreateModal = true" v-if="auth.isAdmin" class="btn-primary text-sm">
         {{ $t('tags.add_new') }}

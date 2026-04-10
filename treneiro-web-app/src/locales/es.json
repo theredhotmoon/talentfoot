@@ -19,8 +19,7 @@
         "add_new": "A\u00f1adir Categor\u00eda",
         "create_category": "Crear Categor\u00eda",
         "edit_category": "Editar Categor\u00eda",
-        "confirm_delete": "\u00bfEst\u00e1 seguro de que desea eliminar esta categor\u00eda?",
-        "subtitle": "Organiza tu biblioteca de contenido"
+        "confirm_delete": "\u00bfEst\u00e1 seguro de que desea eliminar esta categor\u00eda?"
     },
     "users": {
         "title": "Gesti\u00f3n de Usuarios",
@@ -54,8 +53,11 @@
         "delete": "Eliminar",
         "subclips": "Lecciones",
         "participants": "Participantes",
-        "rate_modal_title": "Calificar este clip",
-        "rate_modal_submit": "Enviar calificaci\u00f3n"
+        "rate_modal_title": "Califica este clip",
+        "rate_modal_submit": "Enviar Calificaci\u00f3n",
+        "register_cta_title": "Comienza Tu Primer Desaf\u00edo",
+        "register_cta_desc": "\u00danete a TalentFoot para rastrear tu progreso, completar cursos y convertirte en un mejor jugador.",
+        "register_to_start": "Reg\u00edstrate para comenzar el desaf\u00edo gratis"
     },
     "upload": {
         "title": "Subir Clip",
@@ -152,7 +154,6 @@
         "cannot_delete": "No se puede eliminar la etiqueta con clips asociados",
         "confirm_delete": "\u00bfEst\u00e1 seguro de que desea eliminar esta etiqueta?",
         "delete_warning": "Las etiquetas con clips asociados no se pueden eliminar.",
-        "subtitle": "Explora y gestiona etiquetas",
         "delete_error": "Error al eliminar la etiqueta"
     },
     "sort": {
@@ -210,11 +211,14 @@
         "new_password": "Nueva contrase\u00f1a",
         "confirm_password": "Confirmar nueva contrase\u00f1a",
         "password_changed": "\u00a1Contrase\u00f1a cambiada exitosamente!",
+        "password_min_length": "La nueva contrase\u00f1a debe tener al menos 8 caracteres.",
+        "password_mismatch": "Las contrase\u00f1as no coinciden.",
         "save": "Guardar cambios",
         "edit_details": "Editar detalles del perfil",
         "name": "Nombre",
         "email": "Correo electr\u00f3nico",
-        "updated": "\u00a1Perfil actualizado exitosamente!"
+        "updated": "\u00a1Perfil actualizado exitosamente!",
+        "auto_play_delay": "Retraso de reproducci\u00f3n autom\u00e1tica"
     },
     "common": {
         "loading": "Cargando...",
@@ -291,10 +295,22 @@
         "start_step2": "Luego completa cada paso vi\u00e9ndolo de inicio a fin",
         "start_step3": "Completa todos los pasos para obtener tu insignia",
         "start_btn": "Iniciar curso",
-        "see_preview": "Ver vista previa",
+        "see_preview": "Ver efecto del curso",
+        "effect": "Efecto del curso",
         "overview_heading": "Vista general del curso \u2014 Mira la demostraci\u00f3n completa",
         "ready_to_start": "\u00a1Ya viste el clip principal \u2014 est\u00e1s listo para comenzar!",
-        "watch_first_hint": "Mira el clip principal de principio a fin para desbloquear los pasos del curso."
+        "watch_first_hint": "Mira el clip principal de principio a fin para desbloquear los pasos del curso.",
+        "cover_watch_preview": "Ver efecto del curso",
+        "cover_start_course": "Iniciar curso",
+        "cover_subtitle": "Aprende esta habilidad paso a paso",
+        "play_next": "Siguiente",
+        "play_next_countdown": "Siguiente en {seconds}s...",
+        "replay": "Repetir",
+        "course_complete": "\u00a1Curso completado!",
+        "course_complete_desc": "Has visto todos los videos de este curso.",
+        "clip_completed": "\u00a1Completado!",
+        "challenge_limit_title": "L\u00edmite de desaf\u00edos alcanzado",
+        "challenge_limit_message": "Puedes tener hasta {max} desaf\u00edos activos. Completa algunos para iniciar nuevos."
     },
     "captions": {
         "on": "Subt\u00edtulos S\u00cd",
@@ -330,6 +346,16 @@
         "register_now": "Regístrate ahora",
         "register_to_comment": "Regístrate para dejar un comentario",
         "register_to_access_title": "Regístrate e inicia sesión",
-        "register_to_access_desc": "Crea una cuenta gratuita e inicia sesión para desbloquear todo el contenido del curso, iniciar desafíos y seguir tu progreso."
+        "register_to_access_desc": "Crea una cuenta gratuita e inicia sesión para desbloquear todo el contenido del curso, iniciar desafíos y seguir tu progreso.",
+        "login_to_rate_title": "Inicia sesión para calificar este curso",
+        "login_to_rate_subtitle": "Crea una cuenta gratuita para compartir tu calificación y desbloquear la experiencia completa.",
+        "login_reason_1": "Tus calificaciones ayudan a otros jugadores a encontrar los mejores cursos y mejorar su entrenamiento.",
+        "login_reason_2": "Rastrea tus cursos calificados y recibe recomendaciones personalizadas.",
+        "login_reason_3": "Comienza desafíos, gana insignias y sigue tu progreso en todos los cursos.",
+        "login_reason_4": "Únete a una comunidad de entusiastas del fútbol \u2014 comenta, califica y aprende juntos.",
+        "col_rate_title": "Califica el curso",
+        "col_why_title": "¿Por qué registrarse?",
+        "col_register_title": "Crear cuenta",
+        "rate_tooltip": "La calificación solo está disponible para usuarios registrados"
     }
 }

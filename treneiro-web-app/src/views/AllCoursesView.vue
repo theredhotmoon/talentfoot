@@ -4,7 +4,6 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
             <h1 class="font-heading font-extrabold text-3xl gradient-text">Online Football Courses</h1>
-            <p class="text-sm mt-1" style="color: var(--tf-text-muted);">{{ $t('dashboard.subtitle') || 'Browse the full catalog of professional football courses' }}</p>
         </div>
         <SortFilterBar
             :categories="categories"

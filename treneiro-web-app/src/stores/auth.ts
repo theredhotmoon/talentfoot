@@ -14,6 +14,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!token.value);
   const isAdmin = computed(() => user.value?.role === 'admin');
   const showTips = computed(() => user.value?.show_tips ?? true);
+  const autoPlayDelay = computed(() => user.value?.auto_play_delay ?? 8);
 
   async function login(credentials: LoginCredentials): Promise<void> {
     const response = await api.post<{ access_token: string; user: User }>(
@@ -80,6 +81,35 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function renewSubscription(): Promise<void> {
+    try {
+      const response = await api.post<User>('/api/profile/subscription/renew');
+      user.value = response.data;
+    } catch (error) {
+      console.error('Renew subscription failed', error);
+    }
+  }
+
+  async function cancelSubscription(): Promise<void> {
+    try {
+      const response = await api.post<User>('/api/profile/subscription/cancel');
+      user.value = response.data;
+    } catch (error) {
+      console.error('Cancel subscription failed', error);
+    }
+  }
+
+  async function updateAutoPlayDelay(value: number): Promise<void> {
+    try {
+      const response = await api.put<User>('/api/profile/auto-play-delay', {
+        auto_play_delay: value,
+      });
+      user.value = response.data;
+    } catch (error) {
+      console.error('Update auto_play_delay failed', error);
+    }
+  }
+
   return {
     token,
     user,
@@ -88,11 +118,15 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     isAdmin,
     showTips,
+    autoPlayDelay,
     login,
     register,
     logout,
     fetchUser,
     setTokenAndFetchUser,
     updateShowTips,
+    renewSubscription,
+    cancelSubscription,
+    updateAutoPlayDelay,
   };
 });

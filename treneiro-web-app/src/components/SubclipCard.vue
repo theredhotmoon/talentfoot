@@ -43,7 +43,7 @@ const { getThumbnailUrl } = useMediaUrl();
         {{ $t('subclips.now_playing') }}
       </div>
       <!-- Status badge -->
-      <div v-else-if="isWatched" class="absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-semibold"
+      <div v-if="isWatched" class="absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-semibold"
            style="background: rgba(110,231,183,0.25); color: var(--tf-accent-emerald);">✅</div>
       <div v-else-if="isStarted" class="absolute top-1 right-1 text-xs px-1.5 py-0.5 rounded-full font-semibold"
            style="background: rgba(251,191,36,0.25); color: var(--tf-accent-amber);">▶</div>

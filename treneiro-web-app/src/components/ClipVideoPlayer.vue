@@ -3,6 +3,10 @@ import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMediaUrl } from '../composables/useMediaUrl';
 import { useAuthStore } from '../stores/auth';
+import CourseCoverOverlay from './CourseCoverOverlay.vue';
+import PlayNextOverlay from './PlayNextOverlay.vue';
+
+import type { Subclip } from '../types';
 
 const props = defineProps<{
   filePath: string;
@@ -12,13 +16,29 @@ const props = defineProps<{
   hasSubclips: boolean;
   subscriptionActive: boolean;
   isLockedSubclip: boolean;
+  clipName: string;
+  clipDescription: string;
+  showCover: boolean;
+  showPlayNext: boolean;
+  nextItemName: string | null;
+  isLastItem: boolean;
+  isCourseComplete: boolean;
+  autoPlayDelay: number;
+  subclipsCount: number;
+  difficulty: number;
+  previewSubclips?: Subclip[];
 }>();
 
 const emit = defineEmits<{
   (e: 'play'): void;
   (e: 'pause'): void;
   (e: 'ended'): void;
-  (e: 'back-to-main'): void;
+  (e: 'watch-preview'): void;
+  (e: 'start-course'): void;
+  (e: 'play-next'): void;
+  (e: 'replay'): void;
+  (e: 'dismiss-play-next'): void;
+  (e: 'select-subclip', subclip: Subclip): void;
 }>();
 
 const { locale } = useI18n();
@@ -108,20 +128,14 @@ defineExpose({ videoEl });
         >🎨 {{ $t('cartoon.view_cartoon') }}</button>
       </div>
 
-      <!-- Now playing bar -->
-      <div v-if="activeSubclipName" class="px-4 py-2 flex items-center justify-between" style="background: rgba(110,231,183,0.1); border-bottom: 1px solid rgba(110,231,183,0.2);">
-        <span class="text-sm font-semibold" style="color: var(--tf-accent-emerald);">
-          {{ $t('subclips.now_playing') }}: {{ activeSubclipName }}
-        </span>
-        <button @click="emit('back-to-main')" class="btn-ghost text-xs py-1 px-3">
-          {{ $t('subclips.back_to_main') }}
-        </button>
-      </div>
-      <div v-else-if="hasSubclips" class="px-4 py-2 flex items-center" style="background: rgba(99,102,241,0.08); border-bottom: 1px solid rgba(99,102,241,0.15);">
-        <span class="text-sm font-semibold" style="color: var(--tf-accent-violet);">🎯 {{ $t('course.overview_heading') }}</span>
+      <!-- Now playing / Clip title bar -->
+      <div v-if="hasSubclips" class="px-5 py-3.5 flex items-center" style="background: rgba(99,102,241,0.08); border-bottom: 1px solid rgba(99,102,241,0.15);">
+        <h1 class="text-2xl font-heading font-bold gradient-text">
+          {{ clipName }} - {{ activeSubclipName ? activeSubclipName : $t('course.effect') }}
+        </h1>
       </div>
 
-      <!-- Video + captions overlay -->
+      <!-- Video + overlays wrapper -->
       <div class="relative group/captions">
         <video
           ref="videoEl"
@@ -164,6 +178,31 @@ defineExpose({ videoEl });
             {{ captionsEnabled ? $t('captions.on') : $t('captions.off') }}
           </button>
         </div>
+
+        <!-- Course Cover Overlay -->
+        <CourseCoverOverlay
+          v-if="showCover && hasSubclips"
+          :clip-name="clipName"
+          :clip-description="clipDescription"
+          :subclips-count="subclipsCount"
+          :difficulty="difficulty"
+          :preview-subclips="props.previewSubclips ?? []"
+          @watch-preview="emit('watch-preview')"
+          @start-course="emit('start-course')"
+          @select-subclip="(s: Subclip) => emit('select-subclip', s)"
+        />
+
+        <!-- Play Next Overlay -->
+        <PlayNextOverlay
+          v-if="showPlayNext"
+          :next-item-name="nextItemName"
+          :is-last-item="isLastItem"
+          :auto-play-delay="autoPlayDelay"
+          :is-course-complete="isCourseComplete"
+          @play-next="emit('play-next')"
+          @replay="emit('replay')"
+          @dismiss="emit('dismiss-play-next')"
+        />
       </div>
     </template>
   </div>

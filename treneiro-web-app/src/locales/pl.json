@@ -19,8 +19,7 @@
         "add_new": "Dodaj Kategori\u0119",
         "create_category": "Utw\u00f3rz Kategori\u0119",
         "edit_category": "Edytuj Kategori\u0119",
-        "confirm_delete": "Czy na pewno chcesz usun\u0105\u0107 t\u0119 kategori\u0119?",
-        "subtitle": "Organizuj bibliotek\u0119 tre\u015bci"
+        "confirm_delete": "Czy na pewno chcesz usun\u0105\u0107 t\u0119 kategori\u0119?"
     },
     "users": {
         "title": "Zarz\u0105dzanie U\u017cytkownikami",
@@ -54,8 +53,11 @@
         "delete": "Usu\u0144",
         "subclips": "Lekcje",
         "participants": "Uczestnik\u00f3w",
-        "rate_modal_title": "Oce\u0144 materia\u0142",
-        "rate_modal_submit": "Zapisz ocen\u0119"
+        "rate_modal_title": "Oce\u0144 ten klip",
+        "rate_modal_submit": "Prze\u015blij ocen\u0119",
+        "register_cta_title": "Rozpocznij Pierwsze Wyzwanie",
+        "register_cta_desc": "Do\u0142\u0105cz do TalentFoot, \u015bled\u017a swoje post\u0119py, tw\u00f3rz kursy i zosta\u0144 lepszym pi\u0142karzem.",
+        "register_to_start": "Zarejestruj si\u0119, aby rozpocz\u0105\u0107 darmowe wyzwanie"
     },
     "upload": {
         "title": "Dodaj Klip",
@@ -152,7 +154,6 @@
         "cannot_delete": "Nie mo\u017cna usun\u0105\u0107 tagu z przypisanymi klipami",
         "confirm_delete": "Czy na pewno chcesz usun\u0105\u0107 ten tag?",
         "delete_warning": "Tagi z przypisanymi klipami nie mog\u0105 zosta\u0107 usuni\u0119te.",
-        "subtitle": "Przegl\u0105daj i zarz\u0105dzaj tagami",
         "delete_error": "B\u0142\u0105d usuwania tagu"
     },
     "sort": {
@@ -210,11 +211,14 @@
         "new_password": "Nowe has\u0142o",
         "confirm_password": "Potwierd\u017a nowe has\u0142o",
         "password_changed": "Has\u0142o zosta\u0142o zmienione!",
+        "password_min_length": "Nowe has\u0142o musi mie\u0107 co najmniej 8 znak\u00f3w.",
+        "password_mismatch": "Has\u0142a nie s\u0105 zgodne.",
         "save": "Zapisz",
         "edit_details": "Edytuj profil",
         "name": "Imi\u0119",
         "email": "E-mail",
-        "updated": "Profil zosta\u0142 zaktualizowany!"
+        "updated": "Profil zosta\u0142 zaktualizowany!",
+        "auto_play_delay": "Op\u00f3\u017anienie automatycznego odtwarzania"
     },
     "common": {
         "loading": "Wczytywanie...",
@@ -291,10 +295,22 @@
         "start_step2": "Nast\u0119pnie przejd\u017a przez ka\u017cdy krok, ogl\u0105daj\u0105c go od pocz\u0105tku do ko\u0144ca",
         "start_step3": "Uko\u0144cz wszystkie kroki, aby zdoby\u0107 odznak\u0119",
         "start_btn": "Rozpocznij kurs",
-        "see_preview": "Zobacz podgl\u0105d",
+        "see_preview": "Obejrzyj efekt kursu",
+        "effect": "Efekt kursu",
         "overview_heading": "Przegl\u0105d kursu \u2014 Obejrzyj pe\u0142n\u0105 demonstracj\u0119",
         "ready_to_start": "Obejrza\u0142e\u015b g\u0142\u00f3wny klip \u2014 mo\u017cesz ju\u017c zaczyna\u0107!",
-        "watch_first_hint": "Obejrzyj g\u0142\u00f3wny klip od pocz\u0105tku do ko\u0144ca, aby odblokowa\u0107 kolejne kroki kursu."
+        "watch_first_hint": "Obejrzyj g\u0142\u00f3wny klip od pocz\u0105tku do ko\u0144ca, aby odblokowa\u0107 kolejne kroki kursu.",
+        "cover_watch_preview": "Obejrzyj efekt kursu",
+        "cover_start_course": "Rozpocznij kurs",
+        "cover_subtitle": "Naucz si\u0119 tej umiej\u0119tno\u015bci krok po kroku",
+        "play_next": "Nast\u0119pny film",
+        "play_next_countdown": "Nast\u0119pny za {seconds}s...",
+        "replay": "Odtw\u00f3rz ponownie",
+        "course_complete": "Kurs uko\u0144czony!",
+        "course_complete_desc": "Obejrza\u0142e\u015b wszystkie filmy w tym kursie.",
+        "clip_completed": "Uko\u0144czono!",
+        "challenge_limit_title": "Osi\u0105gni\u0119to limit wyzwa\u0144",
+        "challenge_limit_message": "Mo\u017cesz mie\u0107 maksymalnie {max} aktywnych wyzwa\u0144. Uko\u0144cz niekt\u00f3re, aby rozpocz\u0105\u0107 nowe."
     },
     "captions": {
         "on": "Napisy W\u0141",
@@ -330,6 +346,16 @@
         "register_now": "Zarejestruj się",
         "register_to_comment": "Zarejestruj się, aby dodać komentarz",
         "register_to_access_title": "Zarejestruj się i zaloguj",
-        "register_to_access_desc": "Załóż darmowe konto i zaloguj się, aby odblokować pełną treść kursów, rozpoczynać wyzwania i śledzić swoje postępy."
+        "register_to_access_desc": "Załóż darmowe konto i zaloguj się, aby odblokować pełną treść kursów, rozpoczynać wyzwania i śledzić swoje postępy.",
+        "login_to_rate_title": "Zaloguj się, aby ocenić kurs",
+        "login_to_rate_subtitle": "Załóż darmowe konto, aby podzielić się oceną i odblokować pełne możliwości.",
+        "login_reason_1": "Twoje oceny pomagają innym graczom znaleźć najlepsze kursy i usprawnić trening.",
+        "login_reason_2": "Śledź ocenione kursy i otrzymuj spersonalizowane rekomendacje.",
+        "login_reason_3": "Rozpoczynaj wyzwania, zdobywaj odznaki i śledź postępy we wszystkich kursach.",
+        "login_reason_4": "Dołącz do społeczności pasjonatów piłki nożnej \u2014 komentuj, oceniaj i ucz się razem.",
+        "col_rate_title": "Oceń kurs",
+        "col_why_title": "Dlaczego warto?",
+        "col_register_title": "Załóż konto",
+        "rate_tooltip": "Ocenianie jest dostępne tylko dla zalogowanych użytkowników"
     }
 }

@@ -4,6 +4,23 @@ All notable changes to the Trenejro frontend are documented here.
 
 ---
 
+## 2026-04-08 — Change Password Modal
+
+### Fixed
+- **`ChangePasswordModal.vue`:** Fixed broken close button HTML (malformed inline event handlers embedded inside an attribute string).
+- **`UserAvatarMenu.vue`:** Removed pre-existing invalid `focus-ring-color` CSS property from inline style.
+
+### Changed
+- **`ChangePasswordModal.vue`:** Added client-side validation — shows translated error messages for passwords shorter than 8 characters or when they don't match before sending to the API.
+- **`ChangePasswordModal.vue`:** Added `autocomplete` attribute hints to all password fields for better browser UX.
+- **`UserAvatarMenu.vue`:** Removed the `!auth.user?.auth_provider` guard — "Change Password" is now visible for all authenticated users (email and OAuth alike).
+- **Backend:** `ProfileController::changePassword()` already validates `min:8` and `confirmed` — no backend changes needed.
+
+### Added
+- **I18n:** Added `profile.password_min_length` and `profile.password_mismatch` translation keys to all three locales (`en.json`, `pl.json`, `es.json`).
+
+---
+
 ## 2026-03-24 — WCAG Accessibility & Navigation Overhaul
 
 ### Added

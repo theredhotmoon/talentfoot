@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 
 class ChallengeController extends Controller
 {
+    const MAX_ACTIVE_CHALLENGES = 9;
+
     /**
      * List the authenticated user's challenges.
      */
@@ -56,12 +58,32 @@ class ChallengeController extends Controller
     /**
      * Start a challenge for a given clip.
      */
+    /**
+     * Get count of active (unfinished) challenges for the authenticated user.
+     */
+    public function activeCount(Request $request)
+    {
+        $user = $request->user();
+        $count = Challenge::where('user_id', $user->id)
+            ->whereNull('finished_at')
+            ->count();
+
+        return response()->json([
+            'active_count' => $count,
+            'max_allowed' => self::MAX_ACTIVE_CHALLENGES,
+        ]);
+    }
+
+    /**
+     * Start a challenge for a given clip.
+     */
     public function start(Request $request)
     {
         $user = $request->user();
 
         $request->validate([
             'clip_id' => 'required|exists:clips,id',
+            'main_clip_pre_watched' => 'sometimes|boolean',
         ]);
 
         // Check subscription
@@ -91,12 +113,38 @@ class ChallengeController extends Controller
             ]);
         }
 
+        // Check active challenge limit (max 9 unfinished)
+        $activeCount = Challenge::where('user_id', $user->id)
+            ->whereNull('finished_at')
+            ->count();
+
+        if ($activeCount >= self::MAX_ACTIVE_CHALLENGES) {
+            return response()->json([
+                'error' => 'challenge_limit_reached',
+                'message' => 'You can have up to ' . self::MAX_ACTIVE_CHALLENGES . ' active challenges. Complete some to start new ones.',
+                'active_count' => $activeCount,
+                'max_allowed' => self::MAX_ACTIVE_CHALLENGES,
+            ], 429);
+        }
+
         // Create new challenge
         $challenge = Challenge::create([
             'user_id' => $user->id,
             'clip_id' => $request->clip_id,
             'started_at' => now(),
         ]);
+
+        // If the user already watched the main clip preview, mark it as watched immediately
+        if ($request->boolean('main_clip_pre_watched')) {
+            ChallengeProgress::updateOrCreate(
+                [
+                    'challenge_id' => $challenge->id,
+                    'watchable_type' => 'clip',
+                    'watchable_id' => $request->clip_id,
+                ],
+                ['watched_at' => now()]
+            );
+        }
 
         return response()->json([
             'challenge' => $this->formatChallenge($challenge),
