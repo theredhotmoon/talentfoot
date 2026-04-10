@@ -14,6 +14,7 @@ use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\SettingsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,6 +60,9 @@ Route::get('/categories/{category}', [CategoryController::class, 'show']);
 Route::get('/stats', [StatsController::class, 'index']);
 Route::post('/contact', [ContactController::class, 'store']);
 Route::get('/health/dependencies', [HealthController::class, 'dependencies']);
+
+// Public settings (read-only) — used by the frontend on every page load
+Route::get('/settings', [SettingsController::class, 'index']);
 
 // Comments can be read by anyone (guests see them on ClipDetail)
 Route::get('/clips/{clip}/comments', [CommentController::class, 'index']);
@@ -166,5 +170,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('categories', \App\Http\Controllers\CategoryController::class)->only(['store', 'update', 'destroy']);
 
         Route::apiResource('users', \App\Http\Controllers\UserController::class);
+
+        // Admin-only settings write
+        Route::put('/admin/settings', [SettingsController::class, 'update']);
     });
 });

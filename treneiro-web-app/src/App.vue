@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from './stores/auth';
+import { useSettingsStore } from './stores/settings';
 import { useI18n } from 'vue-i18n';
 import { useTimeoutFn } from '@vueuse/core';
 import { useHead } from '@unhead/vue';
@@ -8,9 +9,11 @@ import UserAvatarMenu from './components/UserAvatarMenu.vue';
 import AppFooter from './components/AppFooter.vue';
 import AppBreadcrumb from './components/AppBreadcrumb.vue';
 import RegisterModal from './components/RegisterModal.vue';
+import AppSettingsModal from './components/AppSettingsModal.vue';
 
 
 const auth = useAuthStore();
+const settingsStore = useSettingsStore();
 const { locale } = useI18n();
 
 useHead({
@@ -22,12 +25,15 @@ useHead({
 });
 
 onMounted(async () => {
+  // Always fetch settings so limits & display counts are up-to-date
+  settingsStore.fetchSettings();
   if (auth.token) {
     await auth.fetchUser();
   }
 });
 
 const showManagement = ref(false);
+const showSettingsModal = ref(false);
 
 // VueUse useTimeoutFn replaces the raw setTimeout / clearTimeout pair for hover-leave delay.
 const { start: startCloseTimer, stop: stopCloseTimer } = useTimeoutFn(
@@ -75,20 +81,30 @@ const closeManagement = () => {
             <router-link v-if="auth.isAuthenticated" to="/my-challenges" class="nav-pill" :class="{ 'router-link-active': $route.path.startsWith('/my-challenges') || $route.path.startsWith('/challenge/') }">
               {{ $t('nav.my_challenges') }}
             </router-link>
-            <!-- Management dropdown (admin only) -->
+              <!-- Management dropdown (admin only) -->
             <div v-if="auth.isAdmin" class="relative" @mouseenter="openManagement" @mouseleave="closeManagement">
-              <button @click="showManagement = !showManagement" class="nav-pill flex items-center gap-1">
+              <button @click="showManagement = !showManagement" class="nav-pill flex items-center gap-1" id="management-menu-btn" aria-haspopup="true" :aria-expanded="showManagement">
                 ⚙️ {{ $t('nav.management') }}
-                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="{ 'rotate-180': showManagement }" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="{ 'rotate-180': showManagement }" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
               </button>
               <transition name="dropdown">
-                <div v-if="showManagement" class="absolute top-full left-0 mt-2 py-2 min-w-[180px] rounded-xl overflow-hidden z-50" style="background: var(--tf-bg-surface-solid); border: 1px solid var(--tf-border); box-shadow: 0 12px 40px rgba(0,0,0,0.5);">
-                  <router-link to="/upload" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-white/[0.06]" style="color: var(--tf-text);" @click="showManagement = false">
+                <div v-if="showManagement" class="absolute top-full left-0 mt-2 py-2 min-w-[190px] rounded-xl overflow-hidden z-50" style="background: var(--tf-bg-surface-solid); border: 1px solid var(--tf-border); box-shadow: 0 12px 40px rgba(0,0,0,0.5);" role="menu">
+                  <router-link to="/upload" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-white/[0.06]" style="color: var(--tf-text);" @click="showManagement = false" role="menuitem">
                     {{ $t('nav.upload') }}
                   </router-link>
-                  <router-link to="/users" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-white/[0.06]" style="color: var(--tf-text);" @click="showManagement = false">
+                  <router-link to="/users" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-white/[0.06]" style="color: var(--tf-text);" @click="showManagement = false" role="menuitem">
                     {{ $t('nav.users') }}
                   </router-link>
+                  <div style="height: 1px; background: var(--tf-border); margin: 0.375rem 1rem;"></div>
+                  <button
+                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-white/[0.06] focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-inset outline-none text-left"
+                    style="color: var(--tf-accent-violet);"
+                    id="open-app-settings-btn"
+                    @click="showManagement = false; showSettingsModal = true"
+                    role="menuitem"
+                  >
+                    ⚙ {{ $t('nav.settings') }}
+                  </button>
                 </div>
               </transition>
             </div>
@@ -123,5 +139,6 @@ const closeManagement = () => {
 
     <!-- Global Modals -->
     <RegisterModal v-if="auth.showRegisterModal" @close="auth.showRegisterModal = false" />
+    <AppSettingsModal v-model="showSettingsModal" />
   </div>
 </template>

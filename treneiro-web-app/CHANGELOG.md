@@ -4,6 +4,29 @@ All notable changes to the Trenejro frontend are documented here.
 
 ---
 
+## 2026-04-10 — Admin-Editable App Settings
+
+### Added
+- **Backend:** New `settings` database table (key-value store) with migration that seeds three default values.
+- **Backend:** `Setting` model with static `get()` / `set()` helpers and automatic type-casting from the default type.
+- **Backend:** `SettingsController` — `GET /api/settings` (public, returns all settings) and `PUT /api/admin/settings` (admin-only, validates & persists settings).
+- **Backend:** API routes: public `GET /api/settings` and admin `PUT /api/admin/settings`.
+- **Frontend:** `src/stores/settings.ts` — Pinia store that fetches settings on app mount and exposes `saveSettings()` for admin use. Falls back to hard-coded defaults on network failure.
+- **Frontend:** `AppSettingsModal.vue` — glassmorphic admin modal launched from the Management dropdown. Features labeled number inputs for all three settings, inline validation, spinner during save, `aria-live` success/error feedback, focus-trap, Escape/backdrop close, and `prefers-reduced-motion`-safe animations.
+- **Frontend:** "⚙ App Settings" button added to the Management dropdown in `App.vue` (admin-only, separated from nav links by a divider).
+- **I18n:** Added `settings.*` and `nav.settings` keys to all three locales (`en.json`, `pl.json`, `es.json`).
+- **Tests:** `playwright/e2e/admin/admin-settings.spec.ts` — 8 E2E tests covering modal open/close, validation, save, API access control, and regular user restrictions.
+
+### Changed
+- **`ChallengeController.php`:** Replaced the hard-coded `MAX_ACTIVE_CHALLENGES = 9` constant with a live `Setting::get('max_active_challenges', 9)` DB lookup so the limit can be changed at runtime by admins.
+- **`Dashboard.vue`:** `clips.slice(0, 6)` replaced with `clips.slice(0, settings.dashboardClipsCount)` — dashboard clip count is now driven by the admin setting.
+- **`AllCoursesView.vue`:** `const perPage = 9` replaced with `computed(() => settingsStore.perPageCount)` — courses per page is now driven by the admin setting.
+- **`App.vue`:** Management dropdown updated with `role="menu"` / `role="menuitem"` ARIA attributes, `aria-haspopup` / `aria-expanded` on the trigger button, and an `aria-hidden` decoration attribute on the chevron SVG.
+
+> **⚠️ Action required:** Run `php artisan migrate` inside the backend container to create the `settings` table.
+
+---
+
 ## 2026-04-08 — Change Password Modal
 
 ### Fixed

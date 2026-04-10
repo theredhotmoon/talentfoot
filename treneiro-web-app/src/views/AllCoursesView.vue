@@ -62,6 +62,7 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '../api';
 import { useAuthStore } from '../stores/auth';
+import { useSettingsStore } from '../stores/settings';
 import type { Clip, Challenge, Category } from '../types';
 import { useClipActions } from '../composables/useClipActions';
 import { useSortFilterSync } from '../composables/useSortFilterSync';
@@ -73,6 +74,7 @@ import AppPagination from '../components/AppPagination.vue';
 
 const route = useRoute();
 const auth = useAuthStore();
+const settingsStore = useSettingsStore();
 
 const clips = ref<Clip[]>([]);
 const categories = ref<Category[]>([]);
@@ -88,7 +90,8 @@ useHead({
 
 const { sortBy, sortOrder, selectedCategory, page, updateQuery, initFromQuery } = useSortFilterSync();
 
-const perPage = 9;
+// Dynamic per-page count driven by admin settings
+const perPage = computed(() => settingsStore.perPageCount);
 
 const handleFilterChange = () => {
     page.value = 1; // Reset to page 1 on filter
@@ -108,12 +111,12 @@ const handlePageChange = (newPage: number) => {
 
 // Client-side chunking fallback inside computed
 const currentClips = computed(() => {
-    const startIndex = (page.value - 1) * perPage;
-    return clips.value.slice(startIndex, startIndex + perPage);
+    const startIndex = (page.value - 1) * perPage.value;
+    return clips.value.slice(startIndex, startIndex + perPage.value);
 });
 
 const totalPages = computed(() => {
-    return Math.ceil(clips.value.length / perPage) || 1;
+    return Math.ceil(clips.value.length / perPage.value) || 1;
 });
 
 const { challengeForClip, handleRate, startChallengeForClip } = useClipActions(clips, challenges);

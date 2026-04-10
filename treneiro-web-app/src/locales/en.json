@@ -12,7 +12,8 @@
         "my_challenges": "My Challenges",
         "home": "Home",
         "courses": "Courses",
-        "management": "Management"
+        "management": "Management",
+        "settings": "App Settings"
     },
     "categories": {
         "title": "Categories",
@@ -357,5 +358,17 @@
         "col_why_title": "Why Register?",
         "col_register_title": "Create Account",
         "rate_tooltip": "Rating is available only for logged-in users"
+    },
+    "settings": {
+        "title": "App Settings",
+        "subtitle": "Configure application-wide limits & display options",
+        "max_challenges": "Max Active Challenges per User",
+        "dashboard_count": "Courses Shown on Dashboard",
+        "per_page": "Courses Per Page (Lists)",
+        "save": "Save Settings",
+        "saving": "Saving…",
+        "saved": "Settings saved successfully!",
+        "error": "Failed to save settings. Please try again.",
+        "range_hint": "Value must be between {min} and {max}"
     }
 }

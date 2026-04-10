@@ -12,7 +12,8 @@
         "my_challenges": "Moje Wyzwania",
         "home": "Strona g\u0142\u00f3wna",
         "courses": "Kursy",
-        "management": "Zarz\u0105dzanie"
+        "management": "Zarz\u0105dzanie",
+        "settings": "Ustawienia aplikacji"
     },
     "categories": {
         "title": "Kategorie",
@@ -357,5 +358,17 @@
         "col_why_title": "Dlaczego warto?",
         "col_register_title": "Załóż konto",
         "rate_tooltip": "Ocenianie jest dostępne tylko dla zalogowanych użytkowników"
+    },
+    "settings": {
+        "title": "Ustawienia aplikacji",
+        "subtitle": "Konfiguruj limity i opcje wyświetlania",
+        "max_challenges": "Maks. aktywnych wyzwań na użytkownika",
+        "dashboard_count": "Kursy wyświetlane na panelu głównym",
+        "per_page": "Kursów na stronę (listy)",
+        "save": "Zapisz ustawienia",
+        "saving": "Zapisywanie…",
+        "saved": "Ustawienia zapisane pomyślnie!",
+        "error": "Błąd zapisu ustawień. Spróbuj ponownie.",
+        "range_hint": "Wartość musi być między {min} a {max}"
     }
 }

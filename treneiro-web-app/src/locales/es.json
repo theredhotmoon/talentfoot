@@ -12,7 +12,8 @@
         "my_challenges": "Mis Desaf\u00edos",
         "home": "Inicio",
         "courses": "Cursos",
-        "management": "Gesti\u00f3n"
+        "management": "Gesti\u00f3n",
+        "settings": "Configuraci\u00f3n"
     },
     "categories": {
         "title": "Categor\u00edas",
@@ -357,5 +358,17 @@
         "col_why_title": "¿Por qué registrarse?",
         "col_register_title": "Crear cuenta",
         "rate_tooltip": "La calificación solo está disponible para usuarios registrados"
+    },
+    "settings": {
+        "title": "Configuración de la aplicación",
+        "subtitle": "Configura límites y opciones de visualización",
+        "max_challenges": "Máx. desafíos activos por usuario",
+        "dashboard_count": "Cursos mostrados en el panel",
+        "per_page": "Cursos por página (listas)",
+        "save": "Guardar configuración",
+        "saving": "Guardando…",
+        "saved": "\u00a1Configuración guardada!",
+        "error": "Error al guardar. Inténtalo de nuevo.",
+        "range_hint": "El valor debe estar entre {min} y {max}"
     }
 }

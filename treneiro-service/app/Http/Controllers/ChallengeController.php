@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Challenge;
 use App\Models\ChallengeProgress;
 use App\Models\Clip;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 
 class ChallengeController extends Controller
 {
-    const MAX_ACTIVE_CHALLENGES = 9;
 
     /**
      * List the authenticated user's challenges.
@@ -68,9 +68,11 @@ class ChallengeController extends Controller
             ->whereNull('finished_at')
             ->count();
 
+        $maxAllowed = Setting::get('max_active_challenges', 9);
+
         return response()->json([
             'active_count' => $count,
-            'max_allowed' => self::MAX_ACTIVE_CHALLENGES,
+            'max_allowed'  => $maxAllowed,
         ]);
     }
 
@@ -113,17 +115,18 @@ class ChallengeController extends Controller
             ]);
         }
 
-        // Check active challenge limit (max 9 unfinished)
+        // Check active challenge limit
+        $maxAllowed = Setting::get('max_active_challenges', 9);
         $activeCount = Challenge::where('user_id', $user->id)
             ->whereNull('finished_at')
             ->count();
 
-        if ($activeCount >= self::MAX_ACTIVE_CHALLENGES) {
+        if ($activeCount >= $maxAllowed) {
             return response()->json([
-                'error' => 'challenge_limit_reached',
-                'message' => 'You can have up to ' . self::MAX_ACTIVE_CHALLENGES . ' active challenges. Complete some to start new ones.',
+                'error'        => 'challenge_limit_reached',
+                'message'      => 'You can have up to ' . $maxAllowed . ' active challenges. Complete some to start new ones.',
                 'active_count' => $activeCount,
-                'max_allowed' => self::MAX_ACTIVE_CHALLENGES,
+                'max_allowed'  => $maxAllowed,
             ], 429);
         }
 

@@ -12,7 +12,7 @@
     
     <!-- Skeleton placeholders while loading -->
     <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div v-for="n in 9" :key="n" class="card animate-pulse">
+      <div v-for="n in settings.dashboardClipsCount" :key="n" class="card animate-pulse">
         <!-- Thumbnail skeleton -->
         <div class="aspect-video" style="background: rgba(255,255,255,0.04); border-radius: var(--tf-radius-xl) var(--tf-radius-xl) 0 0;"></div>
         <div class="p-5 space-y-3">
@@ -40,7 +40,7 @@
     
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <ClipTile
-        v-for="clip in clips.slice(0, 6)"
+        v-for="clip in clips.slice(0, settings.dashboardClipsCount)"
         :key="clip.id"
         :clip="clip"
         :challenge="challengeForClip(clip.id)"
@@ -136,6 +136,7 @@
 import { ref, onMounted } from 'vue';
 import api from '../api';
 import { useAuthStore } from '../stores/auth';
+import { useSettingsStore } from '../stores/settings';
 import type { Clip, Challenge } from '../types';
 import { useClipActions } from '../composables/useClipActions';
 import { useTranslation } from '../composables/useTranslation';
@@ -146,6 +147,7 @@ import IconLightning from '../components/icons/IconLightning.vue';
 import IconTrophy from '../components/icons/IconTrophy.vue';
 
 const auth = useAuthStore();
+const settings = useSettingsStore();
 const { getTranslated } = useTranslation();
 const { getThumbnailUrl } = useMediaUrl();
 
