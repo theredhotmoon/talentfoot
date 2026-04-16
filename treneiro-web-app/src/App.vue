@@ -10,6 +10,7 @@ import AppFooter from './components/AppFooter.vue';
 import AppBreadcrumb from './components/AppBreadcrumb.vue';
 import RegisterModal from './components/RegisterModal.vue';
 import AppSettingsModal from './components/AppSettingsModal.vue';
+import ToastManager from './components/ToastManager.vue';
 
 
 const auth = useAuthStore();
@@ -140,5 +141,6 @@ const closeManagement = () => {
     <!-- Global Modals -->
     <RegisterModal v-if="auth.showRegisterModal" @close="auth.showRegisterModal = false" />
     <AppSettingsModal v-model="showSettingsModal" />
+    <ToastManager />
   </div>
 </template>

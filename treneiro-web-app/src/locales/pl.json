@@ -54,8 +54,8 @@
         "delete": "Usu\u0144",
         "subclips": "Lekcje",
         "participants": "Uczestnik\u00f3w",
-        "rate_modal_title": "Oce\u0144 ten klip",
-        "rate_modal_submit": "Prze\u015blij ocen\u0119",
+        "rate_modal_title": "Oce\u0144 materia\u0142",
+        "rate_modal_submit": "Zapisz ocen\u0119",
         "register_cta_title": "Rozpocznij Pierwsze Wyzwanie",
         "register_cta_desc": "Do\u0142\u0105cz do TalentFoot, \u015bled\u017a swoje post\u0119py, tw\u00f3rz kursy i zosta\u0144 lepszym pi\u0142karzem.",
         "register_to_start": "Zarejestruj si\u0119, aby rozpocz\u0105\u0107 darmowe wyzwanie"
@@ -130,7 +130,8 @@
         "failed": "B\u0142\u0105d logowania",
         "signing_in": "Logowanie...",
         "or": "lub",
-        "google": "Zaloguj przez Google"
+        "google": "Zaloguj przez Google",
+        "forgot_password": "Nie pami\u0119tasz has\u0142a?"
     },
     "register": {
         "title": "Rejestracja",
@@ -311,7 +312,10 @@
         "course_complete_desc": "Obejrza\u0142e\u015b wszystkie filmy w tym kursie.",
         "clip_completed": "Uko\u0144czono!",
         "challenge_limit_title": "Osi\u0105gni\u0119to limit wyzwa\u0144",
-        "challenge_limit_message": "Mo\u017cesz mie\u0107 maksymalnie {max} aktywnych wyzwa\u0144. Uko\u0144cz niekt\u00f3re, aby rozpocz\u0105\u0107 nowe."
+        "challenge_limit_message": "Mo\u017cesz mie\u0107 maksymalnie {max} aktywnych wyzwa\u0144. Uko\u0144cz niekt\u00f3re, aby rozpocz\u0105\u0107 nowe.",
+        "start_challenge_modal_title": "Rozpocznij wyzwanie, aby zobaczy\u0107 kroki kursu",
+        "start_challenge_modal_desc": "Aby odblokowa\u0107 i obejrze\u0107 wszystkie kroki kursu, musisz rozpocz\u0105\u0107 wyzwanie. Tw\u00f3j post\u0119p b\u0119dzie \u015bledzony podczas uko\u0144czania ka\u017cdego kroku.",
+        "start_challenge_now": "Rozpocznij wyzwanie"
     },
     "captions": {
         "on": "Napisy W\u0141",
@@ -344,31 +348,50 @@
     "auth": {
         "login": "Zaloguj",
         "register": "Rejestracja",
-        "register_now": "Zarejestruj się",
-        "register_to_comment": "Zarejestruj się, aby dodać komentarz",
-        "register_to_access_title": "Zarejestruj się i zaloguj",
-        "register_to_access_desc": "Załóż darmowe konto i zaloguj się, aby odblokować pełną treść kursów, rozpoczynać wyzwania i śledzić swoje postępy.",
-        "login_to_rate_title": "Zaloguj się, aby ocenić kurs",
-        "login_to_rate_subtitle": "Załóż darmowe konto, aby podzielić się oceną i odblokować pełne możliwości.",
-        "login_reason_1": "Twoje oceny pomagają innym graczom znaleźć najlepsze kursy i usprawnić trening.",
-        "login_reason_2": "Śledź ocenione kursy i otrzymuj spersonalizowane rekomendacje.",
-        "login_reason_3": "Rozpoczynaj wyzwania, zdobywaj odznaki i śledź postępy we wszystkich kursach.",
-        "login_reason_4": "Dołącz do społeczności pasjonatów piłki nożnej \u2014 komentuj, oceniaj i ucz się razem.",
-        "col_rate_title": "Oceń kurs",
+        "register_now": "Zarejestruj si\u0119",
+        "register_to_comment": "Zarejestruj si\u0119, aby doda\u0107 komentarz",
+        "register_to_access_title": "Zarejestruj si\u0119 i zaloguj",
+        "register_to_access_desc": "Za\u0142\u00f3\u017c darmowe konto i zaloguj si\u0119, aby odblokowa\u0107 pe\u0142n\u0105 tre\u015b\u0107 kurs\u00f3w, rozpoczyna\u0107 wyzwania i \u015bledzi\u0107 swoje post\u0119py.",
+        "login_to_rate_title": "Zaloguj si\u0119, aby oceni\u0107 kurs",
+        "login_to_rate_subtitle": "Za\u0142\u00f3\u017c darmowe konto, aby podzieli\u0107 si\u0119 ocen\u0105 i odblokowa\u0107 pe\u0142ne mo\u017cliwo\u015bci.",
+        "login_reason_1": "Twoje oceny pomagaj\u0105 innym graczom znale\u017a\u0107 najlepsze kursy i usprawni\u0107 trening.",
+        "login_reason_2": "\u015aled\u017a ocenione kursy i otrzymuj spersonalizowane rekomendacje.",
+        "login_reason_3": "Rozpoczynaj wyzwania, zdobywaj odznaki i \u015bled\u017a post\u0119py we wszystkich kursach.",
+        "login_reason_4": "Do\u0142\u0105cz do spo\u0142eczno\u015bci pasjonat\u00f3w pi\u0142ki no\u017cnej \u2014 komentuj, oceniaj i ucz si\u0119 razem.",
+        "col_rate_title": "Oce\u0144 kurs",
         "col_why_title": "Dlaczego warto?",
-        "col_register_title": "Załóż konto",
-        "rate_tooltip": "Ocenianie jest dostępne tylko dla zalogowanych użytkowników"
+        "col_register_title": "Za\u0142\u00f3\u017c konto",
+        "rate_tooltip": "Ocenianie jest dost\u0119pne tylko dla zalogowanych u\u017cytkownik\u00f3w"
     },
     "settings": {
         "title": "Ustawienia aplikacji",
-        "subtitle": "Konfiguruj limity i opcje wyświetlania",
-        "max_challenges": "Maks. aktywnych wyzwań na użytkownika",
-        "dashboard_count": "Kursy wyświetlane na panelu głównym",
-        "per_page": "Kursów na stronę (listy)",
+        "subtitle": "Konfiguruj limity i opcje wy\u015bwietlania",
+        "max_challenges": "Maks. aktywnych wyzwa\u0144 na u\u017cytkownika",
+        "dashboard_count": "Kursy wy\u015bwietlane na panelu g\u0142\u00f3wnym",
+        "per_page": "Kurs\u00f3w na stron\u0119 (listy)",
         "save": "Zapisz ustawienia",
-        "saving": "Zapisywanie…",
-        "saved": "Ustawienia zapisane pomyślnie!",
-        "error": "Błąd zapisu ustawień. Spróbuj ponownie.",
-        "range_hint": "Wartość musi być między {min} a {max}"
+        "saving": "Zapisywanie\u2026",
+        "saved": "Ustawienia zapisane pomy\u015blnie!",
+        "error": "B\u0142\u0105d zapisu ustawie\u0144. Spr\u00f3buj ponownie.",
+        "range_hint": "Warto\u015b\u0107 musi by\u0107 mi\u0119dzy {min} a {max}"
+    },
+    "forgot_password": {
+        "title": "Przypomnij has\u0142o",
+        "description": "Podaj sw\u00f3j adres e-mail, a wy\u015blemy Ci link do zresetowania has\u0142a.",
+        "email": "Adres e-mail",
+        "submit": "Wy\u015blij link resetuj\u0105cy",
+        "success_message": "Je\u015bli ten adres e-mail jest zarejestrowany, wkrotce otrzymasz link do resetu has\u0142a.",
+        "back_to_login": "Wroc do logowania",
+        "error_generic": "Wyst\u0105pi\u0142 b\u0142\u0105d wakati wysy\u0142ania linku. Sprobuj ponownie."
+    },
+    "reset_password": {
+        "title": "Resetowanie has\u0142a",
+        "new_password": "Nowe has\u0142o",
+        "confirm_password": "Potwierdz nowe has\u0142o",
+        "submit": "Zresetuj has\u0142o",
+        "success_message": "Twoje has\u0142o zosta\u0142o pomy\u015blnie zresetowane.",
+        "login_now": "Zaloguj si\u0119 teraz",
+        "missing_token": "Nieprawid\u0142owy lub brakuj\u0105cy token resetowania has\u0142a.",
+        "error_generic": "Nie uda\u0142o si\u0119 zresetowac has\u0142a. Spr\u00f3buj ponownie lub popro\u015b o nowy link."
     }
 }

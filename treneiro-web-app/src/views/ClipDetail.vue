@@ -7,6 +7,7 @@ import { useAuthStore } from '../stores/auth';
 import { useTranslation } from '../composables/useTranslation';
 import { useChallenge } from '../composables/useChallenge';
 import { useHead } from '@unhead/vue';
+import { useToast } from '../composables/useToast';
 import type { Clip, Comment, Subclip } from '../types';
 
 // ── Components ─────────────────────────────────────────────────────────────
@@ -17,13 +18,15 @@ import ClipInfo from '../components/ClipInfo.vue';
 import ClipComments from '../components/ClipComments.vue';
 import ChallengeProgressBar from '../components/ChallengeProgressBar.vue';
 import SubscriptionRequiredModal from '../components/SubscriptionRequiredModal.vue';
+import StartChallengeModal from '../components/StartChallengeModal.vue';
 import WelcomeTourModal from '../components/WelcomeTourModal.vue';
 import RegisterStartModal from '../components/RegisterStartModal.vue';
 
-const { } = useI18n();
+const { t } = useI18n();
 const authStore = useAuthStore();
 const route = useRoute();
 const { getTranslated } = useTranslation();
+const { showToast } = useToast();
 
 const clipId = route.params.id as string;
 
@@ -389,6 +392,59 @@ watch(() => authStore.isInitialized, (initialized) => {
     }
   }
 }, { immediate: true });
+
+// ── Watch Toast Flags ──────────────────────────────────────────────────────
+watch(showChallengeCompleteToast, (val) => {
+  if (val) {
+    showToast({
+      title: t('challenges.complete_title'),
+      message: t('challenges.complete_message'),
+      type: 'success',
+      icon: '🏆',
+      duration: 6000,
+    });
+    showChallengeCompleteToast.value = false;
+  }
+});
+
+watch(showWatchErrorToast, (val) => {
+  if (val) {
+    showToast({
+      title: t('challenges.watch_error_title'),
+      message: t('challenges.watch_error_message'),
+      type: 'error',
+      icon: '⚠️',
+      duration: 5000,
+    });
+    showWatchErrorToast.value = false;
+  }
+});
+
+watch(showMainClipRequiredToast, (val) => {
+  if (val) {
+    showToast({
+      title: t('course.main_clip_required_title'),
+      message: t('course.main_clip_required_msg'),
+      type: 'warning',
+      icon: '🎬',
+      duration: 5000,
+    });
+    showMainClipRequiredToast.value = false;
+  }
+});
+
+watch(showChallengeLimitToast, (val) => {
+  if (val) {
+    showToast({
+      title: t('course.challenge_limit_title'),
+      message: t('course.challenge_limit_message', { max: MAX_ACTIVE_CHALLENGES }),
+      type: 'error',
+      icon: '🚫',
+      duration: 6000,
+    });
+    showChallengeLimitToast.value = false;
+  }
+});
 </script>
 
 <template>
@@ -499,55 +555,19 @@ watch(() => authStore.isInitialized, (initialized) => {
       @close="onSubRequiredClose"
     />
 
+    <!-- Start Challenge Modal (subscribed user clicks a locked subclip before starting a challenge) -->
+    <StartChallengeModal
+      v-if="showChallengeModal"
+      :loading="challengeStarting"
+      @confirm="onStartCourse"
+      @cancel="cancelChallenge"
+    />
+
     <!-- Register + Start Modal (for unauthenticated users) -->
     <RegisterStartModal
       v-if="showRegisterStartModal"
       :clip="clip"
       @close="showRegisterStartModal = false"
     />
-
-    <!-- Challenge Complete Toast -->
-    <transition name="slide-up">
-      <div v-if="showChallengeCompleteToast"
-           class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-6 py-4 rounded-2xl text-center"
-           style="background: var(--tf-gradient-primary); color: #0f0e17; box-shadow: 0 8px 32px rgba(16,185,129,0.4);">
-        <div class="text-3xl mb-1">🏆</div>
-        <p class="font-heading font-bold">{{ $t('challenges.complete_title') }}</p>
-        <p class="text-xs opacity-75">{{ $t('challenges.complete_message') }}</p>
-      </div>
-    </transition>
-
-    <!-- Watch Duration Error Toast -->
-    <transition name="slide-up">
-      <div v-if="showWatchErrorToast"
-           class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-6 py-4 rounded-2xl text-center"
-           style="background: rgba(239,68,68,0.9); color: white; box-shadow: 0 8px 32px rgba(239,68,68,0.4);">
-        <div class="text-3xl mb-1">⚠️</div>
-        <p class="font-heading font-bold">{{ $t('challenges.watch_error_title') }}</p>
-        <p class="text-xs opacity-85">{{ $t('challenges.watch_error_message') }}</p>
-      </div>
-    </transition>
-
-    <!-- Main Clip Required Toast -->
-    <transition name="slide-up">
-      <div v-if="showMainClipRequiredToast"
-           class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-6 py-4 rounded-2xl text-center"
-           style="background: rgba(251,191,36,0.9); color: #0f0e17; box-shadow: 0 8px 32px rgba(251,191,36,0.4);">
-        <div class="text-3xl mb-1">🎬</div>
-        <p class="font-heading font-bold">{{ $t('course.main_clip_required_title') }}</p>
-        <p class="text-xs opacity-85">{{ $t('course.main_clip_required_msg') }}</p>
-      </div>
-    </transition>
-
-    <!-- Challenge Limit Toast -->
-    <transition name="slide-up">
-      <div v-if="showChallengeLimitToast"
-           class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-6 py-4 rounded-2xl text-center"
-           style="background: rgba(239,68,68,0.9); color: white; box-shadow: 0 8px 32px rgba(239,68,68,0.4);">
-        <div class="text-3xl mb-1">🚫</div>
-        <p class="font-heading font-bold">{{ $t('course.challenge_limit_title') }}</p>
-        <p class="text-xs opacity-85">{{ $t('course.challenge_limit_message', { max: MAX_ACTIVE_CHALLENGES }) }}</p>
-      </div>
-    </transition>
   </div>
 </template>

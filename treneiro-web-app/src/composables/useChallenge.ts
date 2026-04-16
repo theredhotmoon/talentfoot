@@ -30,28 +30,6 @@ export function useChallenge(clipId: string) {
   const accumulatedWatchTime = ref(0);
   const startedSubclips = ref<Set<string>>(new Set());
 
-  // ── Toast auto-dismiss ─────────────────────────────────────────────────
-  const { start: dismissCompleteToast } = useTimeoutFn(
-    () => { showChallengeCompleteToast.value = false; },
-    6000,
-    { immediate: false },
-  );
-  const { start: dismissWatchErrorToast } = useTimeoutFn(
-    () => { showWatchErrorToast.value = false; },
-    5000,
-    { immediate: false },
-  );
-  const { start: dismissMainClipToast } = useTimeoutFn(
-    () => { showMainClipRequiredToast.value = false; },
-    5000,
-    { immediate: false },
-  );
-  const { start: dismissLimitToast } = useTimeoutFn(
-    () => { showChallengeLimitToast.value = false; },
-    6000,
-    { immediate: false },
-  );
-
   const canStartChallenge = computed(() =>
     activeChallengeCount.value < MAX_ACTIVE_CHALLENGES,
   );
@@ -104,7 +82,6 @@ export function useChallenge(clipId: string) {
       if (err.response?.status === 429 && err.response?.data?.error === 'challenge_limit_reached') {
         activeChallengeCount.value = err.response.data.active_count ?? MAX_ACTIVE_CHALLENGES;
         showChallengeLimitToast.value = true;
-        dismissLimitToast();
       } else if (err.response?.data?.challenge) {
         activeChallenge.value = err.response.data.challenge;
       }
@@ -124,7 +101,6 @@ export function useChallenge(clipId: string) {
       activeChallenge.value = res.data.challenge;
       if (res.data.challenge.is_completed) {
         showChallengeCompleteToast.value = true;
-        dismissCompleteToast();
       }
     } catch (e) {
       console.error('Failed to record challenge watch', e);
@@ -166,7 +142,6 @@ export function useChallenge(clipId: string) {
 
     if (type === 'subclip' && !mainClipIsWatched) {
       showMainClipRequiredToast.value = true;
-      dismissMainClipToast();
       return;
     }
 
@@ -178,7 +153,6 @@ export function useChallenge(clipId: string) {
       const totalWatched = accumulatedWatchTime.value + currentSegment;
       if (videoElement.duration && totalWatched < videoElement.duration * 0.95) {
         showWatchErrorToast.value = true;
-        dismissWatchErrorToast();
         return;
       }
     }
@@ -201,7 +175,6 @@ export function useChallenge(clipId: string) {
     if (activeChallenge.value && !activeChallenge.value.is_completed) {
       if (!mainClipIsWatched) {
         showMainClipRequiredToast.value = true;
-        dismissMainClipToast();
         return;
       }
       onSelect(subclip);

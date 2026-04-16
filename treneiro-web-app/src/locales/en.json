@@ -130,7 +130,8 @@
         "failed": "Login failed",
         "signing_in": "Signing you in...",
         "or": "or",
-        "google": "Sign in with Google"
+        "google": "Sign in with Google",
+        "forgot_password": "Forgot your password?"
     },
     "register": {
         "title": "Register",
@@ -311,7 +312,10 @@
         "course_complete_desc": "You've finished all videos in this course.",
         "clip_completed": "Completed!",
         "challenge_limit_title": "Challenge Limit Reached",
-        "challenge_limit_message": "You can have up to {max} active challenges. Complete some to start new ones."
+        "challenge_limit_message": "You can have up to {max} active challenges. Complete some to start new ones.",
+        "start_challenge_modal_title": "Start a challenge to see course steps",
+        "start_challenge_modal_desc": "To unlock and watch all course steps, you need to start a challenge. Your progress will be tracked as you complete each step.",
+        "start_challenge_now": "Start challenge now"
     },
     "captions": {
         "on": "Captions ON",
@@ -353,7 +357,7 @@
         "login_reason_1": "Your ratings help other players find the best courses and improve their training.",
         "login_reason_2": "Track your rated courses and get personalized recommendations based on your preferences.",
         "login_reason_3": "Start challenges, earn badges, and see your progress across all courses.",
-        "login_reason_4": "Join a community of football enthusiasts — comment, rate, and learn together.",
+        "login_reason_4": "Join a community of football enthusiasts \u2014 comment, rate, and learn together.",
         "col_rate_title": "Rate Course",
         "col_why_title": "Why Register?",
         "col_register_title": "Create Account",
@@ -366,9 +370,28 @@
         "dashboard_count": "Courses Shown on Dashboard",
         "per_page": "Courses Per Page (Lists)",
         "save": "Save Settings",
-        "saving": "Saving…",
+        "saving": "Saving\u2026",
         "saved": "Settings saved successfully!",
         "error": "Failed to save settings. Please try again.",
         "range_hint": "Value must be between {min} and {max}"
+    },
+    "forgot_password": {
+        "title": "Forgot Password",
+        "description": "Enter your email address and we'll send you a link to reset your password.",
+        "email": "Email Address",
+        "submit": "Send Reset Link",
+        "success_message": "If this email is registered, you will receive a password reset link shortly.",
+        "back_to_login": "Back to Login",
+        "error_generic": "Failed to send reset link. Please try again."
+    },
+    "reset_password": {
+        "title": "Reset Password",
+        "new_password": "New Password",
+        "confirm_password": "Confirm New Password",
+        "submit": "Reset Password",
+        "success_message": "Your password has been successfully reset.",
+        "login_now": "Login Now",
+        "missing_token": "Invalid or missing password reset token.",
+        "error_generic": "Failed to reset password. Please try again or request a new link."
     }
 }

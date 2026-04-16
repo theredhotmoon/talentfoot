@@ -14,6 +14,7 @@ class SettingsController extends Controller
         'max_active_challenges' => ['default' => 9,  'min' => 1, 'max' => 50],
         'dashboard_clips_count' => ['default' => 6,  'min' => 1, 'max' => 20],
         'per_page_count'        => ['default' => 9,  'min' => 3, 'max' => 30],
+        'password_reset_token_lifetime' => ['default' => 60, 'min' => 10, 'max' => 1440],
     ];
 
     /**

@@ -54,8 +54,8 @@
         "delete": "Eliminar",
         "subclips": "Lecciones",
         "participants": "Participantes",
-        "rate_modal_title": "Califica este clip",
-        "rate_modal_submit": "Enviar Calificaci\u00f3n",
+        "rate_modal_title": "Calificar este clip",
+        "rate_modal_submit": "Enviar calificaci\u00f3n",
         "register_cta_title": "Comienza Tu Primer Desaf\u00edo",
         "register_cta_desc": "\u00danete a TalentFoot para rastrear tu progreso, completar cursos y convertirte en un mejor jugador.",
         "register_to_start": "Reg\u00edstrate para comenzar el desaf\u00edo gratis"
@@ -130,7 +130,8 @@
         "failed": "Fallo al iniciar sesi\u00f3n",
         "signing_in": "Iniciando sesi\u00f3n...",
         "or": "o",
-        "google": "Accede con Google"
+        "google": "Iniciar sesi\u00f3n con Google",
+        "forgot_password": "\u00bfOlvidaste tu contrase\u00f1a?"
     },
     "register": {
         "title": "Registrarse",
@@ -342,33 +343,52 @@
         "start_challenge_desc": "Haz clic en Iniciar desaf\u00edo para comenzar a seguir tu progreso en todas las lecciones."
     },
     "auth": {
-        "login": "Iniciar sesión",
+        "login": "Iniciar sesi\u00f3n",
         "register": "Registrarse",
-        "register_now": "Regístrate ahora",
-        "register_to_comment": "Regístrate para dejar un comentario",
-        "register_to_access_title": "Regístrate e inicia sesión",
-        "register_to_access_desc": "Crea una cuenta gratuita e inicia sesión para desbloquear todo el contenido del curso, iniciar desafíos y seguir tu progreso.",
-        "login_to_rate_title": "Inicia sesión para calificar este curso",
-        "login_to_rate_subtitle": "Crea una cuenta gratuita para compartir tu calificación y desbloquear la experiencia completa.",
+        "register_now": "Reg\u00edstrate ahora",
+        "register_to_comment": "Reg\u00edstrate para dejar un comentario",
+        "register_to_access_title": "Reg\u00edstrate e inicia sesi\u00f3n",
+        "register_to_access_desc": "Crea una cuenta gratuita e inicia sesi\u00f3n para desbloquear todo el contenido del curso, iniciar desaf\u00edos y seguir tu progreso.",
+        "login_to_rate_title": "Inicia sesi\u00f3n para calificar este curso",
+        "login_to_rate_subtitle": "Crea una cuenta gratuita para compartir tu calificaci\u00f3n y desbloquear la experiencia completa.",
         "login_reason_1": "Tus calificaciones ayudan a otros jugadores a encontrar los mejores cursos y mejorar su entrenamiento.",
         "login_reason_2": "Rastrea tus cursos calificados y recibe recomendaciones personalizadas.",
-        "login_reason_3": "Comienza desafíos, gana insignias y sigue tu progreso en todos los cursos.",
-        "login_reason_4": "Únete a una comunidad de entusiastas del fútbol \u2014 comenta, califica y aprende juntos.",
+        "login_reason_3": "Comienza desaf\u00edos, gana insignias y sigue tu progreso en todos los cursos.",
+        "login_reason_4": "\u00danete a una comunidad de entusiastas del f\u00fatbol \u2014 comenta, califica y aprende juntos.",
         "col_rate_title": "Califica el curso",
-        "col_why_title": "¿Por qué registrarse?",
+        "col_why_title": "\u00bfPor qu\u00e9 registrarse?",
         "col_register_title": "Crear cuenta",
-        "rate_tooltip": "La calificación solo está disponible para usuarios registrados"
+        "rate_tooltip": "La calificaci\u00f3n solo est\u00e1 disponible para usuarios registrados"
     },
     "settings": {
-        "title": "Configuración de la aplicación",
-        "subtitle": "Configura límites y opciones de visualización",
-        "max_challenges": "Máx. desafíos activos por usuario",
+        "title": "Configuraci\u00f3n de la aplicaci\u00f3n",
+        "subtitle": "Configura l\u00edmites y opciones de visualizaci\u00f3n",
+        "max_challenges": "M\u00e1x. desaf\u00edos activos por usuario",
         "dashboard_count": "Cursos mostrados en el panel",
-        "per_page": "Cursos por página (listas)",
-        "save": "Guardar configuración",
-        "saving": "Guardando…",
-        "saved": "\u00a1Configuración guardada!",
-        "error": "Error al guardar. Inténtalo de nuevo.",
+        "per_page": "Cursos por p\u00e1gina (listas)",
+        "save": "Guardar configuraci\u00f3n",
+        "saving": "Guardando\u2026",
+        "saved": "\u00a1Configuraci\u00f3n guardada!",
+        "error": "Error al guardar configuraci\u00f3n. Int\u00e9ntalo de nuevo.",
         "range_hint": "El valor debe estar entre {min} y {max}"
+    },
+    "forgot_password": {
+        "title": "Recuperar contrase\u00f1a",
+        "description": "Ingresa tu correo electr\u00f3nico y te enviaremos un enlace para restablecer tu contrase\u00f1a.",
+        "email": "Correo electr\u00f3nico",
+        "submit": "Enviar enlace",
+        "success_message": "Si este correo est\u00e1 registrado, recibir\u00e1s un enlace pronto.",
+        "back_to_login": "Volver al inicio de sesi\u00f3n",
+        "error_generic": "Error al enviar el enlace. Int\u00e9ntalo de nuevo."
+    },
+    "reset_password": {
+        "title": "Restablecer contrase\u00f1a",
+        "new_password": "Nueva contrase\u00f1a",
+        "confirm_password": "Confirmar contrase\u00f1a",
+        "submit": "Restablecer contrase\u00f1a",
+        "success_message": "Tu contrase\u00f1a ha sido restablecida correctamente.",
+        "login_now": "Iniciar sesi\u00f3n ahora",
+        "missing_token": "Enlace de restablecimiento no v\u00e1lido o faltante.",
+        "error_generic": "Error al restablecer la contrase\u00f1a. Int\u00e9ntalo de nuevo o solicita un nuevo enlace."
     }
 }

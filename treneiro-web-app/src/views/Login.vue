@@ -11,6 +11,9 @@
       <form @submit.prevent="handleLogin" class="space-y-4">
         <input v-model="email" type="email" :placeholder="$t('login.email')" class="input-modern" required />
         <input v-model="password" type="password" :placeholder="$t('login.password')" class="input-modern" required />
+        <div class="text-right mt-1">
+          <router-link to="/forgot-password" class="text-xs transition-colors" style="color: var(--tf-accent-emerald);">{{ $t('login.forgot_password') }}</router-link>
+        </div>
         <div v-if="error" class="text-sm px-3 py-2 rounded-lg" style="color: #f87171; background: rgba(239,68,68,0.1);">{{ error }}</div>
         <button type="submit" :disabled="loading" class="btn-primary w-full text-sm">
           {{ loading ? '...' : $t('login.submit') }}

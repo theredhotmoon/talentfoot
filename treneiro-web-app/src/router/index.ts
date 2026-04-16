@@ -6,6 +6,8 @@ const router = createRouter({
   routes: [
     { path: '/login', component: () => import('../views/Login.vue') },
     { path: '/register', component: () => import('../views/Register.vue') },
+    { path: '/forgot-password', component: () => import('../views/ForgotPassword.vue') },
+    { path: '/reset-password', component: () => import('../views/ResetPassword.vue') },
     { path: '/auth/google/callback', component: () => import('../views/GoogleCallback.vue') },
     // ── Public browsing routes (no auth required) ────────────────────────
     { path: '/', component: () => import('../views/Dashboard.vue') },
