@@ -67,7 +67,10 @@ jobs:
           mkdir -p storage/framework/views
           mkdir -p storage/framework/cache/data
           mkdir -p storage/logs
-          mkdir -p storage/app/public
+          mkdir -p storage/app/public/clips
+          mkdir -p storage/app/public/subclips
+          mkdir -p storage/app/public/thumbnails
+          mkdir -p storage/app/public/captions
           chmod -R 777 storage bootstrap/cache
 
       - name: Run database migrations
@@ -138,7 +141,10 @@ jobs:
           mkdir -p storage/framework/views
           mkdir -p storage/framework/cache/data
           mkdir -p storage/logs
-          mkdir -p storage/app/public
+          mkdir -p storage/app/public/clips
+          mkdir -p storage/app/public/subclips
+          mkdir -p storage/app/public/thumbnails
+          mkdir -p storage/app/public/captions
           chmod -R 777 storage bootstrap/cache
 
       - name: Run migrations and seed test data
