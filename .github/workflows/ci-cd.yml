@@ -172,6 +172,21 @@ jobs:
         working-directory: treneiro-web-app
         run: npm ci
 
+      - name: Start Vite dev server (port 5173)
+        working-directory: treneiro-web-app
+        env:
+          VITE_API_BASE_URL: http://localhost:8000
+        run: npm run dev &
+
+      - name: Wait for both servers to be ready
+        run: |
+          echo "Waiting for Laravel on port 8000..."
+          timeout 60 bash -c 'until curl -sf http://localhost:8000/api/health/dependencies > /dev/null 2>&1; do sleep 1; done'
+          echo "Laravel is up."
+          echo "Waiting for Vite on port 5173..."
+          timeout 60 bash -c 'until curl -sf http://localhost:5173 > /dev/null 2>&1; do sleep 1; done'
+          echo "Vite is up."
+
       - name: Install Playwright browsers
         working-directory: treneiro-web-app
         run: npx playwright install --with-deps chromium
