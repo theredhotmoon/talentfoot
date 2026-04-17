@@ -14,8 +14,9 @@ return new class extends Migration {
     {
         Schema::table('clips', function (Blueprint $table) {
             $table->text('name')->change();
-            $table->text('slug')->change();
-            $table->text('description')->change();
+            // slug stays as string/varchar — it has a unique index and
+            // MySQL cannot index a TEXT column without an explicit key length
+            $table->text('description')->nullable()->change();
         });
     }
 
@@ -28,8 +29,7 @@ return new class extends Migration {
     {
         Schema::table('clips', function (Blueprint $table) {
             $table->string('name')->change();
-            $table->string('slug')->change();
-            $table->text('description')->change();
+            $table->text('description')->nullable()->change();
         });
     }
 };
