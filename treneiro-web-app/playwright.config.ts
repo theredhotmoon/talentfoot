@@ -16,7 +16,7 @@ export default defineConfig({
   timeout: 30_000,
   expect: { timeout: 8_000 },
   fullyParallel: false, // keep sequential — shared DB state
-  retries: process.env.CI ? 2 : 0,
+  retries: 0,
   workers: 1,
 
   reporter: [
