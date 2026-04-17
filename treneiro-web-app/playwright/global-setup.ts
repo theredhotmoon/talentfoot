@@ -48,12 +48,18 @@ async function saveAuthState(
     return;
   }
 
-  const json = await response.json() as { token: string };
+  const json = await response.json() as { access_token: string };
+
+  if (!json.access_token) {
+    console.error(`[global-setup] No access_token in response for ${creds.email}:`, json);
+    await browser.close();
+    return;
+  }
 
   // 3. Inject the Sanctum token into localStorage (same key used by the auth store)
   await page.evaluate((token: string) => {
     localStorage.setItem('token', token);
-  }, json.token);
+  }, json.access_token);
 
   // 4. Ensure the auth dir exists and persist state
   const dir = path.dirname(outFile);

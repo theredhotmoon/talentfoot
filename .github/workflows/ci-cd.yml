@@ -156,6 +156,10 @@ jobs:
           php artisan migrate --force
           php artisan db:seed --force
 
+      - name: Verify seeded users exist in DB
+        run: |
+          mysql -u root -proot laravel_test -e "SELECT id, name, email, role, LEFT(password,20) AS pw_prefix FROM users;"
+
       - name: Start Laravel backend (port 8000)
         working-directory: treneiro-service
         run: php artisan serve --port=8000 &
