@@ -12,7 +12,6 @@ import RegisterModal from './components/RegisterModal.vue';
 import AppSettingsModal from './components/AppSettingsModal.vue';
 import ToastManager from './components/ToastManager.vue';
 
-
 const auth = useAuthStore();
 const settingsStore = useSettingsStore();
 const { locale } = useI18n();
