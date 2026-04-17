@@ -181,10 +181,10 @@ jobs:
       - name: Wait for both servers to be ready
         run: |
           echo "Waiting for Laravel on port 8000..."
-          timeout 60 bash -c 'until curl -sf http://localhost:8000/api/health/dependencies > /dev/null 2>&1; do sleep 1; done'
+          timeout 60 bash -c 'until curl -s -o /dev/null http://localhost:8000/api/health/dependencies; do sleep 1; done'
           echo "Laravel is up."
           echo "Waiting for Vite on port 5173..."
-          timeout 60 bash -c 'until curl -sf http://localhost:5173 > /dev/null 2>&1; do sleep 1; done'
+          timeout 60 bash -c 'until curl -s -o /dev/null http://localhost:5173; do sleep 1; done'
           echo "Vite is up."
 
       - name: Install Playwright browsers
