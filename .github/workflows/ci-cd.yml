@@ -66,7 +66,7 @@ jobs:
 
       - name: Run PHPUnit tests
         working-directory: treneiro-service
-        run: php artisan test --parallel
+        run: php artisan test
 
   # ──────────────────────────────────────────────
   # JOB 2 — Frontend build + E2E tests (Playwright)
