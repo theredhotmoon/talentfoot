@@ -60,6 +60,16 @@ jobs:
           sed -i 's/DB_USERNAME=root/DB_USERNAME=root/' .env
           sed -i 's/DB_PASSWORD=/DB_PASSWORD=root/' .env
 
+      - name: Create storage directories
+        working-directory: treneiro-service
+        run: |
+          mkdir -p storage/framework/sessions
+          mkdir -p storage/framework/views
+          mkdir -p storage/framework/cache/data
+          mkdir -p storage/logs
+          mkdir -p storage/app/public
+          chmod -R 777 storage bootstrap/cache
+
       - name: Run database migrations
         working-directory: treneiro-service
         run: php artisan migrate --force
@@ -120,6 +130,16 @@ jobs:
           sed -i 's/DB_DATABASE=laravel/DB_DATABASE=laravel_test/' .env
           sed -i 's/DB_USERNAME=root/DB_USERNAME=root/' .env
           sed -i 's/DB_PASSWORD=/DB_PASSWORD=root/' .env
+
+      - name: Create storage directories
+        working-directory: treneiro-service
+        run: |
+          mkdir -p storage/framework/sessions
+          mkdir -p storage/framework/views
+          mkdir -p storage/framework/cache/data
+          mkdir -p storage/logs
+          mkdir -p storage/app/public
+          chmod -R 777 storage bootstrap/cache
 
       - name: Run migrations and seed test data
         working-directory: treneiro-service
