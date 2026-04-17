@@ -34,8 +34,15 @@ const router = createRouter({
 });
 
 // Modern return-value guard — no deprecated next() callback.
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const authStore = useAuthStore();
+
+  // Wait for auth to initialise on the first navigation.
+  // Without this, the guard runs before App.vue's onMounted fetchUser() resolves,
+  // so isAdmin is always false on a fresh page load (causes redirect to / for admin routes).
+  if (!authStore.isInitialized) {
+    await authStore.fetchUser();
+  }
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return '/login';
