@@ -23,7 +23,7 @@ test.describe('Admin — App Settings', () => {
     // Hover over the Management button to open dropdown
     const managementBtn = page.locator('#management-menu-btn');
     await expect(managementBtn).toBeVisible({ timeout: 8_000 });
-    await managementBtn.hover();
+    await managementBtn.click();
 
     // App Settings button should appear inside the dropdown
     const settingsBtn = page.locator('#open-app-settings-btn');
@@ -36,7 +36,7 @@ test.describe('Admin — App Settings', () => {
 
     // Open Management dropdown and click App Settings
     const managementBtn = page.locator('#management-menu-btn');
-    await managementBtn.hover();
+    await managementBtn.click();
     await page.locator('#open-app-settings-btn').click();
 
     // Modal should be visible
@@ -58,7 +58,7 @@ test.describe('Admin — App Settings', () => {
 
     // Open modal
     const managementBtn = page.locator('#management-menu-btn');
-    await managementBtn.hover();
+    await managementBtn.click();
     await page.locator('#open-app-settings-btn').click();
     await expect(page.locator('#app-settings-modal-overlay')).toBeVisible({ timeout: 6_000 });
 
@@ -83,7 +83,7 @@ test.describe('Admin — App Settings', () => {
 
     // Restore defaults to avoid side effects in other tests
     await page.goto('/');
-    await managementBtn.hover();
+    await managementBtn.click();
     await page.locator('#open-app-settings-btn').click();
     await expect(page.locator('#app-settings-modal-overlay')).toBeVisible({ timeout: 6_000 });
     await page.locator('#setting-max-challenges').fill('9');
@@ -97,7 +97,7 @@ test.describe('Admin — App Settings', () => {
     await page.waitForLoadState('networkidle');
 
     const managementBtn = page.locator('#management-menu-btn');
-    await managementBtn.hover();
+    await managementBtn.click();
     await page.locator('#open-app-settings-btn').click();
     await expect(page.locator('#app-settings-modal-overlay')).toBeVisible({ timeout: 6_000 });
 
@@ -115,7 +115,7 @@ test.describe('Admin — App Settings', () => {
     await page.waitForLoadState('networkidle');
 
     const managementBtn = page.locator('#management-menu-btn');
-    await managementBtn.hover();
+    await managementBtn.click();
     await page.locator('#open-app-settings-btn').click();
     await expect(page.locator('#app-settings-modal-overlay')).toBeVisible({ timeout: 6_000 });
 
@@ -128,7 +128,7 @@ test.describe('Admin — App Settings', () => {
     await page.waitForLoadState('networkidle');
 
     const managementBtn = page.locator('#management-menu-btn');
-    await managementBtn.hover();
+    await managementBtn.click();
     await page.locator('#open-app-settings-btn').click();
     const overlay = page.locator('#app-settings-modal-overlay');
     await expect(overlay).toBeVisible({ timeout: 6_000 });

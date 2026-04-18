@@ -18,8 +18,9 @@ test.describe('Admin Navigation', () => {
     const managementBtn = page.locator('#management-menu-btn');
     await expect(managementBtn).toBeVisible({ timeout: 8_000 });
 
-    // Hover to open the dropdown — Upload and Users live inside it
-    await managementBtn.hover();
+    // Click to open the dropdown — more reliable than hover() in headless CI.
+    // The button has @click="showManagement = !showManagement" in App.vue.
+    await managementBtn.click();
 
     await expect(nav.getByRole('link', { name: /upload/i })).toBeVisible({ timeout: 5_000 });
     await expect(nav.getByRole('link', { name: /users/i })).toBeVisible({ timeout: 5_000 });
