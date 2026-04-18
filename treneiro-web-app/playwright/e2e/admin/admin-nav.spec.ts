@@ -14,9 +14,17 @@ test.describe('Admin Navigation', () => {
     const nav = page.locator('nav');
     await expect(nav).toBeVisible();
 
-    // Admin-only nav items
-    await expect(nav.getByRole('link', { name: /upload/i })).toBeVisible();
-    await expect(nav.getByRole('link', { name: /users/i })).toBeVisible();
+    // The Management dropdown button must be visible (proves isAdmin = true)
+    const managementBtn = page.locator('#management-menu-btn');
+    await expect(managementBtn).toBeVisible({ timeout: 8_000 });
+
+    // Hover to open the dropdown — Upload and Users live inside it
+    await managementBtn.hover();
+
+    await expect(nav.getByRole('link', { name: /upload/i })).toBeVisible({ timeout: 5_000 });
+    await expect(nav.getByRole('link', { name: /users/i })).toBeVisible({ timeout: 5_000 });
+
+    // Categories is always visible in the main nav (not inside the dropdown)
     await expect(nav.getByRole('link', { name: /categor/i })).toBeVisible();
   });
 
