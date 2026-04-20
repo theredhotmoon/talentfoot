@@ -6,7 +6,7 @@
       <input v-model="password" type="password" :placeholder="$t('register.password')" class="input-modern" required />
       <input v-model="password_confirmation" type="password" :placeholder="$t('register.confirm_password')" class="input-modern" required />
       
-      <div v-if="error" class="text-sm px-3 py-2 rounded-lg" style="color: #f87171; background: rgba(239,68,68,0.1);">{{ error }}</div>
+      <div v-if="error" class="error-message text-sm px-3 py-2 rounded-lg" style="color: #f87171; background: rgba(239,68,68,0.1);">{{ error }}</div>
       
       <button type="submit" :disabled="loading" class="btn-secondary w-full text-sm">
         {{ loading ? '...' : $t('register.submit') }}

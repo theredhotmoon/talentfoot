@@ -11,8 +11,6 @@ import { test, expect } from '../../fixtures';
 test.describe('Admin — /admin/categories Access', () => {
   test('admin can access /admin/categories page', async ({ adminPage: page }) => {
     await page.goto('/admin/categories');
-    await page.waitForLoadState('networkidle');
-
     await expect(page).toHaveURL(/\/admin\/categories/, { timeout: 8_000 });
 
     // CategoriesList view should render
@@ -22,8 +20,6 @@ test.describe('Admin — /admin/categories Access', () => {
 
   test('admin sees category management UI with add button', async ({ adminPage: page }) => {
     await page.goto('/admin/categories');
-    await page.waitForLoadState('networkidle');
-
     // Add category button
     const addBtn = page.locator('button').filter({ hasText: /add|new|dodaj|crear/i }).first();
     await expect(addBtn).toBeVisible({ timeout: 8_000 });
@@ -31,8 +27,6 @@ test.describe('Admin — /admin/categories Access', () => {
 
   test('admin categories page renders a list or grid', async ({ adminPage: page }) => {
     await page.goto('/admin/categories');
-    await page.waitForLoadState('networkidle');
-
     // Should have some content container (grid, table, or list)
     const content = page.locator('.grid, table, ul').first();
     await expect(content).toBeVisible({ timeout: 8_000 });
@@ -52,8 +46,6 @@ test.describe('Admin — /admin/categories CRUD', () => {
 
   test('admin can create a category from admin page', async ({ adminPage: page }) => {
     await page.goto('/admin/categories');
-    await page.waitForLoadState('networkidle');
-
     const addBtn = page.locator('button').filter({ hasText: /add|new|dodaj/i }).first();
     await addBtn.click();
 
@@ -80,8 +72,6 @@ test.describe('Admin — /admin/categories CRUD', () => {
 
   test('admin can edit a category from admin page', async ({ adminPage: page }) => {
     await page.goto('/admin/categories');
-    await page.waitForLoadState('networkidle');
-
     // Hover first card to reveal edit button
     const firstCard = page.locator('.grid > a, .grid > [class*="card"]').first();
     if (await firstCard.isVisible()) {

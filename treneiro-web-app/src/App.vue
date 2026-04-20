@@ -54,8 +54,8 @@ const closeManagement = () => {
 
 <template>
   <div class="min-h-screen flex flex-col" style="background: var(--tf-bg-deep); color: var(--tf-text);">
-    <!-- Glassmorphic Navbar (always visible) -->
-    <nav class="glass-nav sticky top-0 z-40 px-6 py-3 flex justify-between items-center">
+    <!-- Glassmorphic Navbar -->
+    <nav v-if="!['/login', '/register', '/forgot-password', '/reset-password'].includes($route.path)" class="glass-nav sticky top-0 z-40 px-6 py-3 flex justify-between items-center">
       <div class="flex items-center gap-8">
         <!-- Logo -->
         <router-link to="/" class="flex items-center gap-2 group">

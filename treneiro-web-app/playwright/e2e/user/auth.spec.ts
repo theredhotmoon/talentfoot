@@ -35,8 +35,6 @@ const NEW_USER = {
 test.describe('Auth — Registration', () => {
   test('registers a new account successfully', async ({ page }) => {
     await page.goto(APP + '/register');
-    await page.waitForLoadState('networkidle');
-
     await page.locator('input[type="text"]').fill(NEW_USER.name);
     await page.locator('input[type="email"]').fill(NEW_USER.email);
     // Two password inputs
@@ -52,8 +50,6 @@ test.describe('Auth — Registration', () => {
 
   test('shows validation error when passwords do not match', async ({ page }) => {
     await page.goto(APP + '/register');
-    await page.waitForLoadState('networkidle');
-
     await page.locator('input[type="text"]').fill('Test User');
     await page.locator('input[type="email"]').fill(`nomatch_${RUN}@test.com`);
     const pwdInputs = page.locator('input[type="password"]');
@@ -63,13 +59,11 @@ test.describe('Auth — Registration', () => {
     await page.locator('button[type="submit"]').click();
 
     // Error message div should appear
-    await expect(page.locator('div[style*="color: #f87171"]')).toBeVisible({ timeout: 8_000 });
+    await expect(page.locator('.error-message')).toBeVisible({ timeout: 8_000 });
   });
 
   test('shows error for already-existing email', async ({ page }) => {
     await page.goto(APP + '/register');
-    await page.waitForLoadState('networkidle');
-
     await page.locator('input[type="text"]').fill('Admin');
     await page.locator('input[type="email"]').fill('admin@admin.com');
     const pwdInputs = page.locator('input[type="password"]');
@@ -78,14 +72,13 @@ test.describe('Auth — Registration', () => {
 
     await page.locator('button[type="submit"]').click();
 
-    await expect(page.locator('div[style*="color: #f87171"]')).toBeVisible({ timeout: 8_000 });
+    await expect(page.locator('.error-message')).toBeVisible({ timeout: 8_000 });
   });
 
   test('has a link to the login page', async ({ page }) => {
     await page.goto(APP + '/register');
-    await page.waitForLoadState('networkidle');
-
-    await page.getByRole('link', { name: /login|sign in/i }).click();
+    // The register form has a login link; nav also has one — use the form's link specifically
+    await page.locator('p').getByRole('link', { name: /login|sign in/i }).click();
     await expect(page).toHaveURL(APP + '/login');
   });
 });
@@ -93,8 +86,6 @@ test.describe('Auth — Registration', () => {
 test.describe('Auth — Login', () => {
   test('logs in with valid credentials and reaches dashboard', async ({ page }) => {
     await page.goto(APP + '/login');
-    await page.waitForLoadState('networkidle');
-
     await page.locator('input[type="email"]').fill('testuser@talentfoot.com');
     await page.locator('input[type="password"]').fill('Password1!');
     await page.locator('button[type="submit"]').click();
@@ -104,43 +95,44 @@ test.describe('Auth — Login', () => {
 
   test('shows error message with wrong password', async ({ page }) => {
     await page.goto(APP + '/login');
-    await page.waitForLoadState('networkidle');
-
     await page.locator('input[type="email"]').fill('admin@admin.com');
     await page.locator('input[type="password"]').fill('WrongPassword!');
     await page.locator('button[type="submit"]').click();
 
-    await expect(page.locator('div[style*="color: #f87171"]')).toBeVisible({ timeout: 8_000 });
+    await expect(page.locator('.error-message')).toBeVisible({ timeout: 8_000 });
   });
 
   test('shows error for non-existing email', async ({ page }) => {
     await page.goto(APP + '/login');
-    await page.waitForLoadState('networkidle');
-
     await page.locator('input[type="email"]').fill('nobody@notexist.com');
     await page.locator('input[type="password"]').fill('SomePassword1!');
     await page.locator('button[type="submit"]').click();
 
-    await expect(page.locator('div[style*="color: #f87171"]')).toBeVisible({ timeout: 8_000 });
+    await expect(page.locator('.error-message')).toBeVisible({ timeout: 8_000 });
   });
 
   test('has a link to the registration page', async ({ page }) => {
     await page.goto(APP + '/login');
-    await page.waitForLoadState('networkidle');
-
-    await page.getByRole('link', { name: /register|sign up|create/i }).click();
+    // Login page has a register link in the form footer; nav also has one — use the form's link
+    await page.locator('p').getByRole('link', { name: /register|sign up|create/i }).click();
     await expect(page).toHaveURL(APP + '/register');
   });
 });
 
 test.describe('Auth — Protected Routes & Logout', () => {
-  test('redirects unauthenticated user from dashboard to /login', async ({ page }) => {
+  test('unauthenticated user can visit dashboard and sees login/register links', async ({ page }) => {
     // Clear storage so no token is present
     await page.goto(APP + '/login');
     await page.evaluate(() => localStorage.clear());
 
+    // Dashboard (/) is publicly accessible for browsing
     await page.goto(APP + '/');
-    await expect(page).toHaveURL(APP + '/login', { timeout: 8_000 });
+    await expect(page).toHaveURL(APP + '/', { timeout: 8_000 });
+
+    // Without auth the nav shows Login and Register links (not a user avatar)
+    const nav = page.locator('nav');
+    await expect(nav.getByRole('link', { name: /login/i })).toBeVisible();
+    await expect(nav.getByRole('link', { name: /register/i })).toBeVisible();
   });
 
   test('redirects unauthenticated user from /my-challenges to /login', async ({ page }) => {
@@ -154,13 +146,16 @@ test.describe('Auth — Protected Routes & Logout', () => {
   test('logout clears session and redirects to /login', async ({ page }) => {
     // Login via UI
     await page.goto(APP + '/login');
-    await page.waitForLoadState('networkidle');
     await page.locator('input[type="email"]').fill('testuser@talentfoot.com');
     await page.locator('input[type="password"]').fill('Password1!');
     await page.locator('button[type="submit"]').click();
     await expect(page).toHaveURL(APP + '/', { timeout: 10_000 });
 
-    // Click logout in nav — the button or link with logout text
+    // The logout option is inside the UserAvatarMenu dropdown.
+    // First open the avatar menu (circular button in the top-right nav area),
+    // then click the Logout item inside the dropdown.
+    const avatarBtn = page.locator('nav button[title]').last();
+    await avatarBtn.click();
     await page.getByRole('button', { name: /logout|sign out/i }).click();
     await expect(page).toHaveURL(/\/login/, { timeout: 8_000 });
   });

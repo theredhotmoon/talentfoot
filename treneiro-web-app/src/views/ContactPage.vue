@@ -33,7 +33,7 @@
               <span v-if="submitting">{{ $t('contact.sending') }}...</span>
               <span v-else>{{ $t('contact.send') }}</span>
             </button>
-            <p v-if="error" class="text-sm" style="color: var(--tf-accent-red);">{{ error }}</p>
+            <p v-if="error" class="text-sm error-message" style="color: var(--tf-accent-red);">{{ error }}</p>
           </div>
         </form>
       </div>
