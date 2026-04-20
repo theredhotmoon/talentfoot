@@ -51,10 +51,12 @@ test.describe('Clip Detail — Rating', () => {
 
     if (await ratingButtons.count() > 0) {
       // Intercept the rating API call
-      const [response] = await Promise.all([
-        page.waitForResponse((resp) => resp.url().includes('/rate') && resp.request().method() === 'POST'),
-        ratingButtons.first().click(),
-      ]);
+      // Register listener BEFORE clicking to avoid race condition in CI.
+      const responsePromise = page.waitForResponse(
+        (resp) => resp.url().includes('/rate') && resp.request().method() === 'POST',
+      );
+      await ratingButtons.first().click();
+      const response = await responsePromise;
       expect(response.status()).toBeLessThan(500);
     } else {
       // Rating UI has generic buttons — find them by position in ClipInfo
@@ -69,6 +71,15 @@ test.describe('Clip Detail — Rating', () => {
 test.describe('Clip Detail — Comments', () => {
   test('posts a new comment and it appears in the list', async ({ userPage: page }) => {
     await gotoFirstClip(page);
+
+    // The WelcomeTourModal (or any other full-screen modal) may appear on first visit in CI
+    // because the test user has showTips=true. It uses Teleport to <body> with a backdrop div.
+    // Click the backdrop to close it, then wait for it to be gone.
+    const tourBackdrop = page.locator('.fixed.inset-0.z-\\[9999\\] .absolute.inset-0');
+    if (await tourBackdrop.isVisible({ timeout: 1_500 }).catch(() => false)) {
+      await tourBackdrop.click();
+      await page.waitForSelector('.fixed.inset-0.z-\\[9999\\]', { state: 'hidden', timeout: 5_000 });
+    }
 
     const commentText = `E2E test comment ${Date.now()}`;
     const textarea = page.locator('textarea').first();
@@ -177,10 +188,12 @@ test.describe('Clip Detail — Challenge', () => {
       // Confirm button in the modal
       const confirmBtn = page.locator('.fixed button').filter({ hasText: /start|confirm|yes/i }).first();
       if (await confirmBtn.count() > 0) {
-        const [resp] = await Promise.all([
-          page.waitForResponse((r) => r.url().includes('/challenges') && r.request().method() === 'POST').catch(() => null),
-          confirmBtn.click(),
-        ]);
+        // Register listener BEFORE clicking to avoid race condition in CI.
+        const respPromise = page.waitForResponse(
+          (r) => r.url().includes('/challenges') && r.request().method() === 'POST',
+        ).catch(() => null);
+        await confirmBtn.click();
+        await respPromise;
 
         // Progress bar should appear fixed at the bottom
         const progressBar = page.locator('[class*="progress"], [class*="challenge"]').filter({ hasText: /progress|\//i });

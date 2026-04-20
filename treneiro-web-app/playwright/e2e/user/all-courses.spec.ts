@@ -60,7 +60,6 @@ test.describe('All Courses — Sort & Filter', () => {
 
   test('changing sort option triggers API request', async ({ userPage: page }) => {
     await page.goto('/courses');
-    
 
     const sortSelect = page.locator('select').first();
     const options = sortSelect.locator('option');
@@ -69,10 +68,13 @@ test.describe('All Courses — Sort & Filter', () => {
     if (optionCount > 1) {
       const secondValue = await options.nth(1).getAttribute('value');
       if (secondValue) {
-        const [request] = await Promise.all([
-          page.waitForRequest((req) => req.url().includes('/api/clips')),
-          sortSelect.selectOption(secondValue),
-        ]);
+        // Register listener BEFORE triggering the change to avoid the race condition in CI.
+        const requestPromise = page.waitForRequest(
+          (req) => req.url().includes('/api/clips'),
+          { timeout: 10_000 },
+        );
+        await sortSelect.selectOption(secondValue);
+        const request = await requestPromise;
         expect(request.url()).toContain('sort');
       }
     }
