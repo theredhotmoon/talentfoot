@@ -30,7 +30,7 @@ test.describe('Dashboard — Error States', () => {
 
     await page.goto('/');
     // Page should still render (not blank/crashed)
-    await expect(page.locator('nav')).toBeVisible();
+    await expect(page.locator('nav.glass-nav')).toBeVisible();
 
     // No unhandled JS exceptions (console.error is fine, thrown is not)
     expect(errors.filter((e) => !e.includes('AxiosError'))).toHaveLength(0);
@@ -42,9 +42,9 @@ test.describe('Clip Detail — Error States', () => {
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
 
-    await page.goto('/clips/999999/non-existent-clip');
+    await page.goto('/courses/999999/non-existent-clip');
     // Page should not show a blank screen — nav should still be visible
-    await expect(page.locator('nav')).toBeVisible({ timeout: 8_000 });
+    await expect(page.locator('nav.glass-nav')).toBeVisible({ timeout: 8_000 });
   });
 });
 
@@ -71,7 +71,7 @@ test.describe('Categories — Error States', () => {
     page.on('pageerror', (error) => errors.push(error.message));
 
     await page.goto('/categories');
-    await expect(page.locator('nav')).toBeVisible();
+    await expect(page.locator('nav.glass-nav')).toBeVisible();
   });
 });
 
@@ -96,7 +96,7 @@ test.describe('Tags — Error States', () => {
     page.on('pageerror', (error) => errors.push(error.message));
 
     await page.goto('/tags');
-    await expect(page.locator('nav')).toBeVisible();
+    await expect(page.locator('nav.glass-nav')).toBeVisible();
   });
 });
 
@@ -106,7 +106,7 @@ test.describe('Tag Detail — Error States', () => {
     page.on('pageerror', (error) => errors.push(error.message));
 
     await page.goto('/tags/999999');
-    await expect(page.locator('nav')).toBeVisible({ timeout: 8_000 });
+    await expect(page.locator('nav.glass-nav')).toBeVisible({ timeout: 8_000 });
   });
 });
 
@@ -116,7 +116,7 @@ test.describe('Category Detail — Error States', () => {
     page.on('pageerror', (error) => errors.push(error.message));
 
     await page.goto('/categories/999999');
-    await expect(page.locator('nav')).toBeVisible({ timeout: 8_000 });
+    await expect(page.locator('nav.glass-nav')).toBeVisible({ timeout: 8_000 });
   });
 });
 
@@ -130,6 +130,6 @@ test.describe('Challenges — Error States', () => {
     page.on('pageerror', (error) => errors.push(error.message));
 
     await page.goto('/my-challenges');
-    await expect(page.locator('nav')).toBeVisible();
+    await expect(page.locator('nav.glass-nav')).toBeVisible();
   });
 });

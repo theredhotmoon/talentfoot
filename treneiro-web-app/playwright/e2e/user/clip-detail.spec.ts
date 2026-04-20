@@ -76,14 +76,17 @@ test.describe('Clip Detail — Comments', () => {
 
     await textarea.fill(commentText);
 
-    // Submit button associated with the comment form
+    // Register the response listener BEFORE clicking to avoid the race condition
+    // where the response resolves before the listener is set up (especially in CI).
     const submitBtn = page.locator('button[type="submit"]').last();
-    
-    const [response] = await Promise.all([
-      page.waitForResponse((resp) => resp.url().includes('/comments') && resp.request().method() === 'POST'),
-      submitBtn.click(),
-    ]);
+    const responsePromise = page.waitForResponse(
+      (resp) => resp.url().includes('/comments') && resp.request().method() === 'POST',
+      { timeout: 15_000 },
+    );
 
+    await submitBtn.click();
+
+    const response = await responsePromise;
     expect(response.status()).toBe(201);
 
     // Comment should appear in the comment list
