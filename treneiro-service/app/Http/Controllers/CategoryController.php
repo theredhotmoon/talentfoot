@@ -95,7 +95,7 @@ class CategoryController extends Controller
 
         $name = $request->name;
         $requestSlugs = $request->slug;
-        $slugs = $category->slug ?? [];
+        $slugs = $category->getTranslations('slug') ?: [];
 
         if (is_array($name)) {
             foreach ($name as $locale => $val) {

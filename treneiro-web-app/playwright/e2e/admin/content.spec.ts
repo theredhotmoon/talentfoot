@@ -10,8 +10,6 @@ const API = 'http://localhost:8000';
 test.describe('Admin — Upload Page', () => {
   test('upload page is accessible and renders the form', async ({ adminPage: page }) => {
     await page.goto('/upload');
-    await page.waitForLoadState('networkidle');
-
     await expect(page).toHaveURL(/\/upload/, { timeout: 8_000 });
 
     // The upload form should contain a file input or form element
@@ -21,10 +19,8 @@ test.describe('Admin — Upload Page', () => {
 
   test('upload form has required fields (title, file input, category)', async ({ adminPage: page }) => {
     await page.goto('/upload');
-    await page.waitForLoadState('networkidle');
-
-    // File input must be present
-    const fileInput = page.locator('input[type="file"]');
+    // File input must be present (upload page has multiple; first is captions, last is the video)
+    const fileInput = page.locator('input[type="file"]').first();
     await expect(fileInput).toBeAttached({ timeout: 8_000 });
 
     // Title input (first text input)
@@ -34,8 +30,6 @@ test.describe('Admin — Upload Page', () => {
 
   test('upload page has a category selector', async ({ adminPage: page }) => {
     await page.goto('/upload');
-    await page.waitForLoadState('networkidle');
-
     const selectEl = page.locator('select').first();
     await expect(selectEl).toBeVisible({ timeout: 8_000 });
   });
@@ -54,17 +48,13 @@ test.describe('Admin — Edit Clip', () => {
 
   test('edit clip page renders with pre-populated form', async ({ adminPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const clipId = await getFirstClipId(page);
     if (!clipId) {
       console.log('No clips available to edit');
       return;
     }
 
-    await page.goto(`/clips/${clipId}/edit`);
-    await page.waitForLoadState('networkidle');
-
+    await page.goto(`/courses/${clipId}/edit`);
     await expect(page).toHaveURL(/\/edit/, { timeout: 8_000 });
 
     // Form should be pre-filled
@@ -74,13 +64,10 @@ test.describe('Admin — Edit Clip', () => {
 
   test('edit clip form allows changing the title', async ({ adminPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const clipId = await getFirstClipId(page);
     if (!clipId) return;
 
-    await page.goto(`/clips/${clipId}/edit`);
-    await page.waitForLoadState('networkidle');
+    await page.goto(`/courses/${clipId}/edit`);
 
     // Edit the EN title input
     const titleInput = page.locator('input[type="text"]').first();
@@ -93,13 +80,10 @@ test.describe('Admin — Edit Clip', () => {
 
   test('save button on edit clip page sends PUT request', async ({ adminPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const clipId = await getFirstClipId(page);
     if (!clipId) return;
 
-    await page.goto(`/clips/${clipId}/edit`);
-    await page.waitForLoadState('networkidle');
+    await page.goto(`/courses/${clipId}/edit`);
 
     // Just verify the save button exists and is clickable
     const saveBtn = page.locator('button[type="submit"], button').filter({ hasText: /save|zapisz|update/i }).first();
@@ -111,8 +95,6 @@ test.describe('Admin — Edit Clip', () => {
 test.describe('Admin — Delete Clip via API', () => {
   test('deleting a clip returns 200/204 and clip is no longer accessible', async ({ adminPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const token = await page.evaluate(() => localStorage.getItem('token'));
 
     // Create a temp clip via API (minimal payload)
@@ -166,12 +148,10 @@ test.describe('Admin — Clip Detail Admin Actions', () => {
   test('edit button appears on clip detail for admin', async ({ adminPage: page }) => {
     // Navigate to first clip detail
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
-    const firstClipLink = page.locator('a[href*="/clips/"]').first();
+    // Dashboard course cards link to /courses/:id/… (not /clips/)
+    const firstClipLink = page.locator('a[href*="/courses/"]').first();
     await expect(firstClipLink).toBeVisible({ timeout: 10_000 });
     await firstClipLink.click();
-    await page.waitForLoadState('networkidle');
 
     // Edit button/link only shown to admin
     const editBtn = page.getByRole('link', { name: /edit|edytuj/i });

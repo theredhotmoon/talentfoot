@@ -9,17 +9,13 @@ const RUN = Date.now();
 
 test.describe('Admin — Categories List', () => {
   test('categories page renders category cards', async ({ adminPage: page }) => {
-    await page.goto('/categories');
-    await page.waitForLoadState('networkidle');
-
+    await page.goto('/admin/categories');
     const grid = page.locator('.grid').first();
     await expect(grid).toBeVisible({ timeout: 8_000 });
   });
 
   test('Add New button is visible for admin', async ({ adminPage: page }) => {
-    await page.goto('/categories');
-    await page.waitForLoadState('networkidle');
-
+    await page.goto('/admin/categories');
     const addBtn = page.locator('button').filter({ hasText: /add|new|dodaj/i }).first();
     await expect(addBtn).toBeVisible({ timeout: 8_000 });
   });
@@ -27,9 +23,7 @@ test.describe('Admin — Categories List', () => {
 
 test.describe('Admin — Create Category', () => {
   test('opens create modal and creates a new category', async ({ adminPage: page }) => {
-    await page.goto('/categories');
-    await page.waitForLoadState('networkidle');
-
+    await page.goto('/admin/categories');
     const addBtn = page.locator('button').filter({ hasText: /add|new|dodaj/i }).first();
     await addBtn.click();
 
@@ -55,9 +49,7 @@ test.describe('Admin — Create Category', () => {
   });
 
   test('cancel button closes modal without creating', async ({ adminPage: page }) => {
-    await page.goto('/categories');
-    await page.waitForLoadState('networkidle');
-
+    await page.goto('/admin/categories');
     const addBtn = page.locator('button').filter({ hasText: /add|new|dodaj/i }).first();
     await addBtn.click();
 
@@ -74,9 +66,7 @@ test.describe('Admin — Create Category', () => {
 
 test.describe('Admin — Edit Category', () => {
   test('edit category modal opens on hover+click of edit icon', async ({ adminPage: page }) => {
-    await page.goto('/categories');
-    await page.waitForLoadState('networkidle');
-
+    await page.goto('/admin/categories');
     // Hover the first card to reveal the edit button
     const firstCard = page.locator('.grid > a, .grid > [class*="card"]').first();
     await firstCard.hover();
@@ -99,6 +89,9 @@ test.describe('Admin — Edit Category', () => {
         modal.locator('button[type="submit"], button').filter({ hasText: /save|zapisz|update/i }).first().click(),
       ]);
 
+      if (response.status() >= 400) {
+        console.error('Edit category failed:', await response.text());
+      }
       expect(response.status()).toBeLessThan(500);
     }
   });
@@ -108,9 +101,7 @@ test.describe('Admin — Delete Category', () => {
   test('creates and then deletes a category', async ({ adminPage: page }) => {
     const catName = `DelCat ${RUN}`;
 
-    await page.goto('/categories');
-    await page.waitForLoadState('networkidle');
-
+    await page.goto('/admin/categories');
     // Create first
     const addBtn = page.locator('button').filter({ hasText: /add|new|dodaj/i }).first();
     await addBtn.click();
@@ -142,7 +133,6 @@ test.describe('Admin — Delete Category', () => {
           page.waitForResponse((resp) => resp.url().includes('/api/categories/') && resp.request().method() === 'DELETE'),
           deleteBtn.click({ force: true }),
         ]);
-        await page.waitForLoadState('networkidle');
         await expect(page.getByText(catName)).not.toBeVisible({ timeout: 8_000 });
         break;
       }
@@ -152,9 +142,7 @@ test.describe('Admin — Delete Category', () => {
 
 test.describe('Admin — Category Detail Navigation', () => {
   test('clicking a category card navigates to category detail', async ({ adminPage: page }) => {
-    await page.goto('/categories');
-    await page.waitForLoadState('networkidle');
-
+    await page.goto('/admin/categories');
     const firstCard = page.locator('a[href*="/categories/"]').first();
     await expect(firstCard).toBeVisible({ timeout: 8_000 });
     await firstCard.click();

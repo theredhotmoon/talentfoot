@@ -18,8 +18,6 @@ test.describe('Admin — App Settings', () => {
 
   test('admin sees "App Settings" button in the Management dropdown', async ({ adminPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     // Hover over the Management button to open dropdown
     const managementBtn = page.locator('#management-menu-btn');
     await expect(managementBtn).toBeVisible({ timeout: 8_000 });
@@ -32,8 +30,6 @@ test.describe('Admin — App Settings', () => {
 
   test('clicking "App Settings" opens the modal with 3 inputs', async ({ adminPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     // Open Management dropdown and click App Settings
     const managementBtn = page.locator('#management-menu-btn');
     await managementBtn.click();
@@ -54,8 +50,6 @@ test.describe('Admin — App Settings', () => {
 
   test('admin can save settings and sees success feedback', async ({ adminPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     // Open modal
     const managementBtn = page.locator('#management-menu-btn');
     await managementBtn.click();
@@ -76,8 +70,8 @@ test.describe('Admin — App Settings', () => {
     // Success banner or modal auto-close (within 3 seconds)
     // Either: success text visible OR modal closes (both are valid outcomes)
     await expect(
-      page.locator('text=Settings saved successfully!').or(
-        page.locator('#app-settings-modal-overlay').filter({ hasNot: page.locator('[style]') })
+      page.locator('text=Settings saved successfully!').first().or(
+        page.locator('#app-settings-modal-overlay').filter({ hasNot: page.locator('[style]') }).first()
       )
     ).toBeVisible({ timeout: 6_000 });
 
@@ -94,8 +88,6 @@ test.describe('Admin — App Settings', () => {
 
   test('admin sees validation error for out-of-range input', async ({ adminPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const managementBtn = page.locator('#management-menu-btn');
     await managementBtn.click();
     await page.locator('#open-app-settings-btn').click();
@@ -112,8 +104,6 @@ test.describe('Admin — App Settings', () => {
 
   test('modal can be closed with Escape key', async ({ adminPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const managementBtn = page.locator('#management-menu-btn');
     await managementBtn.click();
     await page.locator('#open-app-settings-btn').click();
@@ -125,8 +115,6 @@ test.describe('Admin — App Settings', () => {
 
   test('modal can be closed by clicking the overlay backdrop', async ({ adminPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const managementBtn = page.locator('#management-menu-btn');
     await managementBtn.click();
     await page.locator('#open-app-settings-btn').click();
@@ -167,16 +155,20 @@ test.describe('Regular User — Settings Access', () => {
 
   test('regular user does NOT see App Settings in the nav', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     // Management dropdown should not exist for regular users
     await expect(page.locator('#management-menu-btn')).not.toBeVisible();
     await expect(page.locator('#open-app-settings-btn')).not.toBeVisible();
   });
 
   test('regular user gets 403 when calling PUT /api/admin/settings', async ({ userPage: page }) => {
+    await page.goto('/');
+    const token = await page.evaluate(() => localStorage.getItem('token'));
     const response = await page.request.put('/api/admin/settings', {
       data: { max_active_challenges: 3 },
+      headers: { 
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}` 
+      },
     });
     expect(response.status()).toBe(403);
   });

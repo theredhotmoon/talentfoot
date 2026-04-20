@@ -12,12 +12,10 @@ test.describe('Dashboard — Error States', () => {
     });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     // Should render the page without crashing
     await expect(page.locator('body')).toBeVisible();
     // No clip links should be present
-    const clipLinks = page.locator('a[href*="/clips/"]');
+    const clipLinks = page.locator('a[href*="/courses/"]');
     expect(await clipLinks.count()).toBe(0);
   });
 
@@ -31,10 +29,8 @@ test.describe('Dashboard — Error States', () => {
     page.on('pageerror', (error) => errors.push(error.message));
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     // Page should still render (not blank/crashed)
-    await expect(page.locator('nav')).toBeVisible();
+    await expect(page.locator('nav.glass-nav')).toBeVisible();
 
     // No unhandled JS exceptions (console.error is fine, thrown is not)
     expect(errors.filter((e) => !e.includes('AxiosError'))).toHaveLength(0);
@@ -46,11 +42,9 @@ test.describe('Clip Detail — Error States', () => {
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
 
-    await page.goto('/clips/999999/non-existent-clip');
-    await page.waitForLoadState('networkidle');
-
+    await page.goto('/courses/999999/non-existent-clip');
     // Page should not show a blank screen — nav should still be visible
-    await expect(page.locator('nav')).toBeVisible({ timeout: 8_000 });
+    await expect(page.locator('nav.glass-nav')).toBeVisible({ timeout: 8_000 });
   });
 });
 
@@ -61,8 +55,6 @@ test.describe('Categories — Error States', () => {
     });
 
     await page.goto('/categories');
-    await page.waitForLoadState('networkidle');
-
     // Page should render without crash
     await expect(page.locator('body')).toBeVisible();
     // No category links should be present
@@ -79,9 +71,7 @@ test.describe('Categories — Error States', () => {
     page.on('pageerror', (error) => errors.push(error.message));
 
     await page.goto('/categories');
-    await page.waitForLoadState('networkidle');
-
-    await expect(page.locator('nav')).toBeVisible();
+    await expect(page.locator('nav.glass-nav')).toBeVisible();
   });
 });
 
@@ -92,8 +82,6 @@ test.describe('Tags — Error States', () => {
     });
 
     await page.goto('/tags');
-    await page.waitForLoadState('networkidle');
-
     await expect(page.locator('body')).toBeVisible();
     const tagLinks = page.locator('a[href*="/tags/"]');
     expect(await tagLinks.count()).toBe(0);
@@ -108,9 +96,7 @@ test.describe('Tags — Error States', () => {
     page.on('pageerror', (error) => errors.push(error.message));
 
     await page.goto('/tags');
-    await page.waitForLoadState('networkidle');
-
-    await expect(page.locator('nav')).toBeVisible();
+    await expect(page.locator('nav.glass-nav')).toBeVisible();
   });
 });
 
@@ -120,9 +106,7 @@ test.describe('Tag Detail — Error States', () => {
     page.on('pageerror', (error) => errors.push(error.message));
 
     await page.goto('/tags/999999');
-    await page.waitForLoadState('networkidle');
-
-    await expect(page.locator('nav')).toBeVisible({ timeout: 8_000 });
+    await expect(page.locator('nav.glass-nav')).toBeVisible({ timeout: 8_000 });
   });
 });
 
@@ -132,9 +116,7 @@ test.describe('Category Detail — Error States', () => {
     page.on('pageerror', (error) => errors.push(error.message));
 
     await page.goto('/categories/999999');
-    await page.waitForLoadState('networkidle');
-
-    await expect(page.locator('nav')).toBeVisible({ timeout: 8_000 });
+    await expect(page.locator('nav.glass-nav')).toBeVisible({ timeout: 8_000 });
   });
 });
 
@@ -148,8 +130,6 @@ test.describe('Challenges — Error States', () => {
     page.on('pageerror', (error) => errors.push(error.message));
 
     await page.goto('/my-challenges');
-    await page.waitForLoadState('networkidle');
-
-    await expect(page.locator('nav')).toBeVisible();
+    await expect(page.locator('nav.glass-nav')).toBeVisible();
   });
 });

@@ -48,10 +48,11 @@ async function saveAuthState(
     return;
   }
 
-  const json = await response.json() as { access_token: string };
+  const json = await response.json() as { token?: string; access_token?: string };
 
-  if (!json.access_token) {
-    console.error(`[global-setup] No access_token in response for ${creds.email}:`, json);
+  const tokenValue = json.token ?? json.access_token;
+  if (!tokenValue) {
+    console.error(`[global-setup] No token in response for ${creds.email}:`, json);
     await browser.close();
     return;
   }
@@ -59,7 +60,7 @@ async function saveAuthState(
   // 3. Inject the Sanctum token into localStorage (same key used by the auth store)
   await page.evaluate((token: string) => {
     localStorage.setItem('token', token);
-  }, json.access_token);
+  }, tokenValue);
 
   // 4. Ensure the auth dir exists and persist state
   const dir = path.dirname(outFile);
@@ -68,6 +69,21 @@ async function saveAuthState(
   await context.storageState({ path: outFile });
   await browser.close();
   console.log(`[global-setup] ✅ Auth state saved → ${outFile}`);
+}
+
+async function ensureTestClipExists(token: string) {
+  try {
+    const checkResp = await fetch(`${API_BASE}/api/test-clip`, {
+      headers: { Accept: 'application/json' },
+    });
+    if (checkResp.ok) {
+      console.log('[global-setup] Ensured dummy clip exists via /api/test-clip');
+    } else {
+      console.warn('[global-setup] Failed to ensure dummy clip exists:', await checkResp.text());
+    }
+  } catch (e) {
+    console.warn('[global-setup] Could not check or create dummy clip:', e);
+  }
 }
 
 async function ensureTestUserExists(adminToken: string) {
@@ -110,8 +126,12 @@ export default async function globalSetup(config: FullConfig) {
       headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
       body: JSON.stringify(adminCreds),
     });
-    const { token } = await loginResp.json() as { token: string };
-    await ensureTestUserExists(token);
+    const json = await loginResp.json() as { token?: string, access_token?: string };
+    const token = json.token ?? json.access_token;
+    if (token) {
+      await ensureTestUserExists(token);
+      await ensureTestClipExists(token);
+    }
   } catch (e) {
     console.warn('[global-setup] Could not ensure test user:', e);
   }

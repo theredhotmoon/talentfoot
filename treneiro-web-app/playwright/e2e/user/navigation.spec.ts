@@ -8,8 +8,6 @@ import { test, expect } from '../../fixtures';
 test.describe('Navbar', () => {
   test('renders all expected nav links', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const nav = page.locator('nav');
     await expect(nav).toBeVisible();
 
@@ -25,8 +23,6 @@ test.describe('Navbar', () => {
 
   test('logo link navigates to dashboard', async ({ userPage: page }) => {
     await page.goto('/tags');
-    await page.waitForLoadState('networkidle');
-
     // Click the logo (⚽ TalentFoot)
     const logo = page.locator('nav a[href="/"]').first();
     await expect(logo).toBeVisible();
@@ -37,42 +33,32 @@ test.describe('Navbar', () => {
 
   test('nav link to tags navigates correctly', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     await page.locator('nav a[href="/tags"]').click();
     await expect(page).toHaveURL(/\/tags/, { timeout: 8_000 });
   });
 
   test('nav link to categories navigates correctly', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     await page.locator('nav a[href="/categories"]').click();
     await expect(page).toHaveURL(/\/categories/, { timeout: 8_000 });
   });
 
   test('nav link to my-challenges navigates correctly', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     await page.locator('nav a[href="/my-challenges"]').click();
     await expect(page).toHaveURL(/\/my-challenges/, { timeout: 8_000 });
   });
 
   test('nav is not visible on login page', async ({ page }) => {
     await page.goto('http://localhost:5173/login');
-    await page.waitForLoadState('networkidle');
-
     // Nav should not be rendered when not authenticated
-    const nav = page.locator('nav');
+    const nav = page.locator('nav.glass-nav');
     await expect(nav).not.toBeVisible({ timeout: 3_000 });
   });
 
   test('nav is not visible on register page', async ({ page }) => {
     await page.goto('http://localhost:5173/register');
-    await page.waitForLoadState('networkidle');
-
-    const nav = page.locator('nav');
+    const nav = page.locator('nav.glass-nav');
     await expect(nav).not.toBeVisible({ timeout: 3_000 });
   });
 });
@@ -80,8 +66,6 @@ test.describe('Navbar', () => {
 test.describe('Language Switcher', () => {
   test('language selector is visible in nav', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const langSelect = page.locator('nav select');
     await expect(langSelect).toBeVisible();
 
@@ -93,8 +77,6 @@ test.describe('Language Switcher', () => {
 
   test('switching language changes UI text', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const langSelect = page.locator('nav select');
 
     // Switch to PL
@@ -113,8 +95,6 @@ test.describe('Language Switcher', () => {
 
   test('switching to ES works', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const langSelect = page.locator('nav select');
     await langSelect.selectOption('es');
     await page.waitForTimeout(500);
@@ -129,8 +109,6 @@ test.describe('Language Switcher', () => {
 test.describe('Footer', () => {
   test('footer renders with stats section', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const footer = page.locator('footer');
     await expect(footer).toBeVisible();
 
@@ -143,17 +121,13 @@ test.describe('Footer', () => {
 
   test('footer has TalentFoot branding', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const footer = page.locator('footer');
-    await expect(footer.getByText('TalentFoot')).toBeVisible();
+    await expect(footer.getByText('TalentFoot').first()).toBeVisible();
     await expect(footer.getByText(/all rights reserved/i)).toBeVisible();
   });
 
   test('footer contains Terms link that navigates to /terms', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const footer = page.locator('footer');
     const termsLink = footer.locator('a[href="/terms"]');
     await expect(termsLink).toBeVisible();
@@ -163,8 +137,6 @@ test.describe('Footer', () => {
 
   test('footer contains Privacy link that navigates to /privacy', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const footer = page.locator('footer');
     const privacyLink = footer.locator('a[href="/privacy"]');
     await expect(privacyLink).toBeVisible();
@@ -174,8 +146,6 @@ test.describe('Footer', () => {
 
   test('footer contains Contact link that navigates to /contact', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const footer = page.locator('footer');
     const contactLink = footer.locator('a[href="/contact"]');
     await expect(contactLink).toBeVisible();
@@ -187,8 +157,6 @@ test.describe('Footer', () => {
 test.describe('Breadcrumbs', () => {
   test('breadcrumbs are NOT shown on the dashboard (root path)', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     // AppBreadcrumb is conditionally rendered only when path !== '/'
     const breadcrumb = page.locator('nav + main').locator('[class*="breadcrumb"], ol, .flex.items-center.gap').first();
     // The breadcrumb area should be empty or not present
@@ -199,8 +167,6 @@ test.describe('Breadcrumbs', () => {
 
   test('breadcrumbs ARE shown on non-root pages', async ({ userPage: page }) => {
     await page.goto('/tags');
-    await page.waitForLoadState('networkidle');
-
     // AppBreadcrumb should render on /tags
     // Look for breadcrumb indicators — the component likely has a nav or ordered list
     const mainContent = page.locator('main');

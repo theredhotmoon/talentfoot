@@ -14,7 +14,7 @@ class UserController extends Controller
     {
         $query = User::query();
 
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -22,7 +22,7 @@ class UserController extends Controller
             });
         }
 
-        if ($request->has('role')) {
+        if ($request->filled('role')) {
             $query->where('role', $request->input('role'));
         }
 
@@ -42,6 +42,25 @@ class UserController extends Controller
         $data = $user->toArray();
         $data['subscription_valid_until'] = $user->subscription_valid_until?->toDateString();
         return response()->json($data);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|in:user,admin',
+        ]);
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => $validated['role'],
+        ]);
+
+        return response()->json($user, 201);
     }
 
     public function update(Request $request, User $user)

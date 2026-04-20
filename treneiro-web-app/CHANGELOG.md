@@ -4,6 +4,21 @@ All notable changes to the Trenejro frontend are documented here.
 
 ---
 
+## 2026-04-20 — Playwright Test Suite Stabilization
+
+### Fixed
+- **Tests:** Stabilized the Playwright E2E test suite by resolving infrastructure bottlenecks and synchronization issues.
+- **Tests:** Updated all user spec files to reflect the `/courses/` routing instead of the deprecated `/clips/` paths.
+- **Tests:** Refactored `clip-detail.spec.ts` to properly handle strict mode violations by using `.first()` locators and waiting for URL navigation before asserting element visibility.
+- **Tests:** Fixed `static-pages.spec.ts` contact form test by using a valid email format to bypass browser-native HTML5 validation.
+- **Tests:** Resolved intermittent "429 Too Many Requests" errors by significantly increasing the API rate limit during test execution.
+- **Frontend:** Updated `App.vue` to hide the main navbar on authentication pages (`/login`, `/register`, etc.) as per design requirements and test expectations.
+
+### Changed
+- **Backend:** Increased `api` rate limit from 60 to 6000 requests per minute in `RouteServiceProvider.php` to support high-concurrency E2E testing.
+- **Backend:** Updated `GET /api/test-clip` debug endpoint to automatically seed a "Global Test Clip" if none exists, ensuring a deterministic state for frontend tests.
+- **Frontend:** Updated `global-setup.ts` to leverage the new `/api/test-clip` seeding logic instead of relying on brittle manual API POST requests.
+
 ## 2026-04-10 — Admin-Editable App Settings
 
 ### Added

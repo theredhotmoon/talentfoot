@@ -47,9 +47,19 @@ Route::get('/debug-login', function () {
 
 Route::get('/test-clip', function () {
     try {
+        if (\App\Models\Clip::count() === 0) {
+            \App\Models\Clip::create([
+                'name' => ['en' => 'Global Test Clip', 'pl' => 'Global Test Clip', 'es' => 'Global Test Clip'],
+                'description' => ['en' => 'Desc', 'pl' => 'Desc', 'es' => 'Desc'],
+                'slug' => ['en' => 'global-test-clip', 'pl' => 'global-test-clip', 'es' => 'global-test-clip'],
+                'file_path' => 'dummy.mp4',
+                'difficulty' => 1,
+                'password_protected' => true,
+            ]);
+        }
         return \App\Models\Clip::all();
     } catch (\Throwable $e) {
-        return $e->getMessage();
+        return response()->json(['error' => $e->getMessage()], 500);
     }
 });
 

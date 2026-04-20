@@ -9,18 +9,17 @@ import { test, expect } from '../../fixtures';
 // Helper: navigate to the first clip from dashboard
 async function gotoFirstClip(page: import('@playwright/test').Page) {
   await page.goto('/');
-  await page.waitForLoadState('networkidle');
-  const firstLink = page.locator('a[href*="/clips/"]').first();
+  const firstLink = page.locator('a[href*="/courses/"]').first();
   await expect(firstLink).toBeVisible({ timeout: 10_000 });
   await firstLink.click();
-  await page.waitForLoadState('networkidle');
+  await expect(page).toHaveURL(/\/courses\//, { timeout: 10_000 });
 }
 
 test.describe('Clip Detail — Page Load', () => {
   test('clip detail page renders video element', async ({ userPage: page }) => {
     await gotoFirstClip(page);
 
-    await expect(page).toHaveURL(/\/clips\//, { timeout: 10_000 });
+    await expect(page).toHaveURL(/\/courses\//, { timeout: 10_000 });
     // Video player must be present
     const video = page.locator('video');
     await expect(video).toBeVisible({ timeout: 10_000 });
@@ -77,14 +76,17 @@ test.describe('Clip Detail — Comments', () => {
 
     await textarea.fill(commentText);
 
-    // Submit button associated with the comment form
+    // Register the response listener BEFORE clicking to avoid the race condition
+    // where the response resolves before the listener is set up (especially in CI).
     const submitBtn = page.locator('button[type="submit"]').last();
-    
-    const [response] = await Promise.all([
-      page.waitForResponse((resp) => resp.url().includes('/comments') && resp.request().method() === 'POST'),
-      submitBtn.click(),
-    ]);
+    const responsePromise = page.waitForResponse(
+      (resp) => resp.url().includes('/comments') && resp.request().method() === 'POST',
+      { timeout: 15_000 },
+    );
 
+    await submitBtn.click();
+
+    const response = await responsePromise;
     expect(response.status()).toBe(201);
 
     // Comment should appear in the comment list
@@ -96,8 +98,6 @@ test.describe('Clip Detail — Comments', () => {
 
     // Wait for comments to load
     await page.waitForResponse((resp) => resp.url().includes('/comments'));
-    await page.waitForLoadState('networkidle');
-
     // Either comment items exist or the empty state is shown
     const commentsList = page.locator('[class*="comment"], .space-y-4 > div, .comments');
     // If no comments, the section still renders...
@@ -112,22 +112,18 @@ test.describe('Clip Detail — Subclips', () => {
     // SubclipsSidebar is a desktop sidebar — check if it renders
     const sidebar = page.locator('[class*="sidebar"], [class*="subclip"]').first();
     // Just verify page loads without crash (subclips may not be present)
-    await expect(page.locator('video')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('video').first()).toBeVisible({ timeout: 10_000 });
   });
 
   test('clicking main clip button resets active subclip', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     // Find first clip that has subclips in the data
-    const clipLinks = page.locator('a[href*="/clips/"]');
+    const clipLinks = page.locator('a[href*="/courses/"]');
     const count = await clipLinks.count();
 
     for (let i = 0; i < Math.min(count, 3); i++) {
       const href = await clipLinks.nth(i).getAttribute('href');
       await page.goto(href ?? '/');
-      await page.waitForLoadState('networkidle');
-
       // Check if there are subclip navigation items
       const subclipItems = page.locator('[class*="subclip"] button, [class*="subclip"] [role="button"]');
       if (await subclipItems.count() > 1) {
@@ -158,7 +154,7 @@ test.describe('Clip Detail — Challenge', () => {
       await startBtn.click();
 
       // Modal should appear
-      const modal = page.locator('[class*="modal"], .fixed[class*="z-"]').first();
+      const modal = page.locator('.modal-overlay, .modal-card').first();
       await expect(modal).toBeVisible({ timeout: 5_000 });
 
       // Cancel / close the modal
