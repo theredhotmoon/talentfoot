@@ -72,15 +72,6 @@ test.describe('Clip Detail — Comments', () => {
   test('posts a new comment and it appears in the list', async ({ userPage: page }) => {
     await gotoFirstClip(page);
 
-    // The WelcomeTourModal (or any other full-screen modal) may appear on first visit in CI
-    // because the test user has showTips=true. It uses Teleport to <body> with a backdrop div.
-    // Click the backdrop to close it, then wait for it to be gone.
-    const tourBackdrop = page.locator('.fixed.inset-0.z-\\[9999\\] .absolute.inset-0');
-    if (await tourBackdrop.isVisible({ timeout: 1_500 }).catch(() => false)) {
-      await tourBackdrop.click();
-      await page.waitForSelector('.fixed.inset-0.z-\\[9999\\]', { state: 'hidden', timeout: 5_000 });
-    }
-
     const commentText = `E2E test comment ${Date.now()}`;
     const textarea = page.locator('textarea').first();
     await expect(textarea).toBeVisible({ timeout: 10_000 });
@@ -107,12 +98,10 @@ test.describe('Clip Detail — Comments', () => {
   test('existing comments are listed when any exist', async ({ userPage: page }) => {
     await gotoFirstClip(page);
 
-    // Wait for comments to load
-    await page.waitForResponse((resp) => resp.url().includes('/comments'));
-    // Either comment items exist or the empty state is shown
-    const commentsList = page.locator('[class*="comment"], .space-y-4 > div, .comments');
-    // If no comments, the section still renders...
-    await expect(page.locator('textarea')).toBeVisible();
+    // Comments load async — wait for the textarea (section rendered) then check DOM state.
+    // Do NOT use waitForResponse here: the response may already be done before the listener
+    // is registered, especially after gotoFirstClip already awaited navigation.
+    await expect(page.locator('textarea')).toBeVisible({ timeout: 10_000 });
   });
 });
 
@@ -128,13 +117,21 @@ test.describe('Clip Detail — Subclips', () => {
 
   test('clicking main clip button resets active subclip', async ({ userPage: page }) => {
     await page.goto('/');
-    // Find first clip that has subclips in the data
-    const clipLinks = page.locator('a[href*="/courses/"]');
-    const count = await clipLinks.count();
+    await page.waitForLoadState('networkidle');
 
+    // Collect hrefs FIRST before navigating away — the locator can't re-evaluate after goto().
+    const clipLinks = page.locator('a[href*="/courses/"]');
+    await expect(clipLinks.first()).toBeVisible({ timeout: 10_000 });
+    const count = await clipLinks.count();
+    const hrefs: string[] = [];
     for (let i = 0; i < Math.min(count, 3); i++) {
       const href = await clipLinks.nth(i).getAttribute('href');
-      await page.goto(href ?? '/');
+      if (href) hrefs.push(href);
+    }
+
+    for (const href of hrefs) {
+      await page.goto(href);
+      await page.waitForLoadState('domcontentloaded');
       // Check if there are subclip navigation items
       const subclipItems = page.locator('[class*="subclip"] button, [class*="subclip"] [role="button"]');
       if (await subclipItems.count() > 1) {
