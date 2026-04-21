@@ -305,10 +305,13 @@ jobs:
               cd "$BACKEND_PATH"
               git pull origin main
             else
-              echo "==> No git repo found. Cloning for the first time..."
+              echo "==> Directory exists but is not a git repo. Initialising..."
               mkdir -p "$BACKEND_PATH"
-              git clone "$REPO_URL" "$BACKEND_PATH"
               cd "$BACKEND_PATH"
+              git init
+              git remote add origin "$REPO_URL"
+              git fetch origin main
+              git checkout -f -B main origin/main
               echo "==> Creating .env from example..."
               cp .env.example .env
               php artisan key:generate
