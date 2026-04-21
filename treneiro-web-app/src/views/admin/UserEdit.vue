@@ -51,10 +51,12 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '../../api';
 import { useI18n } from 'vue-i18n';
+import { useToast } from '../../composables/useToast';
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+const { showToast } = useToast();
 const id = route.params.id;
 
 const loading = ref(true);
@@ -75,7 +77,7 @@ onMounted(async () => {
         form.value.subscription_valid_until = response.data.subscription_valid_until || '';
     } catch (e) {
         console.error(e);
-        alert('Failed to load user');
+        showToast({ title: 'Error', message: 'Failed to load user', type: 'error' });
         router.push('/users'); // redirect back
     } finally {
         loading.value = false;
@@ -85,11 +87,11 @@ onMounted(async () => {
 const saveUser = async () => {
     try {
         await api.put(`/api/users/${id}`, form.value);
-        alert(t('users.saved_success'));
+        showToast({ title: 'Success', message: t('users.saved_success'), type: 'success', icon: '✅' });
         router.push('/users');
     } catch (e: any) {
         console.error(e);
-        alert(e.response?.data?.message || 'Failed to update user');
+        showToast({ title: 'Error', message: e.response?.data?.message || 'Failed to update user', type: 'error' });
     }
 };
 </script>

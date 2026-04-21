@@ -3,7 +3,7 @@
  * Covers: Registration, Login (valid/invalid), Logout, Protected route redirect
  */
 
-import { test as base, expect, type Page, chromium } from '@playwright/test';
+import { test as base, expect, type Page } from '@playwright/test';
 
 const APP = 'http://localhost:5173';
 const API  = 'http://localhost:8000';
@@ -32,6 +32,13 @@ const NEW_USER = {
   password: 'Password1!',
 };
 
+// Helper: wait for a toast notification to appear
+async function waitForToast(page: Page, type: 'success' | 'error' | 'warning' = 'error') {
+  // Toasts are rendered by ToastManager with data-test or specific classes
+  // We look for the toast container or any visible toast div
+  await page.waitForSelector('.fixed.bottom-6', { timeout: 8_000 });
+}
+
 test.describe('Auth — Registration', () => {
   test('registers a new account successfully', async ({ page }) => {
     await page.goto(APP + '/register');
@@ -48,7 +55,7 @@ test.describe('Auth — Registration', () => {
     await expect(page).toHaveURL(APP + '/', { timeout: 10_000 });
   });
 
-  test('shows validation error when passwords do not match', async ({ page }) => {
+  test('shows toast error when passwords do not match', async ({ page }) => {
     await page.goto(APP + '/register');
     await page.locator('input[type="text"]').fill('Test User');
     await page.locator('input[type="email"]').fill(`nomatch_${RUN}@test.com`);
@@ -58,11 +65,13 @@ test.describe('Auth — Registration', () => {
 
     await page.locator('button[type="submit"]').click();
 
-    // Error message div should appear
-    await expect(page.locator('.error-message')).toBeVisible({ timeout: 8_000 });
+    // Toast notification should appear
+    await waitForToast(page, 'error');
+    const toast = page.locator('.fixed.bottom-6 div').first();
+    await expect(toast).toBeVisible({ timeout: 8_000 });
   });
 
-  test('shows error for already-existing email', async ({ page }) => {
+  test('shows toast error for already-existing email', async ({ page }) => {
     await page.goto(APP + '/register');
     await page.locator('input[type="text"]').fill('Admin');
     await page.locator('input[type="email"]').fill('admin@admin.com');
@@ -72,7 +81,9 @@ test.describe('Auth — Registration', () => {
 
     await page.locator('button[type="submit"]').click();
 
-    await expect(page.locator('.error-message')).toBeVisible({ timeout: 8_000 });
+    await waitForToast(page, 'error');
+    const toast = page.locator('.fixed.bottom-6 div').first();
+    await expect(toast).toBeVisible({ timeout: 8_000 });
   });
 
   test('has a link to the login page', async ({ page }) => {
@@ -93,22 +104,26 @@ test.describe('Auth — Login', () => {
     await expect(page).toHaveURL(APP + '/', { timeout: 10_000 });
   });
 
-  test('shows error message with wrong password', async ({ page }) => {
+  test('shows toast error with wrong password', async ({ page }) => {
     await page.goto(APP + '/login');
     await page.locator('input[type="email"]').fill('admin@admin.com');
     await page.locator('input[type="password"]').fill('WrongPassword!');
     await page.locator('button[type="submit"]').click();
 
-    await expect(page.locator('.error-message')).toBeVisible({ timeout: 8_000 });
+    await waitForToast(page, 'error');
+    const toast = page.locator('.fixed.bottom-6 div').first();
+    await expect(toast).toBeVisible({ timeout: 8_000 });
   });
 
-  test('shows error for non-existing email', async ({ page }) => {
+  test('shows toast error for non-existing email', async ({ page }) => {
     await page.goto(APP + '/login');
     await page.locator('input[type="email"]').fill('nobody@notexist.com');
     await page.locator('input[type="password"]').fill('SomePassword1!');
     await page.locator('button[type="submit"]').click();
 
-    await expect(page.locator('.error-message')).toBeVisible({ timeout: 8_000 });
+    await waitForToast(page, 'error');
+    const toast = page.locator('.fixed.bottom-6 div').first();
+    await expect(toast).toBeVisible({ timeout: 8_000 });
   });
 
   test('has a link to the registration page', async ({ page }) => {

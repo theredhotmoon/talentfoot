@@ -2,45 +2,40 @@
 import { ref } from 'vue';
 import api from '../api';
 import { useI18n } from 'vue-i18n';
+import { useToast } from '../composables/useToast';
 
 const emit = defineEmits<{ (e: 'close'): void }>();
 const { t } = useI18n();
+const { showToast } = useToast();
 
 const form = ref({
     password: '',
     password_confirmation: '',
 });
 const saving = ref(false);
-const error = ref('');
-const success = ref(false);
 
 const handleSubmit = async () => {
-    error.value = '';
-    success.value = false;
-
     // Client-side validation
     if (form.value.password.length < 8) {
-        error.value = t('profile.password_min_length');
+        showToast({ title: 'Validation Error', message: t('profile.password_min_length'), type: 'error' });
         return;
     }
     if (form.value.password !== form.value.password_confirmation) {
-        error.value = t('profile.password_mismatch');
+        showToast({ title: 'Validation Error', message: t('profile.password_mismatch'), type: 'error' });
         return;
     }
 
     saving.value = true;
     try {
         await api.put('/api/profile/password', form.value);
-        success.value = true;
+        showToast({ title: t('profile.change_password'), message: t('profile.password_changed'), type: 'success', icon: '🔑' });
         form.value = { password: '', password_confirmation: '' };
-        setTimeout(() => emit('close'), 1500);
+        setTimeout(() => emit('close'), 1000);
     } catch (e: any) {
-        if (e.response?.data?.errors) {
-            const errors = e.response.data.errors;
-            error.value = Object.values(errors).flat().join(', ');
-        } else {
-            error.value = e.response?.data?.message || 'Failed to change password.';
-        }
+        const message = e.response?.data?.errors
+            ? Object.values(e.response.data.errors).flat().join(', ')
+            : e.response?.data?.message || 'Failed to change password.';
+        showToast({ title: 'Error', message, type: 'error' });
     } finally {
         saving.value = false;
     }
@@ -71,9 +66,6 @@ const handleSubmit = async () => {
                         <label class="block text-sm mb-1.5" style="color: var(--tf-text-muted);">{{ $t('profile.confirm_password') }}</label>
                         <input v-model="form.password_confirmation" type="password" required minlength="8" class="input-modern" autocomplete="new-password" />
                     </div>
-
-                    <div v-if="error" class="text-sm px-3 py-2 rounded-lg" style="color: #f87171; background: rgba(239,68,68,0.1);">{{ error }}</div>
-                    <div v-if="success" class="text-sm px-3 py-2 rounded-lg" style="color: var(--tf-accent-emerald); background: rgba(110,231,183,0.1);">✓ {{ $t('profile.password_changed') }}</div>
 
                     <div class="flex justify-end gap-3 pt-2">
                         <button type="button" @click="$emit('close')" class="btn-ghost">

@@ -56,7 +56,7 @@
                         <router-link :to="`/users/${user.id}/edit`" class="btn-ghost text-sm py-1 px-3">
                              {{ $t('common.edit') }}
                         </router-link>
-                        <button @click="deleteUser(user)" class="btn-danger text-sm py-1 px-3">
+                        <button @click="confirmDeleteUser(user)" class="btn-danger text-sm py-1 px-3">
                              {{ $t('common.delete') }}
                         </button>
                     </td>
@@ -83,6 +83,18 @@
             </button>
         </div>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <ConfirmModal
+        v-if="showDeleteConfirm && userToDelete"
+        :title="$t('users.actions')"
+        :message="$t('users.confirm_delete', { name: userToDelete.name })"
+        :confirm-label="$t('common.delete') || 'Delete'"
+        :cancel-label="$t('common.cancel') || 'Cancel'"
+        :danger="true"
+        @confirm="deleteUser"
+        @cancel="showDeleteConfirm = false; userToDelete = null"
+    />
   </div>
 </template>
 
@@ -90,8 +102,11 @@
 import { ref, onMounted } from 'vue';
 import api from '../../api';
 import { useI18n } from 'vue-i18n';
+import { useToast } from '../../composables/useToast';
+import ConfirmModal from '../../components/ConfirmModal.vue';
 
 const { t } = useI18n();
+const { showToast } = useToast();
 
 interface User {
     id: number;
@@ -112,6 +127,9 @@ const pagination = ref({
     last_page: 1,
     total: 0
 });
+
+const showDeleteConfirm = ref(false);
+const userToDelete = ref<User | null>(null);
 
 let searchTimeout: any;
 
@@ -158,19 +176,27 @@ const fetchUsers = async () => {
         };
     } catch (e) {
         console.error(e);
-        alert('Failed to load users');
+        showToast({ title: 'Error', message: 'Failed to load users', type: 'error' });
     } finally {
         loading.value = false;
     }
 };
 
-const deleteUser = async (user: User) => {
-    if (!confirm(t('users.confirm_delete', { name: user.name }))) return;
+const confirmDeleteUser = (user: User) => {
+    userToDelete.value = user;
+    showDeleteConfirm.value = true;
+};
+
+const deleteUser = async () => {
+    if (!userToDelete.value) return;
+    showDeleteConfirm.value = false;
     try {
-        await api.delete(`/api/users/${user.id}`);
+        await api.delete(`/api/users/${userToDelete.value.id}`);
+        userToDelete.value = null;
         fetchUsers();
     } catch (e: any) {
-        alert(e.response?.data?.message || 'Failed to delete user');
+        showToast({ title: 'Error', message: e.response?.data?.message || 'Failed to delete user', type: 'error' });
+        userToDelete.value = null;
     }
 };
 

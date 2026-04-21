@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useToast } from '../composables/useToast';
+import ConfirmModal from './ConfirmModal.vue';
 import api from '../api';
 
 const props = defineProps<{
@@ -15,10 +17,13 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const { showToast } = useToast();
 
 const editForm = ref({
     name: { en: '', pl: '', es: '' }
 });
+
+const showDeleteConfirm = ref(false);
 
 const initForm = () => {
     if (props.tag && !props.isCreate) {
@@ -52,7 +57,7 @@ const save = async () => {
         emit('saved');
         emit('close');
     } catch (e: any) {
-        alert(e.response?.data?.message || 'Failed to save');
+        showToast({ title: 'Error', message: e.response?.data?.message || 'Failed to save', type: 'error' });
     } finally {
         saving.value = false;
     }
@@ -60,8 +65,7 @@ const save = async () => {
 
 const deleteTag = async () => {
     if (!props.tag) return;
-    if (!confirm(t('tags.confirm_delete'))) return;
-    
+    showDeleteConfirm.value = false;
     saving.value = true;
     try {
         await api.delete(`/api/tags/${props.tag.id}`);
@@ -69,7 +73,7 @@ const deleteTag = async () => {
         emit('close');
     } catch (e: any) {
         console.error(e);
-        alert(t('tags.delete_error'));
+        showToast({ title: 'Error', message: t('tags.delete_error'), type: 'error' });
     } finally {
         saving.value = false;
     }
@@ -113,7 +117,7 @@ const deleteTag = async () => {
                     <div class="flex-1">
                         <template v-if="!isCreate && tag">
                             <button 
-                                @click="deleteTag" 
+                                @click="showDeleteConfirm = true" 
                                 :disabled="saving || (tag.clips && tag.clips.length > 0)"
                                 class="btn-ghost text-sm text-red-500 hover:text-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
                                 :title="tag.clips && tag.clips.length > 0 ? $t('tags.cannot_delete') : ''"
@@ -134,6 +138,18 @@ const deleteTag = async () => {
             </div>
         </div>
     </div>
+
+    <!-- Delete confirmation modal -->
+    <ConfirmModal
+        v-if="showDeleteConfirm"
+        :title="$t('tags.edit_tag')"
+        :message="$t('tags.confirm_delete')"
+        :confirm-label="$t('dashboard.delete') || 'Delete'"
+        :cancel-label="$t('common.cancel') || 'Cancel'"
+        :danger="true"
+        @confirm="deleteTag"
+        @cancel="showDeleteConfirm = false"
+    />
 </template>
 
 <style scoped>

@@ -245,6 +245,18 @@
       </div>
     </div>
   </div>
+
+  <!-- Delete Subclip Confirmation Modal -->
+  <ConfirmModal
+    v-if="showDeleteSubclipConfirm"
+    :title="$t('subclips.delete') || 'Delete Subclip'"
+    :message="$t('subclips.delete_confirm')"
+    :confirm-label="$t('dashboard.delete') || 'Delete'"
+    :cancel-label="$t('edit_clip.cancel')"
+    :danger="true"
+    @confirm="confirmDeleteSubclip"
+    @cancel="showDeleteSubclipConfirm = false; subclipToDelete = null"
+  />
 </template>
 
 <script setup lang="ts">
@@ -256,7 +268,9 @@ import api from '../api';
 import { useTranslation } from '../composables/useTranslation';
 import { useExtractThumbnails } from '../composables/useExtractThumbnails';
 import { useMediaUrl } from '../composables/useMediaUrl';
+import { useToast } from '../composables/useToast';
 import LanguageTabs from '../components/LanguageTabs.vue';
+import ConfirmModal from '../components/ConfirmModal.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -265,6 +279,7 @@ const id = route.params.id as string;
 const { getTranslated } = useTranslation();
 const { extractThumbnails } = useExtractThumbnails();
 const { getVideoUrl } = useMediaUrl();
+const { showToast } = useToast();
 
 const activeLang = ref('en');
 const mainFilePath = ref('');
@@ -298,6 +313,8 @@ const convertingCartoon = ref(false);
 
 const orderChanged = ref(false);
 const savingOrder = ref(false);
+const showDeleteSubclipConfirm = ref(false);
+const subclipToDelete = ref<string | null>(null);
 
 // VueUse useIntervalFn replaces manual setInterval/clearInterval and auto-stops on unmount.
 const { pause: pauseCartoonPoll, resume: resumeCartoonPoll } = useIntervalFn(async () => {
@@ -379,7 +396,7 @@ const fetchClip = async () => {
         cartoonStatus.value = clip.cartoon_status || null;
     } catch (e) {
         console.error(e);
-        alert(t('edit_clip.load_error'));
+        showToast({ title: 'Error', message: t('edit_clip.load_error'), type: 'error' });
         router.push('/');
     } finally {
         loading.value = false;
@@ -444,12 +461,12 @@ const handleUpdate = async () => {
             { headers: { 'Content-Type': 'multipart/form-data' } },
         );
         
-        alert(t('edit_clip.success'));
+        showToast({ title: 'Success', message: t('edit_clip.success'), type: 'success', icon: '✅' });
         const slug = response.data.slug.en || response.data.slug.pl || response.data.id;
         router.push(`/courses/${response.data.id}/${slug}`);
     } catch (e) {
         console.error(e);
-        alert(t('edit_clip.error'));
+        showToast({ title: 'Error', message: t('edit_clip.error'), type: 'error' });
     } finally {
         saving.value = false;
     }
@@ -479,11 +496,11 @@ const handleSubclipCaptionsChange = (event: Event, subclip: any, lang: string) =
 
 const addSubclip = async () => {
     if (!newSubclip.video_file) {
-        alert(t('subclips.upload_error'));
+        showToast({ title: 'Validation Error', message: t('subclips.upload_error'), type: 'error' });
         return;
     }
     if (!newSubclip.name.en) {
-        alert('Please fill in at least English name.');
+        showToast({ title: 'Validation Error', message: 'Please fill in at least English name.', type: 'error' });
         return;
     }
 
@@ -530,10 +547,10 @@ const addSubclip = async () => {
         newSubclip.captions = { en: null, pl: null, es: null };
         newSubclip.difficulty = 5;
         
-        alert(t('subclips.upload_success'));
+        showToast({ title: 'Success', message: t('subclips.upload_success'), type: 'success', icon: '✅' });
     } catch (e) {
         console.error(e);
-        alert(t('subclips.upload_error'));
+        showToast({ title: 'Error', message: t('subclips.upload_error'), type: 'error' });
     } finally {
         addingSubclip.value = false;
     }
@@ -558,25 +575,32 @@ const updateSubclip = async (subclip: any) => {
         await api.post(`/api/subclips/${subclip.id}`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
-        alert(t('subclips.update_success'));
+        showToast({ title: 'Success', message: t('subclips.update_success'), type: 'success', icon: '✅' });
     } catch (e) {
         console.error(e);
-        alert(t('edit_clip.error'));
+        showToast({ title: 'Error', message: t('edit_clip.error'), type: 'error' });
     } finally {
         subclip._saving = false;
     }
 };
 
 const deleteSubclip = async (subclipId: string) => {
-    if (!confirm(t('subclips.delete_confirm'))) return;
-    
+    subclipToDelete.value = subclipId;
+    showDeleteSubclipConfirm.value = true;
+};
+
+const confirmDeleteSubclip = async () => {
+    const subclipId = subclipToDelete.value;
+    if (!subclipId) return;
+    showDeleteSubclipConfirm.value = false;
+    subclipToDelete.value = null;
     try {
         await api.delete(`/api/subclips/${subclipId}`);
         subclips.value = subclips.value.filter(s => s.id !== subclipId);
-        alert(t('subclips.delete_success'));
+        showToast({ title: 'Success', message: t('subclips.delete_success'), type: 'success', icon: '✅' });
     } catch (e) {
         console.error(e);
-        alert(t('edit_clip.error'));
+        showToast({ title: 'Error', message: t('edit_clip.error'), type: 'error' });
     }
 };
 
@@ -602,10 +626,10 @@ const saveOrder = async () => {
         const ids = subclips.value.map(s => s.id);
         await api.post(`/api/clips/${id}/subclips/reorder`, { ids });
         orderChanged.value = false;
-        alert('Order updated successfully');
+        showToast({ title: 'Success', message: 'Order updated successfully', type: 'success', icon: '✅' });
     } catch (e) {
         console.error(e);
-        alert('Failed to save order');
+        showToast({ title: 'Error', message: 'Failed to save order', type: 'error' });
     } finally {
         savingOrder.value = false;
     }

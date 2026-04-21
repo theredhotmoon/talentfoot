@@ -84,6 +84,8 @@ const { t } = useI18n();
 const router = useRouter();
 const { getTranslated } = useTranslation();
 const { extractThumbnails } = useExtractThumbnails();
+import { useToast } from '../composables/useToast';
+const { showToast } = useToast();
 
 const activeLang = ref('en');
 
@@ -144,13 +146,13 @@ const handleCaptionsChange = (event: Event, lang: string) => {
 
 const handleUpload = async () => {
     if (!form.value.video_file) {
-        alert(t('upload.error'));
+        showToast({ title: 'Validation Error', message: t('upload.error'), type: 'error' });
         return;
     }
 
     // Basic validation: Ensure at least EN is filled
     if (!form.value.name.en || !form.value.description.en) {
-        alert(t('upload.fill_english'));
+        showToast({ title: 'Validation Error', message: t('upload.fill_english'), type: 'error' });
         return;
     }
 
@@ -194,12 +196,12 @@ const handleUpload = async () => {
                 'Content-Type': 'multipart/form-data'
             }
         });
-        alert(t('upload.success'));
+        showToast({ title: 'Success', message: t('upload.success'), type: 'success', icon: '✅' });
         // Redirect to edit page so user can add subclips
         router.push(`/courses/${response.data.id}/edit`);
     } catch (e) {
         console.error(e);
-        alert(t('upload.error'));
+        showToast({ title: 'Error', message: t('upload.error'), type: 'error' });
     } finally {
         uploading.value = false;
     }

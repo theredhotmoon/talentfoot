@@ -280,11 +280,15 @@ test.describe('Admin — Delete User', () => {
       const row = rows.nth(i);
       const emailCell = row.locator('td:nth-child(2)');
       if ((await emailCell.textContent())?.includes(tempEmail)) {
-        // Accept the confirm dialog
-        page.once('dialog', (dialog) => dialog.accept());
-
         const deleteBtn = row.locator('button').filter({ hasText: /delete|usuń/i });
         await deleteBtn.click();
+
+        // Wait for ConfirmModal to appear and click confirm
+        const confirmModal = page.locator('.modal-overlay');
+        await expect(confirmModal).toBeVisible({ timeout: 5_000 });
+        const confirmBtn = confirmModal.locator('button').filter({ hasText: /delete|usuń/i });
+        await confirmBtn.click();
+
         // Row should be gone
         await expect(page.getByText(tempEmail)).not.toBeVisible({ timeout: 5_000 });
         break;

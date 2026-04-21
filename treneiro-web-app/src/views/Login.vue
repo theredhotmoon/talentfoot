@@ -14,7 +14,6 @@
         <div class="text-right mt-1">
           <router-link to="/forgot-password" class="text-xs transition-colors" style="color: var(--tf-accent-emerald);">{{ $t('login.forgot_password') }}</router-link>
         </div>
-        <div v-if="error" class="error-message text-sm px-3 py-2 rounded-lg" style="color: #f87171; background: rgba(239,68,68,0.1);">{{ error }}</div>
         <button type="submit" :disabled="loading" class="btn-primary w-full text-sm">
           {{ loading ? '...' : $t('login.submit') }}
         </button>
@@ -53,25 +52,25 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { useToast } from '../composables/useToast';
 import api from '../api';
 import type { LoginCredentials } from '../types';
 
 const auth = useAuthStore();
+const { showToast } = useToast();
 const email = ref('');
 const password = ref('');
-const error = ref('');
 const loading = ref(false);
 const googleLoading = ref(false);
 
 const handleLogin = async (): Promise<void> => {
   loading.value = true;
-  error.value = '';
   try {
     const credentials: LoginCredentials = { email: email.value, password: password.value };
     await auth.login(credentials);
   } catch (e: unknown) {
     const err = e as { response?: { data?: { message?: string } } };
-    error.value = err.response?.data?.message ?? 'Login failed';
+    showToast({ title: 'Login Failed', message: err.response?.data?.message ?? 'Login failed', type: 'error' });
   } finally {
     loading.value = false;
   }
@@ -83,7 +82,7 @@ const handleGoogleLogin = async (): Promise<void> => {
     const response = await api.get<{ url: string }>('/api/auth/google/redirect');
     window.location.href = response.data.url;
   } catch {
-    error.value = 'Failed to connect to Google. Please try again.';
+    showToast({ title: 'Connection Error', message: 'Failed to connect to Google. Please try again.', type: 'error' });
     googleLoading.value = false;
   }
 };

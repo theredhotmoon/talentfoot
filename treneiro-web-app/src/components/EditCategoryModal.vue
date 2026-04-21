@@ -13,6 +13,7 @@ const emit = defineEmits<{
 }>();
 
 useI18n();
+import { useToast } from '../composables/useToast';
 
 import api from '../api';
 
@@ -68,6 +69,7 @@ const initForm = () => {
 watch(() => props.category, initForm, { immediate: true });
 
 const saving = ref(false);
+const { showToast } = useToast();
 
 const save = async () => {
     const payload = {
@@ -88,7 +90,7 @@ const save = async () => {
         emit('saved');
         emit('close');
     } catch (e: any) {
-        alert(e.response?.data?.message || 'Failed to save');
+        showToast({ title: 'Error', message: e.response?.data?.message || 'Failed to save', type: 'error' });
     } finally {
         saving.value = false;
     }

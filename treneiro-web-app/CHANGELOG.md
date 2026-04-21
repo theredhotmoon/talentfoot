@@ -4,6 +4,19 @@ All notable changes to the Trenejro frontend are documented here.
 
 ---
 
+## 2026-04-21 — Standardized Notification & Modal System
+
+### Added
+- **`src/components/ConfirmModal.vue`:** New reusable confirmation modal component used app-wide to replace all native `confirm()` browser dialogs. Uses `Teleport to="body"`, styled with the design system's glassmorphic `modal-overlay` and `modal-card` classes, supports `title`, `message`, `confirmLabel`, `cancelLabel`, and `danger` props.
+
+### Changed
+- **All `alert()` calls replaced with toasts:** Migrated 15+ `window.alert()` usages across the app to `showToast()` from `useToast`. Affected files: `Upload.vue`, `EditClip.vue` (×11 alerts), `ClipDetail.vue`, `ClipInfo.vue`, `EditTagModal.vue`, `EditCategoryModal.vue`, `UserEdit.vue`, `UsersList.vue`, `CategoriesList.vue`, `useClipActions.ts`.
+- **All `confirm()` calls replaced with `ConfirmModal`:** Three destructive-action flows now use the styled confirmation modal: delete subclip (`EditClip.vue`), delete user (`UsersList.vue`), delete category (`CategoriesList.vue`), and delete tag (`EditTagModal.vue`).
+- **Auth/form feedback migrated to toasts:** `Login.vue`, `RegisterForm.vue`, `ForgotPassword.vue`, `ResetPassword.vue`, `ChangePasswordModal.vue`, and `EditProfileModal.vue` — inline error/success `<div>` elements removed; all feedback now flows through `ToastManager.vue`.
+- **Tests updated:** `playwright/e2e/user/auth.spec.ts` — assertions updated from `.error-message` class selector to toast container selectors. `playwright/e2e/admin/users.spec.ts` — delete test updated to interact with `ConfirmModal` instead of native dialog.
+
+---
+
 ## 2026-04-21 — Frontend Build Fix
 
 ### Fixed

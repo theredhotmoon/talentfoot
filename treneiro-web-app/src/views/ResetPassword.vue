@@ -7,22 +7,11 @@
         <p class="text-sm mt-1" style="color: var(--tf-text-muted);">{{ $t('reset_password.title') }}</p>
       </div>
 
-      <div v-if="success" class="text-center space-y-4">
-        <div class="text-sm px-3 py-4 rounded-lg" style="color: #6ee7b7; background: rgba(16, 185, 129, 0.1);">
-          {{ $t('reset_password.success_message') }}
-        </div>
-        <router-link to="/login" class="btn-primary w-full text-sm mt-4 inline-block">
-          {{ $t('reset_password.login_now') }}
-        </router-link>
-      </div>
-
-      <form v-else @submit.prevent="handleResetPassword" class="space-y-4">
+      <form @submit.prevent="handleResetPassword" class="space-y-4">
         <input v-model="password" type="password" :placeholder="$t('reset_password.new_password')" class="input-modern" required />
         <input v-model="password_confirmation" type="password" :placeholder="$t('reset_password.confirm_password')" class="input-modern" required />
-        
-        <div v-if="error" class="text-sm px-3 py-2 rounded-lg" style="color: #f87171; background: rgba(239,68,68,0.1);">{{ error }}</div>
-        
-        <button type="submit" :disabled="loading" class="btn-primary w-full text-sm mt-2">
+
+        <button type="submit" :disabled="loading || !token" class="btn-primary w-full text-sm mt-2">
           {{ loading ? '...' : $t('reset_password.submit') }}
         </button>
       </form>
@@ -32,17 +21,18 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useToast } from '../composables/useToast';
 import api from '../api';
 
 const route = useRoute();
+const router = useRouter();
 const { t } = useI18n();
+const { showToast } = useToast();
 
 const password = ref('');
 const password_confirmation = ref('');
-const error = ref('');
-const success = ref(false);
 const loading = ref(false);
 
 const token = ref('');
@@ -53,7 +43,7 @@ onMounted(() => {
     token.value = route.query.token as string;
     email.value = route.query.email as string;
   } else {
-    error.value = t('reset_password.missing_token');
+    showToast({ title: 'Error', message: t('reset_password.missing_token'), type: 'error', duration: 0 });
   }
 });
 
@@ -61,7 +51,6 @@ const handleResetPassword = async (): Promise<void> => {
   if (!token.value || !email.value) return;
 
   loading.value = true;
-  error.value = '';
   try {
     await api.post('/api/reset-password', {
       token: token.value,
@@ -69,14 +58,20 @@ const handleResetPassword = async (): Promise<void> => {
       password: password.value,
       password_confirmation: password_confirmation.value
     });
-    success.value = true;
+    showToast({
+      title: t('reset_password.title'),
+      message: t('reset_password.success_message'),
+      type: 'success',
+      icon: '🔑',
+      duration: 6000,
+    });
+    router.push('/login');
   } catch (e: unknown) {
     const err = e as { response?: { data?: { message?: string, errors?: Record<string, string[]> } } };
-    if (err.response?.data?.errors) {
-      error.value = Object.values(err.response.data.errors).flat().join(', ');
-    } else {
-      error.value = err.response?.data?.message ?? t('reset_password.error_generic');
-    }
+    const message = err.response?.data?.errors
+      ? Object.values(err.response.data.errors).flat().join(', ')
+      : err.response?.data?.message ?? t('reset_password.error_generic');
+    showToast({ title: 'Error', message, type: 'error' });
   } finally {
     loading.value = false;
   }

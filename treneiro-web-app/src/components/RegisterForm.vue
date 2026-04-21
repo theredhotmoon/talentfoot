@@ -5,9 +5,7 @@
       <input v-model="email" type="email" :placeholder="$t('register.email')" class="input-modern" required />
       <input v-model="password" type="password" :placeholder="$t('register.password')" class="input-modern" required />
       <input v-model="password_confirmation" type="password" :placeholder="$t('register.confirm_password')" class="input-modern" required />
-      
-      <div v-if="error" class="error-message text-sm px-3 py-2 rounded-lg" style="color: #f87171; background: rgba(239,68,68,0.1);">{{ error }}</div>
-      
+
       <button type="submit" :disabled="loading" class="btn-secondary w-full text-sm">
         {{ loading ? '...' : $t('register.submit') }}
       </button>
@@ -40,6 +38,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { useToast } from '../composables/useToast';
 import api from '../api';
 import type { RegisterCredentials } from '../types';
 
@@ -54,17 +53,16 @@ const emit = defineEmits<{
 }>();
 
 const auth = useAuthStore();
+const { showToast } = useToast();
 const name = ref('');
 const email = ref('');
 const password = ref('');
 const password_confirmation = ref('');
-const error = ref('');
 const loading = ref(false);
 const googleLoading = ref(false);
 
 const handleRegister = async (): Promise<void> => {
   loading.value = true;
-  error.value = '';
   try {
     const credentials: RegisterCredentials = {
       name: name.value,
@@ -76,11 +74,10 @@ const handleRegister = async (): Promise<void> => {
     emit('success');
   } catch (e: unknown) {
     const err = e as { response?: { data?: { errors?: Record<string, string[]>; message?: string } } };
-    if (err.response?.data?.errors) {
-      error.value = Object.values(err.response.data.errors).flat().join(', ');
-    } else {
-      error.value = err.response?.data?.message ?? 'Registration failed';
-    }
+    const message = err.response?.data?.errors
+      ? Object.values(err.response.data.errors).flat().join(', ')
+      : err.response?.data?.message ?? 'Registration failed';
+    showToast({ title: 'Registration Failed', message, type: 'error' });
   } finally {
     loading.value = false;
   }
@@ -92,7 +89,7 @@ const handleGoogleSignUp = async (): Promise<void> => {
     const response = await api.get<{ url: string }>('/api/auth/google/redirect');
     window.location.href = response.data.url;
   } catch {
-    error.value = 'Failed to connect to Google. Please try again.';
+    showToast({ title: 'Connection Error', message: 'Failed to connect to Google. Please try again.', type: 'error' });
     googleLoading.value = false;
   }
 };

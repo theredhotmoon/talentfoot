@@ -348,7 +348,7 @@ const submitComment = async (content: string) => {
     const response = await api.post<Comment>(`/api/clips/${clipId}/comments`, { content });
     comments.value.unshift(response.data);
   } catch {
-    alert('Failed to post comment');
+    showToast({ title: 'Error', message: 'Failed to post comment', type: 'error' });
   } finally {
     submittingComment.value = false;
   }

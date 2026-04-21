@@ -72,6 +72,18 @@
         @close="showModal = false"
         @saved="fetchCategories"
     />
+
+    <!-- Delete Confirmation Modal -->
+    <ConfirmModal
+        v-if="showDeleteConfirm && categoryToDelete"
+        :title="$t('categories.title')"
+        :message="$t('categories.confirm_delete')"
+        :confirm-label="$t('dashboard.delete') || 'Delete'"
+        :cancel-label="$t('common.cancel') || 'Cancel'"
+        :danger="true"
+        @confirm="confirmDelete"
+        @cancel="showDeleteConfirm = false; categoryToDelete = null"
+    />
   </div>
 </template>
 
@@ -81,11 +93,14 @@ import api from '../../api';
 import { useI18n } from 'vue-i18n';
 import { useTranslation } from '../../composables/useTranslation';
 import { useMediaUrl } from '../../composables/useMediaUrl';
+import { useToast } from '../../composables/useToast';
 import EditCategoryModal from '../../components/EditCategoryModal.vue';
+import ConfirmModal from '../../components/ConfirmModal.vue';
 
 const { t } = useI18n();
 const { getTranslated: getLocalized } = useTranslation();
 const { getThumbnailUrl } = useMediaUrl();
+const { showToast } = useToast();
 
 interface Category {
     id: string;
@@ -102,6 +117,8 @@ const loading = ref(true);
 const showModal = ref(false);
 const isCreating = ref(false);
 const editingCategory = ref<Category | null>(null);
+const showDeleteConfirm = ref(false);
+const categoryToDelete = ref<Category | null>(null);
 
 const getCategoryThumbnails = (category: Category) => {
     if (!category.popular_clips || category.popular_clips.length === 0) return [];
@@ -118,7 +135,7 @@ const fetchCategories = async () => {
         categories.value = response.data;
     } catch (e) {
         console.error(e);
-        alert('Failed to load categories');
+        showToast({ title: 'Error', message: 'Failed to load categories', type: 'error' });
     } finally {
         loading.value = false;
     }
@@ -137,12 +154,20 @@ const openEditModal = (category: Category) => {
 };
 
 const deleteCategory = async (category: Category) => {
-    if (!confirm(t('categories.confirm_delete'))) return;
+    categoryToDelete.value = category;
+    showDeleteConfirm.value = true;
+};
+
+const confirmDelete = async () => {
+    if (!categoryToDelete.value) return;
+    showDeleteConfirm.value = false;
     try {
-        await api.delete(`/api/categories/${category.id}`);
+        await api.delete(`/api/categories/${categoryToDelete.value.id}`);
+        categoryToDelete.value = null;
         fetchCategories();
     } catch (e: any) {
-        alert(e.response?.data?.message || 'Failed to delete category');
+        showToast({ title: 'Error', message: e.response?.data?.message || 'Failed to delete category', type: 'error' });
+        categoryToDelete.value = null;
     }
 };
 
