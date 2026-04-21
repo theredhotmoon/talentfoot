@@ -53,7 +53,7 @@ const handleForgotPassword = async (): Promise<void> => {
   loading.value = true;
   error.value = '';
   try {
-    const response = await api.post('/api/forgot-password', { email: email.value });
+    await api.post('/api/forgot-password', { email: email.value });
     success.value = true;
   } catch (e: unknown) {
     const err = e as { response?: { data?: { message?: string } } };

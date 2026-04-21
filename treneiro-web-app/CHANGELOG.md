@@ -4,6 +4,13 @@ All notable changes to the Trenejro frontend are documented here.
 
 ---
 
+## 2026-04-21 — Frontend Build Fix
+
+### Fixed
+- **Build:** Resolved TypeScript compilation errors by removing unused variables and imports in `src/composables/useChallenge.ts`, `src/views/ClipDetail.vue`, `src/views/ForgotPassword.vue`, and `src/views/ResetPassword.vue`.
+
+---
+
 ## 2026-04-20 — Playwright Test Suite Stabilization
 
 ### Fixed
