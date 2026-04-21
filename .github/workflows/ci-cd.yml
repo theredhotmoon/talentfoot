@@ -288,7 +288,7 @@ jobs:
             dist/ \
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_FRONTEND_PATH }}/
 
-      # — Deploy Backend (pull code, install deps, migrate) —
+      # — Deploy Backend (Docker Compose on VPS) —
       - name: Deploy backend to VPS
         run: |
           ssh -i ~/.ssh/id_ed25519 \
@@ -298,6 +298,7 @@ jobs:
 
             BACKEND_PATH="${{ secrets.VPS_BACKEND_PATH }}"
             REPO_URL="https://github.com/theredhotmoon/talentfoot.git"
+            COMPOSE_DIR="/docker/talentfoot"
 
             echo "==> Checking backend directory..."
             if [ -d "$BACKEND_PATH/.git" ]; then
@@ -312,28 +313,29 @@ jobs:
               git remote add origin "$REPO_URL"
               git fetch origin main
               git checkout -f -B main origin/main
-              echo "==> Creating .env from example..."
-              cp .env.example .env
-              php artisan key:generate
             fi
 
-            echo "==> Installing Composer dependencies..."
-            composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+            echo "==> Rebuilding and restarting Docker containers..."
+            cd "$COMPOSE_DIR"
+            docker compose pull db 2>/dev/null || true
+            docker compose build --no-cache backend
+            docker compose up -d --force-recreate backend
 
-            echo "==> Running database migrations..."
-            php artisan migrate --force
+            echo "==> Waiting for backend container to be healthy..."
+            for i in $(seq 1 30); do
+              STATUS=$(docker inspect --format='{{.State.Health.Status}}' treneiro-backend 2>/dev/null || echo "starting")
+              echo "  Health: $STATUS (attempt $i/30)"
+              if [ "$STATUS" = "healthy" ]; then break; fi
+              sleep 5
+            done
 
-            echo "==> Clearing caches..."
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
+            echo "==> Running database migrations inside container..."
+            docker compose exec -T backend php artisan migrate --force
 
-            echo "==> Setting permissions..."
-            chmod -R 775 storage bootstrap/cache
-            chown -R www-data:www-data storage bootstrap/cache
-
-            echo "==> Restarting queue workers (if any)..."
-            php artisan queue:restart || true
+            echo "==> Clearing caches inside container..."
+            docker compose exec -T backend php artisan config:cache
+            docker compose exec -T backend php artisan route:cache
+            docker compose exec -T backend php artisan view:cache
 
             echo "==> Deployment complete!"
           ENDSSH
