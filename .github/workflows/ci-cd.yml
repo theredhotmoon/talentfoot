@@ -269,9 +269,16 @@ jobs:
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Debug — Validate SSH key (safe, no secret exposed)
+        run: |
+          echo "==> Key file size: $(wc -c < ~/.ssh/id_ed25519) bytes"
+          echo "==> Key header line: $(head -1 ~/.ssh/id_ed25519)"
+          echo "==> Key footer line: $(tail -1 ~/.ssh/id_ed25519)"
+          ssh-keygen -l -f ~/.ssh/id_ed25519 && echo "==> Key is VALID" || echo "==> Key is INVALID"
 
       # — Deploy Frontend (built static files → nginx/apache public dir) —
       - name: Deploy frontend to VPS
