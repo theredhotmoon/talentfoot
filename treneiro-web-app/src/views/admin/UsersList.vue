@@ -131,7 +131,7 @@ const pagination = ref({
 const showDeleteConfirm = ref(false);
 const userToDelete = ref<User | null>(null);
 
-let searchTimeout: any;
+let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const debounceSearch = () => {
     clearTimeout(searchTimeout);

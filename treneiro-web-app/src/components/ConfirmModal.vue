@@ -21,6 +21,7 @@ const emit = defineEmits<{
       role="dialog"
       aria-modal="true"
       :aria-label="title || 'Confirm action'"
+      aria-describedby="confirm-modal-message"
     >
       <div class="modal-card animate-fade-up" style="max-width: 420px;">
         <!-- Header -->
@@ -39,7 +40,7 @@ const emit = defineEmits<{
 
         <!-- Body -->
         <div class="px-6 py-5">
-          <p class="text-sm" style="color: var(--tf-text-muted);">{{ message }}</p>
+          <p id="confirm-modal-message" class="text-sm" style="color: var(--tf-text-muted);">{{ message }}</p>
         </div>
 
         <!-- Actions -->

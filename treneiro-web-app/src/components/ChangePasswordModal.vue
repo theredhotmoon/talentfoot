@@ -31,10 +31,11 @@ const handleSubmit = async () => {
         showToast({ title: t('profile.change_password'), message: t('profile.password_changed'), type: 'success', icon: '🔑' });
         form.value = { password: '', password_confirmation: '' };
         setTimeout(() => emit('close'), 1000);
-    } catch (e: any) {
-        const message = e.response?.data?.errors
-            ? Object.values(e.response.data.errors).flat().join(', ')
-            : e.response?.data?.message || 'Failed to change password.';
+    } catch (e: unknown) {
+        const err = e as { response?: { data?: { errors?: Record<string, string[]>; message?: string } } };
+        const message = err.response?.data?.errors
+            ? Object.values(err.response.data.errors).flat().join(', ')
+            : err.response?.data?.message || 'Failed to change password.';
         showToast({ title: 'Error', message, type: 'error' });
     } finally {
         saving.value = false;

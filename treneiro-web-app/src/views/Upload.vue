@@ -78,13 +78,13 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useTranslation } from '../composables/useTranslation';
 import { useExtractThumbnails } from '../composables/useExtractThumbnails';
+import { useToast } from '../composables/useToast';
 import LanguageTabs from '../components/LanguageTabs.vue';
 
 const { t } = useI18n();
 const router = useRouter();
 const { getTranslated } = useTranslation();
 const { extractThumbnails } = useExtractThumbnails();
-import { useToast } from '../composables/useToast';
 const { showToast } = useToast();
 
 const activeLang = ref('en');

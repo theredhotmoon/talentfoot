@@ -39,10 +39,11 @@ const handleSubmit = async () => {
         await auth.updateAutoPlayDelay(form.value.auto_play_delay);
         showToast({ title: 'Profile', message: '✓ Profile updated successfully', type: 'success', icon: '👤' });
         setTimeout(() => emit('close'), 800);
-    } catch (e: any) {
-        const message = e.response?.data?.errors
-            ? Object.values(e.response.data.errors).flat().join(', ')
-            : e.response?.data?.message || 'Failed to update profile.';
+    } catch (e: unknown) {
+        const err = e as { response?: { data?: { errors?: Record<string, string[]>; message?: string } } };
+        const message = err.response?.data?.errors
+            ? Object.values(err.response.data.errors).flat().join(', ')
+            : err.response?.data?.message || 'Failed to update profile.';
         showToast({ title: 'Error', message, type: 'error' });
     } finally {
         saving.value = false;
@@ -56,7 +57,13 @@ const handleSubmit = async () => {
             <div class="modal-card animate-fade-up">
                 <div class="px-6 py-4 flex justify-between items-center" style="border-bottom: 1px solid var(--tf-border);">
                     <h2 class="text-xl font-heading font-bold" style="color: var(--tf-text);">{{ $t('profile.edit_details') }}</h2>
-                    <button @click="$emit('close')" class="text-xl transition-colors onmouseover=" style="color: var(--tf-text-dimmed);"this.style.color='var(--tf-text)'" onmouseout="this.style.color='var(--tf-text-dimmed)'">&#215;</button>
+                    <button
+                        type="button"
+                        @click="$emit('close')"
+                        class="text-xl leading-none transition-colors hover:opacity-80 focus:outline-none"
+                        style="color: var(--tf-text-dimmed);"
+                        aria-label="Close"
+                    >&#215;</button>
                 </div>
 
                 <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
