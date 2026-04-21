@@ -9,18 +9,17 @@ import { test, expect } from '../../fixtures';
 // Helper: navigate to the first clip from dashboard
 async function gotoFirstClip(page: import('@playwright/test').Page) {
   await page.goto('/');
-  await page.waitForLoadState('networkidle');
-  const firstLink = page.locator('a[href*="/clips/"]').first();
+  const firstLink = page.locator('a[href*="/courses/"]').first();
   await expect(firstLink).toBeVisible({ timeout: 10_000 });
   await firstLink.click();
-  await page.waitForLoadState('networkidle');
+  await expect(page).toHaveURL(/\/courses\//, { timeout: 10_000 });
 }
 
 test.describe('Clip Detail — Page Load', () => {
   test('clip detail page renders video element', async ({ userPage: page }) => {
     await gotoFirstClip(page);
 
-    await expect(page).toHaveURL(/\/clips\//, { timeout: 10_000 });
+    await expect(page).toHaveURL(/\/courses\//, { timeout: 10_000 });
     // Video player must be present
     const video = page.locator('video');
     await expect(video).toBeVisible({ timeout: 10_000 });
@@ -52,10 +51,12 @@ test.describe('Clip Detail — Rating', () => {
 
     if (await ratingButtons.count() > 0) {
       // Intercept the rating API call
-      const [response] = await Promise.all([
-        page.waitForResponse((resp) => resp.url().includes('/rate') && resp.request().method() === 'POST'),
-        ratingButtons.first().click(),
-      ]);
+      // Register listener BEFORE clicking to avoid race condition in CI.
+      const responsePromise = page.waitForResponse(
+        (resp) => resp.url().includes('/rate') && resp.request().method() === 'POST',
+      );
+      await ratingButtons.first().click();
+      const response = await responsePromise;
       expect(response.status()).toBeLessThan(500);
     } else {
       // Rating UI has generic buttons — find them by position in ClipInfo
@@ -77,14 +78,17 @@ test.describe('Clip Detail — Comments', () => {
 
     await textarea.fill(commentText);
 
-    // Submit button associated with the comment form
+    // Register the response listener BEFORE clicking to avoid the race condition
+    // where the response resolves before the listener is set up (especially in CI).
     const submitBtn = page.locator('button[type="submit"]').last();
-    
-    const [response] = await Promise.all([
-      page.waitForResponse((resp) => resp.url().includes('/comments') && resp.request().method() === 'POST'),
-      submitBtn.click(),
-    ]);
+    const responsePromise = page.waitForResponse(
+      (resp) => resp.url().includes('/comments') && resp.request().method() === 'POST',
+      { timeout: 15_000 },
+    );
 
+    await submitBtn.click();
+
+    const response = await responsePromise;
     expect(response.status()).toBe(201);
 
     // Comment should appear in the comment list
@@ -94,14 +98,10 @@ test.describe('Clip Detail — Comments', () => {
   test('existing comments are listed when any exist', async ({ userPage: page }) => {
     await gotoFirstClip(page);
 
-    // Wait for comments to load
-    await page.waitForResponse((resp) => resp.url().includes('/comments'));
-    await page.waitForLoadState('networkidle');
-
-    // Either comment items exist or the empty state is shown
-    const commentsList = page.locator('[class*="comment"], .space-y-4 > div, .comments');
-    // If no comments, the section still renders...
-    await expect(page.locator('textarea')).toBeVisible();
+    // Comments load async — wait for the textarea (section rendered) then check DOM state.
+    // Do NOT use waitForResponse here: the response may already be done before the listener
+    // is registered, especially after gotoFirstClip already awaited navigation.
+    await expect(page.locator('textarea')).toBeVisible({ timeout: 10_000 });
   });
 });
 
@@ -112,22 +112,26 @@ test.describe('Clip Detail — Subclips', () => {
     // SubclipsSidebar is a desktop sidebar — check if it renders
     const sidebar = page.locator('[class*="sidebar"], [class*="subclip"]').first();
     // Just verify page loads without crash (subclips may not be present)
-    await expect(page.locator('video')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('video').first()).toBeVisible({ timeout: 10_000 });
   });
 
   test('clicking main clip button resets active subclip', async ({ userPage: page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    // Find first clip that has subclips in the data
-    const clipLinks = page.locator('a[href*="/clips/"]');
+    // Collect hrefs FIRST before navigating away — the locator can't re-evaluate after goto().
+    const clipLinks = page.locator('a[href*="/courses/"]');
+    await expect(clipLinks.first()).toBeVisible({ timeout: 10_000 });
     const count = await clipLinks.count();
-
+    const hrefs: string[] = [];
     for (let i = 0; i < Math.min(count, 3); i++) {
       const href = await clipLinks.nth(i).getAttribute('href');
-      await page.goto(href ?? '/');
-      await page.waitForLoadState('networkidle');
+      if (href) hrefs.push(href);
+    }
 
+    for (const href of hrefs) {
+      await page.goto(href);
+      await page.waitForLoadState('domcontentloaded');
       // Check if there are subclip navigation items
       const subclipItems = page.locator('[class*="subclip"] button, [class*="subclip"] [role="button"]');
       if (await subclipItems.count() > 1) {
@@ -158,7 +162,7 @@ test.describe('Clip Detail — Challenge', () => {
       await startBtn.click();
 
       // Modal should appear
-      const modal = page.locator('[class*="modal"], .fixed[class*="z-"]').first();
+      const modal = page.locator('.modal-overlay, .modal-card').first();
       await expect(modal).toBeVisible({ timeout: 5_000 });
 
       // Cancel / close the modal
@@ -181,10 +185,12 @@ test.describe('Clip Detail — Challenge', () => {
       // Confirm button in the modal
       const confirmBtn = page.locator('.fixed button').filter({ hasText: /start|confirm|yes/i }).first();
       if (await confirmBtn.count() > 0) {
-        const [resp] = await Promise.all([
-          page.waitForResponse((r) => r.url().includes('/challenges') && r.request().method() === 'POST').catch(() => null),
-          confirmBtn.click(),
-        ]);
+        // Register listener BEFORE clicking to avoid race condition in CI.
+        const respPromise = page.waitForResponse(
+          (r) => r.url().includes('/challenges') && r.request().method() === 'POST',
+        ).catch(() => null);
+        await confirmBtn.click();
+        await respPromise;
 
         // Progress bar should appear fixed at the bottom
         const progressBar = page.locator('[class*="progress"], [class*="challenge"]').filter({ hasText: /progress|\//i });

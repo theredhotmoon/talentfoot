@@ -18,9 +18,7 @@ test.describe('WCAG Accessibility Audit', () => {
 
   for (const p of pagesToAudit) {
     test(`Auditing ${p.name}`, async ({ page }) => {
-      await page.goto(`http://localhost:5174${p.path}`);
-      await page.waitForLoadState('networkidle');
-
+      await page.goto(`http://localhost:5173${p.path}`);
       const accessibilityScanResults = await new AxeBuilder({ page })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
         .disableRules(['color-contrast'])

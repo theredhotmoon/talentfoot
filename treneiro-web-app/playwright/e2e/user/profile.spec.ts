@@ -10,13 +10,10 @@ const API = 'http://localhost:8000';
 test.describe('Profile Management', () => {
   test('profile update form is accessible via nav', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     // Profile link usually in nav (avatar or "Profile" text)
     const profileLink = page.getByRole('link', { name: /profile|account|profil/i });
     if (await profileLink.count() > 0) {
       await profileLink.first().click();
-      await page.waitForLoadState('networkidle');
     } else {
       // Fallback: check nav for user info
       await expect(page.locator('nav')).toBeVisible();
@@ -26,8 +23,6 @@ test.describe('Profile Management', () => {
   test('update profile name via API and verify response', async ({ userPage: page }) => {
     // Directly test the API update with the user's auth token
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const token = await page.evaluate(() => localStorage.getItem('token'));
     expect(token).toBeTruthy();
 
@@ -51,8 +46,6 @@ test.describe('Profile Management', () => {
 
   test('change password with correct old password succeeds', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const token = await page.evaluate(() => localStorage.getItem('token'));
     expect(token).toBeTruthy();
 
@@ -75,8 +68,6 @@ test.describe('Profile Management', () => {
 
   test('change password with wrong current password returns 422', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const token = await page.evaluate(() => localStorage.getItem('token'));
 
     const response = await page.request.put(`${API}/api/profile/password`, {
@@ -97,8 +88,6 @@ test.describe('Profile Management', () => {
 
   test('tips preference can be updated', async ({ userPage: page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     const token = await page.evaluate(() => localStorage.getItem('token'));
 
     const response = await page.request.put(`${API}/api/profile/tips`, {

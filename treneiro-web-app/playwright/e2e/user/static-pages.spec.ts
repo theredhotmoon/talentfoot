@@ -13,8 +13,6 @@ const test = base;
 test.describe('Terms & Conditions', () => {
   test('page renders with heading and sections', async ({ page }) => {
     await page.goto(APP + '/terms');
-    await page.waitForLoadState('networkidle');
-
     const heading = page.locator('h1').first();
     await expect(heading).toBeVisible({ timeout: 8_000 });
 
@@ -26,16 +24,12 @@ test.describe('Terms & Conditions', () => {
 
   test('shows "Last updated" date', async ({ page }) => {
     await page.goto(APP + '/terms');
-    await page.waitForLoadState('networkidle');
-
     await expect(page.getByText(/last updated/i)).toBeVisible();
   });
 
   test('contains a link to the contact page', async ({ page }) => {
     await page.goto(APP + '/terms');
-    await page.waitForLoadState('networkidle');
-
-    const contactLink = page.locator('a[href="/contact"]');
+    const contactLink = page.locator('a[href="/contact"]').first();
     await expect(contactLink).toBeVisible();
     await contactLink.click();
     await expect(page).toHaveURL(APP + '/contact', { timeout: 8_000 });
@@ -45,8 +39,6 @@ test.describe('Terms & Conditions', () => {
 test.describe('Privacy Policy', () => {
   test('page renders with heading and sections', async ({ page }) => {
     await page.goto(APP + '/privacy');
-    await page.waitForLoadState('networkidle');
-
     const heading = page.locator('h1').first();
     await expect(heading).toBeVisible({ timeout: 8_000 });
 
@@ -57,16 +49,12 @@ test.describe('Privacy Policy', () => {
 
   test('shows "Last updated" date', async ({ page }) => {
     await page.goto(APP + '/privacy');
-    await page.waitForLoadState('networkidle');
-
-    await expect(page.getByText(/last updated/i)).toBeVisible();
+    await expect(page.getByText(/last updated/i).first()).toBeVisible();
   });
 
   test('contains a link to the contact page', async ({ page }) => {
     await page.goto(APP + '/privacy');
-    await page.waitForLoadState('networkidle');
-
-    const contactLink = page.locator('a[href="/contact"]');
+    const contactLink = page.locator('a[href="/contact"]').first();
     await expect(contactLink).toBeVisible();
     await contactLink.click();
     await expect(page).toHaveURL(APP + '/contact', { timeout: 8_000 });
@@ -76,8 +64,6 @@ test.describe('Privacy Policy', () => {
 test.describe('Contact Page', () => {
   test('renders contact form with name, email, message fields', async ({ page }) => {
     await page.goto(APP + '/contact');
-    await page.waitForLoadState('networkidle');
-
     const heading = page.locator('h1').first();
     await expect(heading).toBeVisible({ timeout: 8_000 });
 
@@ -93,8 +79,6 @@ test.describe('Contact Page', () => {
 
   test('submit button is present and enabled', async ({ page }) => {
     await page.goto(APP + '/contact');
-    await page.waitForLoadState('networkidle');
-
     const submitBtn = page.locator('button[type="submit"]');
     await expect(submitBtn).toBeVisible();
     await expect(submitBtn).toBeEnabled();
@@ -107,8 +91,6 @@ test.describe('Contact Page', () => {
     });
 
     await page.goto(APP + '/contact');
-    await page.waitForLoadState('networkidle');
-
     await page.locator('input[type="text"]').fill('E2E Test User');
     await page.locator('input[type="email"]').fill('e2e@test.com');
     await page.locator('textarea').fill('This is an E2E test message.');
@@ -129,22 +111,18 @@ test.describe('Contact Page', () => {
     });
 
     await page.goto(APP + '/contact');
-    await page.waitForLoadState('networkidle');
-
     await page.locator('input[type="text"]').fill('Test');
-    await page.locator('input[type="email"]').fill('bad');
+    await page.locator('input[type="email"]').fill('valid.format@but-backend-rejects.com');
     await page.locator('textarea').fill('Test');
     await page.locator('button[type="submit"]').click();
 
     // Error text should appear
-    const errorText = page.locator('[style*="accent-red"], [style*="f87171"], p').filter({ hasText: /invalid|error|błąd/i });
+    const errorText = page.locator('.error-message');
     await expect(errorText.first()).toBeVisible({ timeout: 8_000 });
   });
 
   test('form fields are required (HTML5 validation)', async ({ page }) => {
     await page.goto(APP + '/contact');
-    await page.waitForLoadState('networkidle');
-
     // Check the required attribute on inputs
     await expect(page.locator('input[type="text"]')).toHaveAttribute('required', '');
     await expect(page.locator('input[type="email"]')).toHaveAttribute('required', '');
