@@ -296,11 +296,23 @@ jobs:
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'ENDSSH'
             set -e
 
-            echo "==> Navigating to backend directory..."
-            cd ${{ secrets.VPS_BACKEND_PATH }}
+            BACKEND_PATH="${{ secrets.VPS_BACKEND_PATH }}"
+            REPO_URL="${{ secrets.VPS_REPO_URL }}"
 
-            echo "==> Pulling latest code..."
-            git pull origin main
+            echo "==> Checking backend directory..."
+            if [ -d "$BACKEND_PATH/.git" ]; then
+              echo "==> Git repo found. Pulling latest code..."
+              cd "$BACKEND_PATH"
+              git pull origin main
+            else
+              echo "==> No git repo found. Cloning for the first time..."
+              mkdir -p "$BACKEND_PATH"
+              git clone "$REPO_URL" "$BACKEND_PATH"
+              cd "$BACKEND_PATH"
+              echo "==> Creating .env from example..."
+              cp .env.example .env
+              php artisan key:generate
+            fi
 
             echo "==> Installing Composer dependencies..."
             composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
