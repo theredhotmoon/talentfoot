@@ -297,7 +297,7 @@ jobs:
             set -e
 
             BACKEND_PATH="${{ secrets.VPS_BACKEND_PATH }}"
-            REPO_URL="${{ secrets.VPS_REPO_URL }}"
+            REPO_URL="https://github.com/theredhotmoon/talentfoot.git"
 
             echo "==> Checking backend directory..."
             if [ -d "$BACKEND_PATH/.git" ]; then
