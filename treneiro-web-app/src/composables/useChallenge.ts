@@ -1,5 +1,4 @@
 import { ref, computed } from 'vue';
-import { useTimeoutFn } from '@vueuse/core';
 import api from '../api';
 import type { ActiveChallenge, Clip, Subclip } from '../types';
 
