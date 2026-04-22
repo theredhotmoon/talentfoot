@@ -180,13 +180,17 @@ export function useSubclips(clipId: string) {
 
   function moveSubclipUp(index: number) {
     if (index === 0) return;
-    [subclips.value[index], subclips.value[index - 1]] = [subclips.value[index - 1], subclips.value[index]];
+    const tmp = subclips.value[index - 1]!;
+    subclips.value[index - 1] = subclips.value[index]!;
+    subclips.value[index] = tmp;
     orderChanged.value = true;
   }
 
   function moveSubclipDown(index: number) {
     if (index === subclips.value.length - 1) return;
-    [subclips.value[index], subclips.value[index + 1]] = [subclips.value[index + 1], subclips.value[index]];
+    const tmp = subclips.value[index + 1]!;
+    subclips.value[index + 1] = subclips.value[index]!;
+    subclips.value[index] = tmp;
     orderChanged.value = true;
   }
 
