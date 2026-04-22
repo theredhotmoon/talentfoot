@@ -177,7 +177,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue';
+import { ref, watch, nextTick, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '../stores/settings';
 
@@ -210,6 +210,9 @@ const errors = ref<Errors>({});
 const saving = ref(false);
 const savedMessage = ref('');
 let savedTimer: ReturnType<typeof setTimeout> | null = null;
+onUnmounted(() => {
+  if (savedTimer) clearTimeout(savedTimer);
+});
 
 // Sync form with store when modal opens
 watch(

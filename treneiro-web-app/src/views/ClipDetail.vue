@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick, watch } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../api';
@@ -56,10 +56,6 @@ const {
   activeChallenge,
   showChallengeModal,
   showSubRequiredModal,
-  showChallengeCompleteToast,
-  showWatchErrorToast,
-  showMainClipRequiredToast,
-  showChallengeLimitToast,
   challengeStarting,
   startedSubclips,
   mainClipWatched,
@@ -73,7 +69,36 @@ const {
   onVideoPlay,
   onVideoPause,
   onVideoEnded,
-} = useChallenge(clipId);
+} = useChallenge(clipId, {
+  onChallengeComplete: () => showToast({
+    title: t('challenges.complete_title'),
+    message: t('challenges.complete_message'),
+    type: 'success',
+    icon: '🏆',
+    duration: 6000,
+  }),
+  onWatchError: () => showToast({
+    title: t('challenges.watch_error_title'),
+    message: t('challenges.watch_error_message'),
+    type: 'error',
+    icon: '⚠️',
+    duration: 5000,
+  }),
+  onMainClipRequired: () => showToast({
+    title: t('course.main_clip_required_title'),
+    message: t('course.main_clip_required_msg'),
+    type: 'warning',
+    icon: '🎬',
+    duration: 5000,
+  }),
+  onChallengeLimit: () => showToast({
+    title: t('course.challenge_limit_title'),
+    message: t('course.challenge_limit_message', { max: MAX_ACTIVE_CHALLENGES }),
+    type: 'error',
+    icon: '🚫',
+    duration: 6000,
+  }),
+});
 
 // ── Video player ref (for autoplay) ───────────────────────────────────────
 const playerRef = ref<InstanceType<typeof ClipVideoPlayer> | null>(null);
@@ -325,16 +350,20 @@ const onSubRequiredClose = async () => {
 
 // ── API calls ──────────────────────────────────────────────────────────────
 const fetchClip = async () => {
-  const response = await api.get<{
-    clip: Clip;
-    subscription_active: boolean;
-    cartoon_file_path: string | null;
-    active_challenge: typeof activeChallenge.value;
-  }>(`/api/clips/${clipId}`);
-  clip.value = response.data.clip;
-  subscriptionActive.value = response.data.subscription_active;
-  cartoonFilePath.value = response.data.cartoon_file_path;
-  activeChallenge.value = response.data.active_challenge ?? null;
+  try {
+    const response = await api.get<{
+      clip: Clip;
+      subscription_active: boolean;
+      cartoon_file_path: string | null;
+      active_challenge: typeof activeChallenge.value;
+    }>(`/api/clips/${clipId}`);
+    clip.value = response.data.clip;
+    subscriptionActive.value = response.data.subscription_active;
+    cartoonFilePath.value = response.data.cartoon_file_path;
+    activeChallenge.value = response.data.active_challenge ?? null;
+  } catch {
+    showToast({ title: 'Error', message: t('clip_detail.load_error'), type: 'error' });
+  }
 };
 
 const fetchComments = async () => {
@@ -388,58 +417,6 @@ watch(() => authStore.isInitialized, (initialized) => {
   }
 }, { immediate: true });
 
-// ── Watch Toast Flags ──────────────────────────────────────────────────────
-watch(showChallengeCompleteToast, (val) => {
-  if (val) {
-    showToast({
-      title: t('challenges.complete_title'),
-      message: t('challenges.complete_message'),
-      type: 'success',
-      icon: '🏆',
-      duration: 6000,
-    });
-    showChallengeCompleteToast.value = false;
-  }
-});
-
-watch(showWatchErrorToast, (val) => {
-  if (val) {
-    showToast({
-      title: t('challenges.watch_error_title'),
-      message: t('challenges.watch_error_message'),
-      type: 'error',
-      icon: '⚠️',
-      duration: 5000,
-    });
-    showWatchErrorToast.value = false;
-  }
-});
-
-watch(showMainClipRequiredToast, (val) => {
-  if (val) {
-    showToast({
-      title: t('course.main_clip_required_title'),
-      message: t('course.main_clip_required_msg'),
-      type: 'warning',
-      icon: '🎬',
-      duration: 5000,
-    });
-    showMainClipRequiredToast.value = false;
-  }
-});
-
-watch(showChallengeLimitToast, (val) => {
-  if (val) {
-    showToast({
-      title: t('course.challenge_limit_title'),
-      message: t('course.challenge_limit_message', { max: MAX_ACTIVE_CHALLENGES }),
-      type: 'error',
-      icon: '🚫',
-      duration: 6000,
-    });
-    showChallengeLimitToast.value = false;
-  }
-});
 </script>
 
 <template>

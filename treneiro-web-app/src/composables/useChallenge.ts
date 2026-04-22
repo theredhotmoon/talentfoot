@@ -2,29 +2,25 @@ import { ref, computed } from 'vue';
 import api from '../api';
 import type { ActiveChallenge, Clip, Subclip } from '../types';
 
-/**
- * Encapsulates all challenge-related state and watch-tracking logic
- * for the ClipDetail view.
- *
- * @param clipId - the current clip's id (used for the POST /api/challenges)
- */
+export const MAX_ACTIVE_CHALLENGES = 9;
 
-const MAX_ACTIVE_CHALLENGES = 9;
+interface ChallengeCbs {
+  onChallengeComplete?: () => void;
+  onWatchError?: () => void;
+  onMainClipRequired?: () => void;
+  onChallengeLimit?: () => void;
+}
 
-export function useChallenge(clipId: string) {
+export function useChallenge(clipId: string, cbs: ChallengeCbs = {}) {
   // ── Challenge state ────────────────────────────────────────────────────
   const activeChallenge = ref<ActiveChallenge | null>(null);
   const showChallengeModal = ref(false);
   const showSubRequiredModal = ref(false);
-  const showChallengeCompleteToast = ref(false);
-  const showWatchErrorToast = ref(false);
-  const showMainClipRequiredToast = ref(false);
   const pendingSubclip = ref<Subclip | null>(null);
   const challengeStarting = ref(false);
   const activeChallengeCount = ref(0);
-  const showChallengeLimitToast = ref(false);
 
-  // ── Watch timing state ─────────────────────────────────────────────────
+  // ── Watch timing state (internal) ─────────────────────────────────────
   const watchStartedAt = ref<number | null>(null);
   const accumulatedWatchTime = ref(0);
   const startedSubclips = ref<Set<string>>(new Set());
@@ -58,7 +54,7 @@ export function useChallenge(clipId: string) {
       const res = await api.get<{ active_count: number; max_allowed: number }>('/api/challenges/active-count');
       activeChallengeCount.value = res.data.active_count;
     } catch {
-      // silently fail — will default to 0  
+      // silently fail — will default to 0
     }
   };
 
@@ -80,7 +76,7 @@ export function useChallenge(clipId: string) {
       const err = e as { response?: { status?: number; data?: { challenge?: ActiveChallenge; error?: string; active_count?: number } } };
       if (err.response?.status === 429 && err.response?.data?.error === 'challenge_limit_reached') {
         activeChallengeCount.value = err.response.data.active_count ?? MAX_ACTIVE_CHALLENGES;
-        showChallengeLimitToast.value = true;
+        cbs.onChallengeLimit?.();
       } else if (err.response?.data?.challenge) {
         activeChallenge.value = err.response.data.challenge;
       }
@@ -99,7 +95,7 @@ export function useChallenge(clipId: string) {
       );
       activeChallenge.value = res.data.challenge;
       if (res.data.challenge.is_completed) {
-        showChallengeCompleteToast.value = true;
+        cbs.onChallengeComplete?.();
       }
     } catch (e) {
       console.error('Failed to record challenge watch', e);
@@ -108,10 +104,7 @@ export function useChallenge(clipId: string) {
 
   // ── Video event handlers ───────────────────────────────────────────────
   const onVideoPlay = (activeSubclip: Subclip | null, clip: Clip | null) => {
-    if (activeSubclip && !startedSubclips.value.has(activeSubclip.id)) {
-      startedSubclips.value.add(activeSubclip.id);
-    }
-    const currentId = activeSubclip ? activeSubclip.id : clip?.id;
+    const currentId = activeSubclip?.id ?? clip?.id;
     if (currentId) startedSubclips.value.add(currentId);
     if (watchStartedAt.value === null) {
       watchStartedAt.value = Date.now();
@@ -140,7 +133,7 @@ export function useChallenge(clipId: string) {
     if (!wId || watchedIds.includes(wId)) return;
 
     if (type === 'subclip' && !mainClipIsWatched) {
-      showMainClipRequiredToast.value = true;
+      cbs.onMainClipRequired?.();
       return;
     }
 
@@ -151,7 +144,7 @@ export function useChallenge(clipId: string) {
         : 0;
       const totalWatched = accumulatedWatchTime.value + currentSegment;
       if (videoElement.duration && totalWatched < videoElement.duration * 0.95) {
-        showWatchErrorToast.value = true;
+        cbs.onWatchError?.();
         return;
       }
     }
@@ -173,7 +166,7 @@ export function useChallenge(clipId: string) {
     }
     if (activeChallenge.value && !activeChallenge.value.is_completed) {
       if (!mainClipIsWatched) {
-        showMainClipRequiredToast.value = true;
+        cbs.onMainClipRequired?.();
         return;
       }
       onSelect(subclip);
@@ -201,14 +194,8 @@ export function useChallenge(clipId: string) {
     activeChallenge,
     showChallengeModal,
     showSubRequiredModal,
-    showChallengeCompleteToast,
-    showWatchErrorToast,
-    showMainClipRequiredToast,
-    showChallengeLimitToast,
     challengeStarting,
     startedSubclips,
-    watchStartedAt,
-    accumulatedWatchTime,
     activeChallengeCount,
     // Helpers
     mainClipWatched,
