@@ -105,7 +105,7 @@ import { useI18n } from 'vue-i18n';
 import { useToast } from '../../composables/useToast';
 import ConfirmModal from '../../components/ConfirmModal.vue';
 
-const { t } = useI18n();
+useI18n();
 const { showToast } = useToast();
 
 interface User {
@@ -131,7 +131,7 @@ const pagination = ref({
 const showDeleteConfirm = ref(false);
 const userToDelete = ref<User | null>(null);
 
-let searchTimeout: ReturnType<typeof setTimeout> | null = null;
+let searchTimeout: ReturnType<typeof setTimeout> | undefined;
 
 const debounceSearch = () => {
     clearTimeout(searchTimeout);

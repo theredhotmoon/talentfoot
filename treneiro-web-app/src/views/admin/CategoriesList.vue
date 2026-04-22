@@ -97,7 +97,7 @@ import { useToast } from '../../composables/useToast';
 import EditCategoryModal from '../../components/EditCategoryModal.vue';
 import ConfirmModal from '../../components/ConfirmModal.vue';
 
-const { t } = useI18n();
+useI18n();
 const { getTranslated: getLocalized } = useTranslation();
 const { getThumbnailUrl } = useMediaUrl();
 const { showToast } = useToast();
