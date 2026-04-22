@@ -42,7 +42,6 @@ const tipDismissed = ref(false);
 const showTour = ref(false);
 const isGuestTour = ref(false);
 const showRegisterStartModal = ref(false);
-const showChallengeLimitToast = ref(false);
 
 // ── Cover & Play Next state ───────────────────────────────────────────────
 const coverDismissed = ref(false);
@@ -293,10 +292,7 @@ const onStartCourse = async () => {
   }
   // Check challenge limit
   await fetchActiveChallengeCount();
-  if (!canStartChallenge.value) {
-    showChallengeLimitToast.value = true;
-    return;
-  }
+  if (!canStartChallenge.value) return;
   // Start the challenge
   coverDismissed.value = true;
   startChallenge(async (pendingSubclip: Subclip | null) => {
