@@ -93,7 +93,8 @@
         "post_comment": "Opublikuj",
         "posting": "Wysy\u0142anie...",
         "no_comments": "Brak komentarzy. B\u0105d\u017a pierwszy!",
-        "comment_error": "B\u0142\u0105d dodawania komentarza"
+        "comment_error": "B\u0142\u0105d dodawania komentarza",
+        "load_error": "Nie uda\u0142o si\u0119 za\u0142adowa\u0107 kursu"
     },
     "edit_clip": {
         "title": "Edytuj Klip",
@@ -190,7 +191,8 @@
         "now_playing": "Teraz odtwarzane",
         "rating": "Ocena",
         "votes": "g\u0142os\u00f3w",
-        "preview_available": "Dost\u0119pny do podgl\u0105du"
+        "preview_available": "Dost\u0119pny do podgl\u0105du",
+        "name_required": "Wype\u0142nij co najmniej nazw\u0119 w j\u0119zyku angielskim."
     },
     "subscription": {
         "renew_title": "Odn\u00f3w subskrypcj\u0119",

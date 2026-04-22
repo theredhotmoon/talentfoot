@@ -11,7 +11,7 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  role: string;
+  role: 'admin' | 'user';
   auth_provider?: string | null;
   show_tips?: boolean;
   auto_play_delay?: number;
@@ -89,7 +89,6 @@ export interface Clip {
   captions?: Record<string, string>;
   subclips: Subclip[];
   current_user_rating?: { rating: number } | null;
-  showRatingSelect?: boolean;
   cartoon_status?: string | null;
 }
 

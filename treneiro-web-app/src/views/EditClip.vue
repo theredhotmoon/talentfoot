@@ -37,7 +37,7 @@
               type="text"
               class="input-modern w-full"
             />
-            <p class="text-xs" style="color: var(--tf-text-dimmed) mt-1">{{ $t('edit_clip.slug_help') }}</p>
+            <p class="text-xs mt-1" style="color: var(--tf-text-dimmed)">{{ $t('edit_clip.slug_help') }}</p>
           </div>
           <div>
             <label class="block mb-1">{{ $t('edit_clip.description') }} ({{ activeLang.toUpperCase() }})</label>
@@ -56,7 +56,7 @@
               accept=".vtt" 
               class="input-modern w-full text-xs" 
             />
-            <p class="text-xs" style="color: var(--tf-text-dimmed) mt-1">{{ $t('upload.captions_help') }}</p>
+            <p class="text-xs mt-1" style="color: var(--tf-text-dimmed)">{{ $t('upload.captions_help') }}</p>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
@@ -102,7 +102,7 @@
         <!-- AI Cartoon Conversion Section -->
         <div class="card-static p-6 text-white">
           <h2 class="text-xl font-heading font-bold mb-4">🎨 {{ $t('cartoon.title') }}</h2>
-          <p class="text-sm" style="color: var(--tf-text-muted) mb-6">{{ $t('cartoon.description') }}</p>
+          <p class="text-sm mb-6" style="color: var(--tf-text-muted)">{{ $t('cartoon.description') }}</p>
 
           <div class="flex items-center gap-4">
             <button
@@ -263,380 +263,176 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useIntervalFn } from '@vueuse/core';
 import api from '../api';
 import { useTranslation } from '../composables/useTranslation';
-import { useExtractThumbnails } from '../composables/useExtractThumbnails';
 import { useMediaUrl } from '../composables/useMediaUrl';
 import { useToast } from '../composables/useToast';
+import { useSubclips } from '../composables/useSubclips';
+import { useCartoonConversion } from '../composables/useCartoonConversion';
 import LanguageTabs from '../components/LanguageTabs.vue';
 import ConfirmModal from '../components/ConfirmModal.vue';
+import type { Tag, Category } from '../types';
 
 const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const id = route.params.id as string;
 const { getTranslated } = useTranslation();
-const { extractThumbnails } = useExtractThumbnails();
 const { getVideoUrl } = useMediaUrl();
 const { showToast } = useToast();
 
+// ── Composables ────────────────────────────────────────────────────────────
+const {
+  subclips,
+  newSubclip,
+  newSubclipLang,
+  addingSubclip,
+  orderChanged,
+  savingOrder,
+  showDeleteSubclipConfirm,
+  subclipToDelete,
+  loadSubclips,
+  handleSubclipFileChange,
+  handleNewSubclipCaptionsChange,
+  handleSubclipCaptionsChange,
+  addSubclip,
+  updateSubclip,
+  deleteSubclip,
+  confirmDeleteSubclip,
+  moveSubclipUp,
+  moveSubclipDown,
+  saveOrder,
+} = useSubclips(id);
+
+const { cartoonStatus, cartoonError, convertingCartoon, convertToCartoon } =
+  useCartoonConversion(id);
+
+// ── Main clip state ────────────────────────────────────────────────────────
 const activeLang = ref('en');
 const mainFilePath = ref('');
 
 const form = reactive({
-    name: { en: '', pl: '', es: '' } as Record<string, string>,
-    slug: { en: '', pl: '', es: '' } as Record<string, string>,
-    description: { en: '', pl: '', es: '' } as Record<string, string>,
-    category_id: '',
-    captions: { en: null as File | null, pl: null as File | null, es: null as File | null }
+  name: { en: '', pl: '', es: '' } as Record<string, string>,
+  slug: { en: '', pl: '', es: '' } as Record<string, string>,
+  description: { en: '', pl: '', es: '' } as Record<string, string>,
+  category_id: '',
+  captions: { en: null as File | null, pl: null as File | null, es: null as File | null },
 });
 
-const existingCaptions = reactive({ en: '', pl: '', es: '' } as Record<string, string>);
-
+const existingCaptions = reactive<Record<string, string>>({ en: '', pl: '', es: '' });
 const difficulty = ref(5);
 const selectedTags = ref<string[]>([]);
-const availableTags = ref<any[]>([]);
-const categories = ref<any[]>([]);
+const availableTags = ref<Tag[]>([]);
+const categories = ref<Category[]>([]);
 const loading = ref(true);
 const saving = ref(false);
 
-// Subclips state
-const subclips = ref<any[]>([]);
-const addingSubclip = ref(false);
-const newSubclipLang = ref('en');
-
-// Cartoon state
-const cartoonStatus = ref<string | null>(null);
-const cartoonError = ref<string | null>(null);
-const convertingCartoon = ref(false);
-
-const orderChanged = ref(false);
-const savingOrder = ref(false);
-const showDeleteSubclipConfirm = ref(false);
-const subclipToDelete = ref<string | null>(null);
-
-// VueUse useIntervalFn replaces manual setInterval/clearInterval and auto-stops on unmount.
-const { pause: pauseCartoonPoll, resume: resumeCartoonPoll } = useIntervalFn(async () => {
-    try {
-        const res = await api.get<{ cartoon_status: string | null; cartoon_error: string | null }>(
-            `/api/clips/${id}/cartoon-status`,
-        );
-        cartoonStatus.value = res.data.cartoon_status;
-        cartoonError.value = res.data.cartoon_error;
-        if (res.data.cartoon_status === 'done' || res.data.cartoon_status === 'failed') {
-            pauseCartoonPoll();
-        }
-    } catch (e) {
-        console.error('Polling error', e);
-    }
-}, 5000, { immediate: false });
-const newSubclip = reactive({
-    name: { en: '', pl: '', es: '' } as Record<string, string>,
-    video_file: null as File | null,
-    captions: { en: null as File | null, pl: null as File | null, es: null as File | null },
-    difficulty: 5,
-});
-
+// ── Data fetching ──────────────────────────────────────────────────────────
 const fetchTagsAndCategories = async () => {
-    try {
-        const [tagsRes, catsRes] = await Promise.all([
-            api.get('/api/tags'),
-            api.get('/api/categories')
-        ]);
-        availableTags.value = tagsRes.data;
-        categories.value = catsRes.data;
-    } catch (e) {
-        console.error(e);
-    }
+  try {
+    const [tagsRes, catsRes] = await Promise.all([
+      api.get<Tag[]>('/api/tags'),
+      api.get<Category[]>('/api/categories'),
+    ]);
+    availableTags.value = tagsRes.data;
+    categories.value = catsRes.data;
+  } catch (e) {
+    console.error(e);
+  }
 };
 
 const fetchClip = async () => {
-    try {
-        const response = await api.get(`/api/clips/${id}`);
-        const clip = response.data.clip;
-        
-        const safeGet = (field: any, lang: string) => {
-            if (typeof field === 'string') return field;
-            return field?.[lang] || '';
-        };
+  try {
+    const response = await api.get(`/api/clips/${id}`);
+    const clip = response.data.clip;
 
-        ['en', 'pl', 'es'].forEach(lang => {
-             form.name[lang] = safeGet(clip.name, lang);
-             form.slug[lang] = safeGet(clip.slug, lang);
-             form.description[lang] = safeGet(clip.description, lang);
-             existingCaptions[lang] = safeGet(clip.captions, lang);
-        });
-        
-        mainFilePath.value = clip.file_path;
-        difficulty.value = clip.difficulty;
-        form.category_id = clip.category_id || '';
-        
-        if (clip.tags) {
-            selectedTags.value = clip.tags.map((t: any) => t.id);
-        }
+    const safeGet = (field: unknown, lang: string): string => {
+      if (typeof field === 'string') return field;
+      return (field as Record<string, string>)?.[lang] ?? '';
+    };
 
-        // Load subclips with editable state
-        if (clip.subclips) {
-            subclips.value = clip.subclips.map((sc: any) => ({
-                ...sc,
-                _name: typeof sc.name === 'string' 
-                    ? { en: sc.name, pl: '', es: '' } 
-                    : { en: '', pl: '', es: '', ...sc.name },
-                _difficulty: sc.difficulty,
-                _is_preview: !!sc.is_preview,
-                _existingCaptions: sc.captions || {},
-                _newCaptions: { en: null, pl: null, es: null },
-                _activeLang: 'en',
-                _saving: false,
-            }));
-        }
+    ['en', 'pl', 'es'].forEach((lang) => {
+      form.name[lang] = safeGet(clip.name, lang);
+      form.slug[lang] = safeGet(clip.slug, lang);
+      form.description[lang] = safeGet(clip.description, lang);
+      existingCaptions[lang] = safeGet(clip.captions, lang);
+    });
 
-        // Load cartoon status
-        cartoonStatus.value = clip.cartoon_status || null;
-    } catch (e) {
-        console.error(e);
-        showToast({ title: 'Error', message: t('edit_clip.load_error'), type: 'error' });
-        router.push('/');
-    } finally {
-        loading.value = false;
+    mainFilePath.value = clip.file_path;
+    difficulty.value = clip.difficulty;
+    form.category_id = clip.category_id ?? '';
+
+    if (clip.tags) {
+      selectedTags.value = clip.tags.map((tag: Tag) => tag.id);
     }
+
+    if (clip.subclips) {
+      loadSubclips(clip.subclips);
+    }
+
+    cartoonStatus.value = clip.cartoon_status ?? null;
+  } catch (e) {
+    console.error(e);
+    showToast({ title: 'Error', message: t('edit_clip.load_error'), type: 'error' });
+    router.push('/');
+  } finally {
+    loading.value = false;
+  }
 };
 
-const toggleTag = (id: string) => {
-    if (selectedTags.value.includes(id)) {
-        selectedTags.value = selectedTags.value.filter(t => t !== id);
-    } else {
-        selectedTags.value.push(id);
-    }
+// ── Actions ────────────────────────────────────────────────────────────────
+const toggleTag = (tagId: string) => {
+  if (selectedTags.value.includes(tagId)) {
+    selectedTags.value = selectedTags.value.filter((t) => t !== tagId);
+  } else {
+    selectedTags.value.push(tagId);
+  }
 };
 
 const handleMainCaptionsChange = (event: Event, lang: string) => {
-    const target = event.target as HTMLInputElement;
-    if (target.files && target.files[0]) {
-        form.captions[lang as 'en' | 'pl' | 'es'] = target.files[0];
-    }
-};
-
-const convertToCartoon = async () => {
-    convertingCartoon.value = true;
-    try {
-        const response = await api.post<{ cartoon_status: string }>(
-            `/api/clips/${id}/convert-cartoon`,
-        );
-        cartoonStatus.value = response.data.cartoon_status;
-        resumeCartoonPoll();
-    } catch (e: unknown) {
-        console.error(e);
-        const err = e as { response?: { data?: { message?: string } } };
-        cartoonError.value = err.response?.data?.message ?? 'Failed to start conversion';
-    } finally {
-        convertingCartoon.value = false;
-    }
+  const target = event.target as HTMLInputElement;
+  if (target.files?.[0]) {
+    form.captions[lang as 'en' | 'pl' | 'es'] = target.files[0];
+  }
 };
 
 const handleUpdate = async () => {
-    saving.value = true;
-    
-    try {
-        const formData = new FormData();
-        formData.append('_method', 'PUT'); // Fake PUT for file upload
-        formData.append('name', JSON.stringify(form.name));
-        formData.append('slug', JSON.stringify(form.slug));
-        formData.append('description', JSON.stringify(form.description));
-        formData.append('difficulty', difficulty.value.toString());
-        if (form.category_id) formData.append('category_id', form.category_id);
-        formData.append('tags', JSON.stringify(selectedTags.value));
+  saving.value = true;
+  try {
+    const formData = new FormData();
+    formData.append('_method', 'PUT');
+    formData.append('name', JSON.stringify(form.name));
+    formData.append('slug', JSON.stringify(form.slug));
+    formData.append('description', JSON.stringify(form.description));
+    formData.append('difficulty', difficulty.value.toString());
+    if (form.category_id) formData.append('category_id', form.category_id);
+    formData.append('tags', JSON.stringify(selectedTags.value));
 
-        ['en', 'pl', 'es'].forEach((lang) => {
-            const file = form.captions[lang as 'en' | 'pl' | 'es'];
-            if (file) {
-                formData.append(`captions_${lang}`, file);
-            }
-        });
+    const langs = ['en', 'pl', 'es'] as const;
+    langs.forEach((lang) => {
+      const file = form.captions[lang];
+      if (file) formData.append(`captions_${lang}`, file);
+    });
 
-        const response = await api.post<{ slug: Record<string, string>; id: string }>(
-            `/api/clips/${id}`,
-            formData,
-            { headers: { 'Content-Type': 'multipart/form-data' } },
-        );
-        
-        showToast({ title: 'Success', message: t('edit_clip.success'), type: 'success', icon: '✅' });
-        const slug = response.data.slug.en || response.data.slug.pl || response.data.id;
-        router.push(`/courses/${response.data.id}/${slug}`);
-    } catch (e) {
-        console.error(e);
-        showToast({ title: 'Error', message: t('edit_clip.error'), type: 'error' });
-    } finally {
-        saving.value = false;
-    }
-};
+    const response = await api.post<{ slug: Record<string, string>; id: string }>(
+      `/api/clips/${id}`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } },
+    );
 
-// Subclip management
-const handleSubclipFileChange = (event: Event) => {
-    const target = event.target as HTMLInputElement;
-    if (target.files && target.files[0]) {
-        newSubclip.video_file = target.files[0];
-    }
-};
-
-const handleNewSubclipCaptionsChange = (event: Event, lang: string) => {
-    const target = event.target as HTMLInputElement;
-    if (target.files && target.files[0]) {
-        newSubclip.captions[lang as 'en' | 'pl' | 'es'] = target.files[0];
-    }
-};
-
-const handleSubclipCaptionsChange = (event: Event, subclip: any, lang: string) => {
-    const target = event.target as HTMLInputElement;
-    if (target.files && target.files[0]) {
-        subclip._newCaptions[lang] = target.files[0];
-    }
-};
-
-const addSubclip = async () => {
-    if (!newSubclip.video_file) {
-        showToast({ title: 'Validation Error', message: t('subclips.upload_error'), type: 'error' });
-        return;
-    }
-    if (!newSubclip.name.en) {
-        showToast({ title: 'Validation Error', message: 'Please fill in at least English name.', type: 'error' });
-        return;
-    }
-
-    addingSubclip.value = true;
-    try {
-        const formData = new FormData();
-        formData.append('name', JSON.stringify(newSubclip.name));
-        formData.append('video_file', newSubclip.video_file);
-        formData.append('difficulty', newSubclip.difficulty.toString());
-
-        ['en', 'pl', 'es'].forEach((lang) => {
-            const file = newSubclip.captions[lang as 'en' | 'pl' | 'es'];
-            if (file) {
-                formData.append(`captions_${lang}`, file);
-            }
-        });
-
-        // Generate thumbnails
-        const thumbnails = await extractThumbnails(newSubclip.video_file);
-        thumbnails.forEach((blob, index) => {
-            formData.append('thumbnails[]', blob, `thumb_${index}.jpg`);
-        });
-
-        const response = await api.post(`/api/clips/${id}/subclips`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
-
-        // Add to local list
-        subclips.value.push({
-            ...response.data,
-            _name: typeof response.data.name === 'string' 
-                ? { en: response.data.name, pl: '', es: '' } 
-                : { en: '', pl: '', es: '', ...response.data.name },
-            _difficulty: response.data.difficulty,
-            _existingCaptions: response.data.captions || {},
-            _newCaptions: { en: null, pl: null, es: null },
-            _activeLang: 'en',
-            _saving: false,
-        });
-
-        // Reset form
-        newSubclip.name = { en: '', pl: '', es: '' };
-        newSubclip.video_file = null;
-        newSubclip.captions = { en: null, pl: null, es: null };
-        newSubclip.difficulty = 5;
-        
-        showToast({ title: 'Success', message: t('subclips.upload_success'), type: 'success', icon: '✅' });
-    } catch (e) {
-        console.error(e);
-        showToast({ title: 'Error', message: t('subclips.upload_error'), type: 'error' });
-    } finally {
-        addingSubclip.value = false;
-    }
-};
-
-const updateSubclip = async (subclip: any) => {
-    subclip._saving = true;
-    try {
-        const formData = new FormData();
-        formData.append('_method', 'PUT');
-        formData.append('name', JSON.stringify(subclip._name));
-        formData.append('difficulty', subclip._difficulty.toString());
-        formData.append('is_preview', subclip._is_preview ? '1' : '0');
-
-        ['en', 'pl', 'es'].forEach((lang) => {
-            const file = subclip._newCaptions[lang];
-            if (file) {
-                formData.append(`captions_${lang}`, file);
-            }
-        });
-
-        await api.post(`/api/subclips/${subclip.id}`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        showToast({ title: 'Success', message: t('subclips.update_success'), type: 'success', icon: '✅' });
-    } catch (e) {
-        console.error(e);
-        showToast({ title: 'Error', message: t('edit_clip.error'), type: 'error' });
-    } finally {
-        subclip._saving = false;
-    }
-};
-
-const deleteSubclip = async (subclipId: string) => {
-    subclipToDelete.value = subclipId;
-    showDeleteSubclipConfirm.value = true;
-};
-
-const confirmDeleteSubclip = async () => {
-    const subclipId = subclipToDelete.value;
-    if (!subclipId) return;
-    showDeleteSubclipConfirm.value = false;
-    subclipToDelete.value = null;
-    try {
-        await api.delete(`/api/subclips/${subclipId}`);
-        subclips.value = subclips.value.filter(s => s.id !== subclipId);
-        showToast({ title: 'Success', message: t('subclips.delete_success'), type: 'success', icon: '✅' });
-    } catch (e) {
-        console.error(e);
-        showToast({ title: 'Error', message: t('edit_clip.error'), type: 'error' });
-    }
-};
-
-const moveSubclipUp = (index: number) => {
-    if (index === 0) return;
-    const temp = subclips.value[index];
-    subclips.value[index] = subclips.value[index - 1];
-    subclips.value[index - 1] = temp;
-    orderChanged.value = true;
-};
-
-const moveSubclipDown = (index: number) => {
-    if (index === subclips.value.length - 1) return;
-    const temp = subclips.value[index];
-    subclips.value[index] = subclips.value[index + 1];
-    subclips.value[index + 1] = temp;
-    orderChanged.value = true;
-};
-
-const saveOrder = async () => {
-    savingOrder.value = true;
-    try {
-        const ids = subclips.value.map(s => s.id);
-        await api.post(`/api/clips/${id}/subclips/reorder`, { ids });
-        orderChanged.value = false;
-        showToast({ title: 'Success', message: 'Order updated successfully', type: 'success', icon: '✅' });
-    } catch (e) {
-        console.error(e);
-        showToast({ title: 'Error', message: 'Failed to save order', type: 'error' });
-    } finally {
-        savingOrder.value = false;
-    }
+    showToast({ title: 'Success', message: t('edit_clip.success'), type: 'success', icon: '✅' });
+    const slug = response.data.slug.en || response.data.slug.pl || response.data.id;
+    router.push(`/courses/${response.data.id}/${slug}`);
+  } catch (e) {
+    console.error(e);
+    showToast({ title: 'Error', message: t('edit_clip.error'), type: 'error' });
+  } finally {
+    saving.value = false;
+  }
 };
 
 onMounted(() => {
-    fetchTagsAndCategories();
-    fetchClip();
+  fetchTagsAndCategories();
+  fetchClip();
 });
 </script>

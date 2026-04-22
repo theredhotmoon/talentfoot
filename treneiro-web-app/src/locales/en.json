@@ -93,7 +93,8 @@
         "post_comment": "Post Comment",
         "posting": "Posting...",
         "no_comments": "No comments yet. Be the first!",
-        "comment_error": "Failed to post comment"
+        "comment_error": "Failed to post comment",
+        "load_error": "Failed to load course"
     },
     "edit_clip": {
         "title": "Edit Clip",
@@ -190,7 +191,8 @@
         "now_playing": "Now Playing",
         "rating": "Rating",
         "votes": "votes",
-        "preview_available": "Available for preview"
+        "preview_available": "Available for preview",
+        "name_required": "Please fill in at least the English name."
     },
     "subscription": {
         "renew_title": "Renew Your Subscription",

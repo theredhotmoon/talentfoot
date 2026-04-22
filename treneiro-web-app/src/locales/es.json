@@ -93,7 +93,8 @@
         "post_comment": "Publicar Comentario",
         "posting": "Publicando...",
         "no_comments": "Sin comentarios. \u00a1S\u00e9 el primero!",
-        "comment_error": "Error al publicar comentario"
+        "comment_error": "Error al publicar comentario",
+        "load_error": "Error al cargar el curso"
     },
     "edit_clip": {
         "title": "Editar Clip",
@@ -190,7 +191,8 @@
         "now_playing": "Reproduciendo",
         "rating": "Calificaci\u00f3n",
         "votes": "votos",
-        "preview_available": "Disponible para vista previa"
+        "preview_available": "Disponible para vista previa",
+        "name_required": "Por favor, rellena al menos el nombre en ingl\u00e9s."
     },
     "subscription": {
         "renew_title": "Renueva tu suscripci\u00f3n",
