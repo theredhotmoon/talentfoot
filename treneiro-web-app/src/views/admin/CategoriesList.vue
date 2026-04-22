@@ -90,14 +90,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import api from '../../api';
-import { useI18n } from 'vue-i18n';
 import { useTranslation } from '../../composables/useTranslation';
 import { useMediaUrl } from '../../composables/useMediaUrl';
 import { useToast } from '../../composables/useToast';
 import EditCategoryModal from '../../components/EditCategoryModal.vue';
 import ConfirmModal from '../../components/ConfirmModal.vue';
 
-const { t } = useI18n();
 const { getTranslated: getLocalized } = useTranslation();
 const { getThumbnailUrl } = useMediaUrl();
 const { showToast } = useToast();
