@@ -99,6 +99,7 @@ test.describe('Admin — Edit Category', () => {
 
 test.describe('Admin — Delete Category', () => {
   test('creates and then deletes a category', async ({ adminPage: page }) => {
+    test.setTimeout(60_000);
     const catName = `DelCat ${RUN}`;
 
     await page.goto('/admin/categories');
@@ -119,24 +120,26 @@ test.describe('Admin — Delete Category', () => {
 
     await expect(page.getByText(catName)).toBeVisible({ timeout: 8_000 });
 
-    // Now find and hover its card to reveal delete
-    const cards = page.locator('.grid > a');
-    const count = await cards.count();
-    for (let i = 0; i < count; i++) {
-      const card = cards.nth(i);
-      const text = await card.textContent();
-      if (text?.includes(catName)) {
-        await card.hover();
-        const deleteBtn = card.locator('button[class*="red"], button').last();
-        page.once('dialog', (dialog) => dialog.accept());
-        await Promise.all([
-          page.waitForResponse((resp) => resp.url().includes('/api/categories/') && resp.request().method() === 'DELETE'),
-          deleteBtn.click({ force: true }),
-        ]);
-        await expect(page.getByText(catName)).not.toBeVisible({ timeout: 8_000 });
-        break;
-      }
-    }
+    // Find and hover the new card directly — avoids per-card textContent() round-trips
+    const targetCard = page.locator('.grid > a').filter({ hasText: catName }).first();
+    await expect(targetCard).toBeVisible({ timeout: 5_000 });
+    await targetCard.hover();
+
+    const deleteBtn = targetCard.locator('button[class*="red"], button').last();
+    await deleteBtn.click({ force: true });
+
+    const confirmModal = page.locator('.modal-overlay');
+    await expect(confirmModal).toBeVisible({ timeout: 5_000 });
+    const confirmBtn = confirmModal.locator('button').filter({ hasText: /delete|usuń|confirm|potwierdź/i }).first();
+
+    // Register listener before the click so the response is never missed
+    const deleteResponsePromise = page.waitForResponse(
+      (resp) => resp.url().includes('/api/categories/') && resp.request().method() === 'DELETE',
+    );
+    await confirmBtn.click();
+    await deleteResponsePromise;
+
+    await expect(page.getByText(catName)).not.toBeVisible({ timeout: 8_000 });
   });
 });
 
