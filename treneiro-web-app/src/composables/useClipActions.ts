@@ -2,6 +2,7 @@ import type { Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../api';
 import { useAuthStore } from '../stores/auth';
+import { useToast } from './useToast';
 import type { Clip, Challenge } from '../types';
 
 /**
@@ -19,6 +20,7 @@ export function useClipActions(
 ) {
   const router = useRouter();
   const auth = useAuthStore();
+  const { showToast } = useToast();
 
   /**
    * Returns the challenge for a given clip id (or null if none).
@@ -46,7 +48,7 @@ export function useClipActions(
         clip.ratings_count = response.data.ratings_count;
       }
     } catch {
-      alert('Failed to rate');
+      showToast({ title: 'Error', message: 'Failed to rate', type: 'error' });
     }
   };
 
@@ -76,7 +78,12 @@ export function useClipActions(
     } catch (e: unknown) {
       const err = e as { response?: { status?: number; data?: { challenge?: Challenge } } };
       if (err.response?.status === 403) {
-        alert('You need an active subscription to start a challenge.');
+        showToast({
+          title: 'Subscription Required',
+          message: 'You need an active subscription to start a challenge.',
+          type: 'warning',
+          icon: '🔒',
+        });
       } else if (err.response?.data?.challenge) {
         challenges.value.push(err.response.data.challenge);
         router.push(`/challenge/${clip.id}/${getSlug(clip)}?autoplay=1`);

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '../stores/auth';
 import { useTranslation } from '../composables/useTranslation';
+import { useToast } from '../composables/useToast';
 import TagPills from './TagPills.vue';
 import ClipStatsGrid from './ClipStatsGrid.vue';
 import RateClipModal from './RateClipModal.vue';
@@ -26,6 +27,7 @@ const emit = defineEmits<{
 
 const authStore = useAuthStore();
 const { getTranslated } = useTranslation();
+const { showToast } = useToast();
 
 const currentViews = computed(() => props.clip.views);
 const currentDifficulty = computed(() => props.clip.difficulty);
@@ -61,7 +63,7 @@ const onRateSubmit = async (rating: number, clipId: string) => {
         props.clip.current_user_rating = { rating: rating };
     }
   } catch {
-    alert('Failed to rate clip');
+    showToast({ title: 'Error', message: 'Failed to rate clip', type: 'error' });
   }
 };
 </script>

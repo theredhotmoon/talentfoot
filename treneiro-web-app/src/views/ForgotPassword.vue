@@ -7,28 +7,18 @@
         <p class="text-sm mt-1" style="color: var(--tf-text-muted);">{{ $t('forgot_password.title') }}</p>
       </div>
 
-      <div v-if="success" class="text-center space-y-4">
-        <div class="text-sm px-3 py-4 rounded-lg" style="color: #6ee7b7; background: rgba(16, 185, 129, 0.1);">
-          {{ $t('forgot_password.success_message') }}
-        </div>
-        <router-link to="/login" class="btn-ghost w-full text-sm mt-4 inline-block">
-          {{ $t('forgot_password.back_to_login') }}
-        </router-link>
-      </div>
-
-      <form v-else @submit.prevent="handleForgotPassword" class="space-y-4">
+      <form @submit.prevent="handleForgotPassword" class="space-y-4">
         <div class="text-sm mb-4" style="color: var(--tf-text-dimmed);">
           {{ $t('forgot_password.description') }}
         </div>
         <input v-model="email" type="email" :placeholder="$t('forgot_password.email')" class="input-modern" required />
-        <div v-if="error" class="text-sm px-3 py-2 rounded-lg" style="color: #f87171; background: rgba(239,68,68,0.1);">{{ error }}</div>
-        
+
         <button type="submit" :disabled="loading" class="btn-primary w-full text-sm mt-2">
           {{ loading ? '...' : $t('forgot_password.submit') }}
         </button>
 
         <div class="text-center mt-6">
-          <router-link to="/login" class="text-xs transition-colors" style="color: var(--tf-text-muted); hover:color: var(--tf-text);">
+          <router-link to="/login" class="text-xs transition-colors" style="color: var(--tf-text-muted);">
             {{ $t('forgot_password.back_to_login') }}
           </router-link>
         </div>
@@ -40,24 +30,34 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useToast } from '../composables/useToast';
 import api from '../api';
 
 const { t } = useI18n();
+const { showToast } = useToast();
 
 const email = ref('');
-const error = ref('');
-const success = ref(false);
 const loading = ref(false);
 
 const handleForgotPassword = async (): Promise<void> => {
   loading.value = true;
-  error.value = '';
   try {
     await api.post('/api/forgot-password', { email: email.value });
-    success.value = true;
+    showToast({
+      title: t('forgot_password.title'),
+      message: t('forgot_password.success_message'),
+      type: 'success',
+      icon: '✉️',
+      duration: 8000,
+    });
+    email.value = '';
   } catch (e: unknown) {
     const err = e as { response?: { data?: { message?: string } } };
-    error.value = err.response?.data?.message ?? t('forgot_password.error_generic');
+    showToast({
+      title: 'Error',
+      message: err.response?.data?.message ?? t('forgot_password.error_generic'),
+      type: 'error',
+    });
   } finally {
     loading.value = false;
   }

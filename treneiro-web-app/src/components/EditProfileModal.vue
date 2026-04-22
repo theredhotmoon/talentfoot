@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { useToast } from '../composables/useToast';
 import api from '../api';
 
 const emit = defineEmits<{ (e: 'close'): void }>();
 const auth = useAuthStore();
+const { showToast } = useToast();
 
 const form = ref({
     name: '',
@@ -12,8 +14,6 @@ const form = ref({
     auto_play_delay: 8,
 });
 const saving = ref(false);
-const error = ref('');
-const success = ref(false);
 
 onMounted(() => {
     if (auth.user) {
@@ -25,8 +25,6 @@ onMounted(() => {
 
 const handleSubmit = async () => {
     saving.value = true;
-    error.value = '';
-    success.value = false;
 
     try {
         const response = await api.put('/api/profile', {
@@ -39,15 +37,14 @@ const handleSubmit = async () => {
         }
         // Update auto-play delay separately
         await auth.updateAutoPlayDelay(form.value.auto_play_delay);
-        success.value = true;
-        setTimeout(() => emit('close'), 1000);
-    } catch (e: any) {
-        if (e.response?.data?.errors) {
-            const errors = e.response.data.errors;
-            error.value = Object.values(errors).flat().join(', ');
-        } else {
-            error.value = e.response?.data?.message || 'Failed to update profile.';
-        }
+        showToast({ title: 'Profile', message: '✓ Profile updated successfully', type: 'success', icon: '👤' });
+        setTimeout(() => emit('close'), 800);
+    } catch (e: unknown) {
+        const err = e as { response?: { data?: { errors?: Record<string, string[]>; message?: string } } };
+        const message = err.response?.data?.errors
+            ? Object.values(err.response.data.errors).flat().join(', ')
+            : err.response?.data?.message || 'Failed to update profile.';
+        showToast({ title: 'Error', message, type: 'error' });
     } finally {
         saving.value = false;
     }
@@ -60,7 +57,13 @@ const handleSubmit = async () => {
             <div class="modal-card animate-fade-up">
                 <div class="px-6 py-4 flex justify-between items-center" style="border-bottom: 1px solid var(--tf-border);">
                     <h2 class="text-xl font-heading font-bold" style="color: var(--tf-text);">{{ $t('profile.edit_details') }}</h2>
-                    <button @click="$emit('close')" class="text-xl transition-colors onmouseover=" style="color: var(--tf-text-dimmed);"this.style.color='var(--tf-text)'" onmouseout="this.style.color='var(--tf-text-dimmed)'">&times;</button>
+                    <button
+                        type="button"
+                        @click="$emit('close')"
+                        class="text-xl leading-none transition-colors hover:opacity-80 focus:outline-none"
+                        style="color: var(--tf-text-dimmed);"
+                        aria-label="Close"
+                    >&#215;</button>
                 </div>
 
                 <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
@@ -93,9 +96,6 @@ const handleSubmit = async () => {
                           <span>30s</span>
                         </div>
                     </div>
-
-                    <div v-if="error" class="text-sm px-3 py-2 rounded-lg" style="color: #f87171; background: rgba(239,68,68,0.1);">{{ error }}</div>
-                    <div v-if="success" class="text-sm px-3 py-2 rounded-lg" style="color: var(--tf-accent-emerald); background: rgba(110,231,183,0.1);">✓ {{ $t('profile.updated') }}</div>
 
                     <div class="flex justify-end gap-3 pt-2">
                         <button type="button" @click="$emit('close')" class="btn-ghost">
