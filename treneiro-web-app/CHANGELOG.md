@@ -4,6 +4,27 @@ All notable changes to the Trenejro frontend are documented here.
 
 ---
 
+## 2026-04-22 — Vue 3 Code Quality Refactor
+
+### Added
+- `useSubclips.ts` — extracted all subclip CRUD, reorder, and delete-confirm logic from `EditClip.vue` into a typed composable with `EditableSubclip` interface
+- `useCartoonConversion.ts` — extracted cartoon polling and convert action from `EditClip.vue` into its own composable
+- `clip_detail.load_error` and `subclips.name_required` i18n keys added to EN, PL, and ES locales
+
+### Changed
+- `useChallenge.ts` — toast notification flags (`showChallengeCompleteToast`, etc.) replaced with a `ChallengeCbs` callback interface; removes 4 `watch` blocks from `ClipDetail.vue`
+- `useChallenge.ts` — internal timing state (`watchStartedAt`, `accumulatedWatchTime`) removed from public return; double-add bug fixed in `onVideoPlay`
+- `EditClip.vue` — script reduced from ~380 to ~120 lines by delegating to new composables; `any[]` replaced with `Tag[]`, `Category[]`, `EditableSubclip[]`
+- `ClipDetail.vue` — `fetchClip` now has error handling with a toast on failure
+- `types/index.ts` — `showRatingSelect` (dead field) removed from `Clip`; `User.role` narrowed to `'admin' | 'user'` union
+- `useThumbnailPreview.ts` — `any` parameter replaced with typed `Clip`
+- `AppSettingsModal.vue` — `onUnmounted` cleanup added for the save-feedback timer
+
+### Fixed
+- Three broken inline styles in `EditClip.vue` where Tailwind utility classes (`mt-1`, `mb-6`) were placed inside `style=""` attributes and silently ignored by the browser
+
+---
+
 ## 2026-04-21 — Standardized Notification & Modal System
 
 ### Added
