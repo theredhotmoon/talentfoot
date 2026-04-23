@@ -292,10 +292,7 @@ const onStartCourse = async () => {
   }
   // Check challenge limit
   await fetchActiveChallengeCount();
-  if (!canStartChallenge.value) {
-    showChallengeLimitToast.value = true;
-    return;
-  }
+  if (!canStartChallenge.value) return;
   // Start the challenge
   coverDismissed.value = true;
   startChallenge(async (pendingSubclip: Subclip | null) => {
